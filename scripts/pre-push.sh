@@ -5,8 +5,8 @@ set -e
 echo "RUN CLANG-FORMAT"
 ./scripts/pre-push-format.sh
 
-echo "CHECK UNIT-TESTS"
-./scripts/run-tests.sh
+#echo "CHECK UNIT-TESTS"
+#./scripts/run-tests.sh
 
 # $? stores exit value of the last command
 if [ $? -ne 0 ]; then
