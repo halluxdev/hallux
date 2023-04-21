@@ -1,0 +1,5 @@
+clang==16.0.1
+libclang==16.0.0
+networkx
+tensorflow_gnn
+tensorflow-cpu==2.11.0
