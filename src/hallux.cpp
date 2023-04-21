@@ -1,15 +1,18 @@
-#include "cppwriter.h"
-#include <cppparser.h>
 #include <fstream>
 #include <iostream>
+#include "cppwriter.h"
+#include <cppparser.h>
 
 int main(int argc, char* argv[])
 {
+  int aaa = 0.0;
   if (argc < 2)
   {
     std::cout << "Usage: " << argv[0] << " filename.cpp" << std::endl;
     return 1;
   }
+
+  aaa += 10;
 
   CppParser parser;
   auto progUnit = parser.parseFile(argv[1]);
@@ -23,5 +26,5 @@ int main(int argc, char* argv[])
   std::ofstream stm(std::string(argv[1]) + ".reconstructed");
   writer.emit(progUnit.get(), stm);
 
-  return 0;
+  return aaa;
 }
