@@ -3,4 +3,5 @@
 cmake-*/
 build/
 Testing/
+venv/
 *.reconstructed
