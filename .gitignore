@@ -5,3 +5,4 @@ build/
 Testing/
 venv/
 *.reconstructed
+__pycache__

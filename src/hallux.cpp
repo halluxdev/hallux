@@ -1,4 +1,4 @@
-//#include <fstream>
+#include <fstream>
 #include <iostream>
 #include <cppwriter.h>
 #include <cppparser.h>

@@ -79,7 +79,7 @@ def process_ast(cursor: Cursor, level: int = 0, order: int = 0, id: int = 0) -> 
     order = 0
     # child Cursors may go interleaved with child Tokens
     # i.e. order of Branches and leafs is arbitrary, so we process them carefully
-    for _, child_cursor in enumerate(cursor.get_children()):
+    for child_cursor in cursor.get_children():
         child_token : Token | None = None
         try: # try to get first token for a child
             child_token = next(child_cursor.get_tokens())

@@ -1,3 +1,8 @@
+class SomeClass
+{
+  SomeClass() = default;
+};
+
 {
   ;
   int* a = nullptr;

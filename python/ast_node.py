@@ -295,7 +295,7 @@ class TokenNode(AstNode):
             prev_loc.line += 1
             prev_loc.column = 0
 
-        while(prev_loc.column < self.location.column):
+        while(prev_loc.column < self.location.column-1):
             print(" ", end="")
             prev_loc.column += 1
 
