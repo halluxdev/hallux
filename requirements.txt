@@ -1,5 +1,7 @@
 clang==16.0.1
 libclang==16.0.0
-networkx
-tensorflow_gnn
+#networkx
+#tensorflow_gnn
 tensorflow-cpu==2.11.0
+tiktoken==0.3.3
+pytest==7.3.1

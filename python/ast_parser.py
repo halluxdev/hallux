@@ -4,17 +4,15 @@ from __future__ import annotations
 import copy
 from pathlib import Path
 from typing import Final, Tuple, Any
-
 from clang.cindex import *
-
 from ast_node import CursorNode, TokenNode, Location
+
 Config.set_library_file(str(Path(__file__).resolve().parent.parent.joinpath("venv", "lib", "python3.8", "site-packages", "clang", "native", "libclang.so")))
 
-
-def parse_cpp_file(filename) :
+def parse_cpp_file(filename) -> CursorNode:
     index = Index.create()
     ast = index.parse(filename)
-    return process_ast(ast.cursor)
+    return process_ast(ast.cursor)[0]
 
 def print_from_cursor(cursor: Cursor):
     line = ""
@@ -40,12 +38,12 @@ def print_cpp_file(filename) :
     index = Index.create()
     ast = index.parse(filename)
     print_from_cursor(ast.cursor)
-    #conf.lib.
 
-
-def print_tokens(tokens):
-     for tok in tokens:
-         print("||", tok.kind, ": ", tok.spelling, " -> ", tok.location)
+def inSameFile(current_token: Token, child_token: Token) -> bool:
+    if current_token is not None and child_token is not None:
+        if current_token.location is not None and child_token.location is not None:
+            return str(current_token.location.file) == str(child_token.location.file)
+    return False
 
 def isFirstTokenBeforeNext(current_token: Token, child_token: Token) -> bool:
     if current_token.location is None or child_token.location is None :
@@ -64,10 +62,8 @@ def print_token(token, label=""):
     print(f"{label}{token.spelling}", end=" ")
     return None
 
-def process_ast(cursor: Cursor, prev_location = None, level: int = 0, order: int = 0, id: int = 0) -> Tuple[CursorNode|None, int, Any, Any]:
-    myId : Final[int] = copy.copy(id)
+def process_ast(cursor: Cursor, level: int = 0, order: int = 0, id: int = 0) -> Tuple[CursorNode|None, int, Token|None]:
     id += 1
-
     current_tokens = cursor.get_tokens()
     current_token: Token | None = None
     try:
@@ -75,100 +71,64 @@ def process_ast(cursor: Cursor, prev_location = None, level: int = 0, order: int
     except StopIteration:
         pass
 
-    if current_token is None:
-        return None, id, None, prev_location
-    last_good_token = current_token
-    print()
-    for i in range(level):
-         print("  ", end="")
-
-    # print(f"/*{order}: */", end="")
-    # print(f"/*{order} {cursor.kind.name} lvl={level} id={id}", end="")
-    # usr = cursor.get_usr()
-    # if usr is not None and len(str(usr)) > 0:
-    #     print(f" usr={usr}", end="")
-    # print(f"*/", end="")
+    if current_token is None: # sometimes Cursors end up in the unparsed or missing file
+        return None, id, None
 
     node = CursorNode(level, order, cursor)
 
-
     order = 0
+    # child Cursors may go interleaved with child Tokens
+    # i.e. order of Branches and leafs is arbitrary, so we process them carefully
     for _, child_cursor in enumerate(cursor.get_children()):
-        child_token = None
-        try:
+        child_token : Token | None = None
+        try: # try to get first token for a child
             child_token = next(child_cursor.get_tokens())
         except StopIteration:
             pass
-        if child_token is not None:
+
+        # if child_token is in the same file let's iterate current_token until they are equal
+        # resulting tokens added as leafs for current node
+        if inSameFile(current_token, child_token):
             while isFirstTokenBeforeNext(current_token, child_token):
-                prev_location = print_token(current_token)# , label=f"<A{myId}:{child_index}>")
                 leaf = TokenNode(level+1, order, current_token)
                 node.add_child(leaf)
                 order += 1
-                last_good_token = current_token
                 try:
                     current_token = next(current_tokens)
                 except StopIteration:
-                    current_token = last_good_token
                     break
-                #if current_token is None:
-                #    break
-                #    #return node, id, current_token, prev_location
 
-        sub_tree, id, prev_token, prev_location = process_ast(child_cursor, prev_location, level+1, order, id)
+        sub_tree, id, last_child_token = process_ast(child_cursor, level+1, order, id)
         order += 1
         node.add_child(sub_tree)
 
-        if prev_token is not None:
-            while isFirstTokenBeforeNext(current_token, prev_token):
-                 last_good_token = current_token
+        if inSameFile(current_token, last_child_token):
+            # iterate current_token to keep up with last_child_token
+            while isFirstTokenBeforeNext(current_token, last_child_token):
                  try:
                      current_token = next(current_tokens)
                  except StopIteration:
-                     current_token = last_good_token
-                     #current_token = None
-                     return node, id, current_token, prev_location
+                     break
+                     #return node, id, current_token
 
     if level == 0:
         if current_token is not None:
-            prev_location = print_token(current_token)#, label=f"<C{myId}>")
             leaf = TokenNode(level+1, order, current_token)
             node.add_child(leaf)
             order += 1
             for current_token in current_tokens:
-                prev_location = print_token(current_token)#, label=f"<D{myId}>")
                 leaf = TokenNode(level+1, order, current_token)
                 node.add_child(leaf)
                 order += 1
+    # elif current_token is not None:
+    #     if last_child_token is None or str(current_token.location.file) != str(last_child_token.location.file):
+    #         leaf = TokenNode(level+1, order, current_token)
+    #         node.add_child(leaf)
+    #         order += 1
+    #         for current_token in current_tokens:
+    #             leaf = TokenNode(level+1, order, current_token)
+    #             node.add_child(leaf)
+    #             order += 1
 
 
-    return node, id, current_token, prev_location
-
-
-
-
-
-
-# %%
-# Build a graph from the AST using NetworkX
-# graph = nx.DiGraph()
-# for node in ast.get_children():
-#     graph.add_node(node.spelling, kind=node.kind.name)
-#     for child in node.get_children():
-#         graph.add_edge(node.spelling, child.spelling)
-#
-# # Convert the graph to a TensorFlow tensor
-# adj_matrix = nx.to_numpy_matrix(graph, dtype=np.float32)
-# adj_tensor = tf.convert_to_tensor(adj_matrix)
-#
-# # Build the graph neural network model
-# model = tf.keras.Sequential([
-#     tf.keras.layers.Input(shape=(adj_tensor.shape[0],)),
-#     tf.keras.layers.Dense(64, activation="relu"),
-#     tf.keras.layers.Dense(32, activation="relu"),
-#     tf.keras.layers.Dense(1, activation="sigmoid")
-# ])
-#
-# # Train the model
-# model.compile(optimizer="adam", loss="binary_crossentropy")
-# model.fit(adj_tensor, y_train, epochs=10)
+    return node, id, current_token

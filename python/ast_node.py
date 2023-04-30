@@ -126,7 +126,10 @@ class AstNode:
     def encode(self, weights: Weights) -> tf.Tensor:
         pass
 
-    def print(self, prev_location: Location | None = None) -> Location:
+    def print(self, location: Location | None = None) -> Location:
+        pass
+
+    def save(self, file_strteam, location: Location | None = None) -> Location:
         pass
 
 # # Node which needs to be predicted
@@ -213,12 +216,28 @@ class CursorNode(AstNode):
         if node is not None:
             self.children.append(node)
 
-    def print(self, prev_location: Location | None = None) -> Location:
-        location = self.location
-        # Cursor does not print anything itself
+    def print(self, location: Location | None = None) -> Location:
+        # CursorNode does not print anything by itself
+        prev_loc = location
+        if prev_loc == None or str(prev_loc.file) != str(self.location.file):
+            print(f"/*  {self.location.file}   */")
+            prev_loc = self.location
+
         for child in self.children:
-            location = child.print(location)
-        return location
+            prev_loc = child.print(prev_loc)
+        return prev_loc
+
+    def save(self, file_strteam, location: Location | None = None) -> Location:
+        prev_loc = location
+        if prev_loc == None or str(prev_loc.file) != str(self.location.file):
+            file_strteam.write("\n")
+            prev_loc = self.location
+
+        for child in self.children:
+            prev_loc = child.save(file_strteam, prev_loc)
+        return prev_loc
+
+
 
     # def encode(self, weights: Weights) -> tf.Tensor:
     #     if self.features is not None:
@@ -249,7 +268,6 @@ class CursorNode(AstNode):
     #     pass
 
 
-
 # Node Corresponds to an Ast Token aka Leaf-of-a-tree
 class TokenNode(AstNode):
 
@@ -263,30 +281,52 @@ class TokenNode(AstNode):
         assert token is not None or features is not None, "either `token` or `features` must be provided"
         super().__init__(level, order, kind=token.kind.value, spelling=token.spelling, location=Location(token.location))
 
+    def print(self, location: Location | None = None) -> Location:
+        prev_loc = location if location is not None else self.location
 
-    def print(self, prev_location: Location | None = None) -> Location:
-        if prev_location is None:
-            prev_location = self.location
-
-        if prev_location.file != self.location.file:
-            prev_location = self.location
-
-        while(self.location.line > prev_location.line):
+        if str(prev_loc.file) != str(self.location.file):
             print()
-            prev_location.line += 1
-            prev_location.column = 0
+            print(f"/*  {self.location.file}   */")
+            prev_loc = self.location
+            prev_loc.column = 0
 
-        while(self.location.column > prev_location.column):
-            print(" ")
-            prev_location.column += 1
+        while(prev_loc.line < self.location.line):
+            print()
+            prev_loc.line += 1
+            prev_loc.column = 0
+
+        while(prev_loc.column < self.location.column):
+            print(" ", end="")
+            prev_loc.column += 1
 
         print(self.spelling, end="")
+        prev_loc.column += len(self.spelling)
 
-        location = prev_location
-        location.column += len(self.spelling)
+        return prev_loc
 
-        return location
 
+    def save(self, file_strteam, location: Location | None = None) -> Location:
+        prev_loc = location if location is not None else self.location
+
+        if str(prev_loc.file) != str(self.location.file):
+            file_strteam.write("\n")
+
+            prev_loc = self.location
+            prev_loc.column = 0
+
+        while(prev_loc.line < self.location.line):
+            file_strteam.write("\n")
+            prev_loc.line += 1
+            prev_loc.column = 0
+
+        while(prev_loc.column < self.location.column-1):
+            file_strteam.write(" ")
+            prev_loc.column += 1
+
+        file_strteam.write(str(self.spelling))
+        prev_loc.column += len(self.spelling)
+
+        return prev_loc
 
 
 
