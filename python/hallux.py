@@ -1,7 +1,15 @@
-from ast_parser import parse_cpp_file
+from ast_parser import parse_cpp_file, print_cpp_file
 
-out = parse_cpp_file('/home/sergey/git/hallux/src/hallux.cpp')
-print(out)
+#print_cpp_file('/home/sergey/git/hallux/src/hallux.cpp')
+
+#out, connects,
+
+tree, max_id, _, _ = parse_cpp_file('/home/sergey/git/hallux/src/hallux.cpp')
+tree.print()
+#print(out)
+#out.print()
+
+
 # connects, id = process_ast(ast.cursor)
 # print('----------------------')
 # for kindId, kindConns in connects.items():

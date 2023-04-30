@@ -1,21 +1,22 @@
 #!/usr/bin/env python3
 from __future__ import annotations
+
+import copy
+from pathlib import Path
+from typing import Final, Tuple, Any
+
 from clang.cindex import *
-from  ast_node import KnownNode
-Config.set_library_file('/home/sergey/git/hallux/venv/lib/python3.8/site-packages/clang/native/libclang.so')
+
+from ast_node import BranchNode, LeafNode, Location
+Config.set_library_file(str(Path(__file__).resolve().parent.parent.joinpath("venv", "lib", "python3.8", "site-packages", "clang", "native", "libclang.so")))
+
 
 def parse_cpp_file(filename) :
     index = Index.create()
     ast = index.parse(filename)
     return process_ast(ast.cursor)
 
-def print_cpp_file(filename) :
-    index = Index.create()
-    ast = index.parse(filename)
-    print_from_cursor(ast.cursor)
-
 def print_from_cursor(cursor: Cursor):
-    code = []
     line = ""
     prev_token = None
     for tok in cursor.get_tokens():
@@ -25,7 +26,7 @@ def print_from_cursor(cursor: Cursor):
         prev_token_end_col = prev_location.column + len(prev_token.spelling)
         cur_location = tok.location
         if cur_location.line > prev_location.line:
-            code.append(line)
+            print(line)
             line = " " * (cur_location.column - 1)
         else:
             if cur_location.column > (prev_token_end_col):
@@ -35,65 +36,105 @@ def print_from_cursor(cursor: Cursor):
     if len(line.strip()) > 0:
         print(line)
 
+def print_cpp_file(filename) :
+    index = Index.create()
+    ast = index.parse(filename)
+    print_from_cursor(ast.cursor)
+    #conf.lib.
 
-# def print_tokens(cursor: Cursor):
-#     tok: Token
-#     for tok in cursor.get_tokens():
-#         print(tok.kind, ": ", tok.spelling, " -> ", tok.location)
 
-def process_ast(tok: Cursor, connects: dict = None, level: int = 0, order: int = 0, id: int = 0):
-    print(f"{id}:", end="")
-    for i in range(level):
-        print("-", end="")
+def print_tokens(tokens):
+     for tok in tokens:
+         print("||", tok.kind, ": ", tok.spelling, " -> ", tok.location)
 
-    usr = tok.get_usr()
-    print("(", order, "): ",tok.kind.name,": ", tok.spelling, " -> ", usr)
-    tree = KnownNode(level=level, order=order, cursor=tok)
+def isFirstTokenBeforeNext(current_token: Token, child_token: Token) -> bool:
+    if str(current_token.location.file) == str(child_token.location.file):
+         if int(current_token.location.line) < int(child_token.location.line):
+             return True
+         if current_token.location.line  == child_token.location.line:
+            return current_token.location.column < child_token.location.column
+    else:
+        return False
 
-    # if usr is not None and len(usr) > 0:
-    #     if tok.kind.value not in connects:
-    #         connects[tok.kind.value] = {}
-    #
-    #     if usr not in connects[tok.kind.value]:
-    #         connects[tok.kind.value][usr] = []
-    #
-    #     connects[tok.kind.value][usr].append(id)
+    return current_token.spelling != child_token.spelling
 
+def print_token(token, label=""):
+    print(f"{label}{token.spelling}", end=" ")
+    return None
+
+def process_ast(cursor: Cursor, prev_location = None, level: int = 0, order: int = 0, id: int = 0) -> Tuple[BranchNode|None, int, Any, Any]:
+    myId : Final[int] = copy.copy(id)
     id += 1
-    child_tok: Cursor
-    for child_index, child_tok in enumerate(tok.get_children()):
-        sub_tree, child_connects = process_ast(child_tok, connects, level+1, child_index, id)
-        tree.add_child(sub_tree)
 
-    #     print(tok.kind.value, ": ", tok.spelling, " -> ", tok.location)
-    return tree, connects
+    current_tokens = cursor.get_tokens()
+    try:
+        current_token = next(current_tokens)
+    except StopIteration:
+        return None, id, None, prev_location
 
-# def process_code_tree(cur: Cursor, connects: dict = {}, level: int = 0, index: int = 0):
-#     for i in range(level):
-#         print("-", end="")
-#     print(index, ":",  cur.kind.value, "(",cur.kind.name,"): ", cur.spelling)
-#
-#     if cur.kind.value not in connects:
-#         connects[cur.kind.value] = {}
-#
-#     usr = cur.get_usr()
-#     if usr is not None:
-#         if usr not in connects[cur.kind.value]:
-#             connects[cur.kind.value][usr] = []
-#         connects[cur.kind.value][usr].append()
-#
-#
-#     child_tok: Cursor
-#     for child_index, child_tok in enumerate(cur.get_children()):
-#         child_connects = process_code_tree(child_tok, connects, level+1, child_index)
-#
-#     #     print(tok.kind.value, ": ", tok.spelling, " -> ", tok.location)
-#     return connects
+    print()
+    for i in range(level):
+         print("  ", end="")
+
+    # print(f"/*{order}: */", end="")
+    # print(f"/*{order} {cursor.kind.name} lvl={level} id={id}", end="")
+    # usr = cursor.get_usr()
+    # if usr is not None and len(str(usr)) > 0:
+    #     print(f" usr={usr}", end="")
+    # print(f"*/", end="")
+
+    node = BranchNode(level, order, cursor)
 
 
-# code = code_from_cursor(ast.cursor)
-# for line in code:
-#     print(line)
+    order = 0
+    for _, child_cursor in enumerate(cursor.get_children()):
+        child_token = None
+        try:
+            child_token = next(child_cursor.get_tokens())
+        except StopIteration:
+            pass
+        if child_token is not None:
+            while isFirstTokenBeforeNext(current_token, child_token):
+                prev_location = print_token(current_token)# , label=f"<A{myId}:{child_index}>")
+                leaf = LeafNode(level+1, order, current_token)
+                node.add_child(leaf)
+                order += 1
+                try:
+                    current_token = next(current_tokens)
+                except StopIteration:
+                    return node, id, current_token, prev_location
+
+        sub_tree, id, prev_token, prev_location = process_ast(child_cursor, prev_location, level+1, order, id)
+        order += 1
+        node.add_child(sub_tree)
+
+        if prev_token is not None:
+            while isFirstTokenBeforeNext(current_token, prev_token):
+                 try:
+                     current_token = next(current_tokens)
+                 except StopIteration:
+                     current_token = None
+                     #return id, current_token, prev_location
+
+    if level== 0:
+        if current_token is not None:
+            prev_location = print_token(current_token, label=f"<C{myId}>")
+            leaf = LeafNode(level+1, order, current_token)
+            node.add_child(leaf)
+            order += 1
+            for current_token in current_tokens:
+                prev_location = print_token(current_token, label=f"<D{myId}>")
+                leaf = LeafNode(level+1, order, current_token)
+                node.add_child(leaf)
+                order += 1
+
+
+    return node, id, current_token, prev_location
+
+
+
+
+
 
 # %%
 # Build a graph from the AST using NetworkX
