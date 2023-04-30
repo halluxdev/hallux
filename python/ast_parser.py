@@ -7,7 +7,7 @@ from typing import Final, Tuple, Any
 
 from clang.cindex import *
 
-from ast_node import BranchNode, LeafNode, Location
+from ast_node import CursorNode, TokenNode, Location
 Config.set_library_file(str(Path(__file__).resolve().parent.parent.joinpath("venv", "lib", "python3.8", "site-packages", "clang", "native", "libclang.so")))
 
 
@@ -48,6 +48,8 @@ def print_tokens(tokens):
          print("||", tok.kind, ": ", tok.spelling, " -> ", tok.location)
 
 def isFirstTokenBeforeNext(current_token: Token, child_token: Token) -> bool:
+    if current_token.location is None or child_token.location is None :
+        return False
     if str(current_token.location.file) == str(child_token.location.file):
          if int(current_token.location.line) < int(child_token.location.line):
              return True
@@ -62,16 +64,20 @@ def print_token(token, label=""):
     print(f"{label}{token.spelling}", end=" ")
     return None
 
-def process_ast(cursor: Cursor, prev_location = None, level: int = 0, order: int = 0, id: int = 0) -> Tuple[BranchNode|None, int, Any, Any]:
+def process_ast(cursor: Cursor, prev_location = None, level: int = 0, order: int = 0, id: int = 0) -> Tuple[CursorNode|None, int, Any, Any]:
     myId : Final[int] = copy.copy(id)
     id += 1
 
     current_tokens = cursor.get_tokens()
+    current_token: Token | None = None
     try:
         current_token = next(current_tokens)
     except StopIteration:
-        return None, id, None, prev_location
+        pass
 
+    if current_token is None:
+        return None, id, None, prev_location
+    last_good_token = current_token
     print()
     for i in range(level):
          print("  ", end="")
@@ -83,7 +89,7 @@ def process_ast(cursor: Cursor, prev_location = None, level: int = 0, order: int
     #     print(f" usr={usr}", end="")
     # print(f"*/", end="")
 
-    node = BranchNode(level, order, cursor)
+    node = CursorNode(level, order, cursor)
 
 
     order = 0
@@ -96,13 +102,18 @@ def process_ast(cursor: Cursor, prev_location = None, level: int = 0, order: int
         if child_token is not None:
             while isFirstTokenBeforeNext(current_token, child_token):
                 prev_location = print_token(current_token)# , label=f"<A{myId}:{child_index}>")
-                leaf = LeafNode(level+1, order, current_token)
+                leaf = TokenNode(level+1, order, current_token)
                 node.add_child(leaf)
                 order += 1
+                last_good_token = current_token
                 try:
                     current_token = next(current_tokens)
                 except StopIteration:
-                    return node, id, current_token, prev_location
+                    current_token = last_good_token
+                    break
+                #if current_token is None:
+                #    break
+                #    #return node, id, current_token, prev_location
 
         sub_tree, id, prev_token, prev_location = process_ast(child_cursor, prev_location, level+1, order, id)
         order += 1
@@ -110,21 +121,23 @@ def process_ast(cursor: Cursor, prev_location = None, level: int = 0, order: int
 
         if prev_token is not None:
             while isFirstTokenBeforeNext(current_token, prev_token):
+                 last_good_token = current_token
                  try:
                      current_token = next(current_tokens)
                  except StopIteration:
-                     current_token = None
-                     #return id, current_token, prev_location
+                     current_token = last_good_token
+                     #current_token = None
+                     return node, id, current_token, prev_location
 
-    if level== 0:
+    if level == 0:
         if current_token is not None:
-            prev_location = print_token(current_token, label=f"<C{myId}>")
-            leaf = LeafNode(level+1, order, current_token)
+            prev_location = print_token(current_token)#, label=f"<C{myId}>")
+            leaf = TokenNode(level+1, order, current_token)
             node.add_child(leaf)
             order += 1
             for current_token in current_tokens:
-                prev_location = print_token(current_token, label=f"<D{myId}>")
-                leaf = LeafNode(level+1, order, current_token)
+                prev_location = print_token(current_token)#, label=f"<D{myId}>")
+                leaf = TokenNode(level+1, order, current_token)
                 node.add_child(leaf)
                 order += 1
 

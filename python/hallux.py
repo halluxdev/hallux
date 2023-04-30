@@ -5,7 +5,7 @@ from ast_parser import parse_cpp_file, print_cpp_file
 #out, connects,
 
 tree, max_id, _, _ = parse_cpp_file('/home/sergey/git/hallux/src/hallux.cpp')
-tree.print()
+#tree.print()
 #print(out)
 #out.print()
 

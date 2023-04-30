@@ -159,19 +159,18 @@ class CursorNode(AstNode):
     children: list[AstNode] | None = None
 
     def __init__(self, level: int, order: int, cursor: Cursor | None = None, features: tf.Tensor | None = None):
-
         '''
-
         :param id: identifier of the node
         :param level: level from the root
         :param order: order within siblings
-        :param cursor: AST cursor
+        :param cursor: AST Cursor
         '''
+        assert cursor is not None or features is not None, "either `cursor` or `features` must be provided"
 
         super().__init__(level, order, kind=cursor.kind.value, spelling=cursor.spelling, location=Location(cursor.location))
         self.children: list[AstNode] = []
 
-        assert cursor is not None or features is not None, "cursor or features must be provided"
+
 
         # kind_embeddings = np.zeros(CURSOR_KIND_EMB, dtype=np.float32)
         # #kind_embeddings[self.kind] = 1.0
@@ -251,28 +250,21 @@ class CursorNode(AstNode):
 
 
 
-# Node Corresponds to an Ast Tokenm aka Leaf-of-a-tree
+# Node Corresponds to an Ast Token aka Leaf-of-a-tree
 class TokenNode(AstNode):
 
     def __init__(self, level: int, order: int, token: Token | None = None, features: tf.Tensor | None = None):
-
         '''
         :param id: identifier of the node
         :param level: level from the root
         :param order: order within siblings
         :param token: AST Token
         '''
-
-        location = Location()
-        location.file = token.location.file
-        location.line = token.location.line
-        location.column = token.location.column
-
-        super().__init__(level, order, kind=token.kind.value, spelling=token.spelling, location=location)
+        assert token is not None or features is not None, "either `token` or `features` must be provided"
+        super().__init__(level, order, kind=token.kind.value, spelling=token.spelling, location=Location(token.location))
 
 
     def print(self, prev_location: Location | None = None) -> Location:
-
         if prev_location is None:
             prev_location = self.location
 
