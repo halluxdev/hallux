@@ -10,8 +10,8 @@ from ast_parser import parse_cpp_file
 
 @pytest.mark.parametrize("cpp_filename",
                          [
-                             pytest.param(str(Path(__file__).resolve().parent.joinpath("samples", "test1.cpp"))),
-                             pytest.param(str(Path(__file__).resolve().parent.joinpath("samples", "test2.cpp")))
+                             pytest.param(str(Path(__file__).resolve().parent.parent.joinpath("samples", "test1.cpp"))),
+                             pytest.param(str(Path(__file__).resolve().parent.parent.joinpath("samples", "test2.cpp")))
                          ],)
 def test_ast_parser(cpp_filename: str):
     tree = parse_cpp_file(cpp_filename)

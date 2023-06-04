@@ -45,7 +45,7 @@ def inSameFile(current_token: Token, child_token: Token) -> bool:
             return str(current_token.location.file) == str(child_token.location.file)
     return False
 
-def isFirstTokenBeforeNext(current_token: Token, child_token: Token) -> bool:
+def isTokenBefore(current_token: Token, child_token: Token) -> bool:
     if current_token.location is None or child_token.location is None :
         return False
     if str(current_token.location.file) == str(child_token.location.file):
@@ -58,10 +58,6 @@ def isFirstTokenBeforeNext(current_token: Token, child_token: Token) -> bool:
 
     return current_token.spelling != child_token.spelling
 
-def print_token(token, label=""):
-    print(f"{label}{token.spelling}", end=" ")
-    return None
-
 def process_ast(cursor: Cursor, level: int = 0, order: int = 0, id: int = 0) -> Tuple[CursorNode|None, int, Token|None]:
     id += 1
     current_tokens = cursor.get_tokens()
@@ -73,6 +69,8 @@ def process_ast(cursor: Cursor, level: int = 0, order: int = 0, id: int = 0) -> 
 
     if current_token is None: # sometimes Cursors end up in the unparsed or missing file
         return None, id, None
+
+    last_child_token = None
 
     node = CursorNode(level, order, cursor)
 
@@ -89,7 +87,7 @@ def process_ast(cursor: Cursor, level: int = 0, order: int = 0, id: int = 0) -> 
         # if child_token is in the same file let's iterate current_token until they are equal
         # resulting tokens added as leafs for current node
         if inSameFile(current_token, child_token):
-            while isFirstTokenBeforeNext(current_token, child_token):
+            while isTokenBefore(current_token, child_token):
                 leaf = TokenNode(level+1, order, current_token)
                 node.add_child(leaf)
                 order += 1
@@ -104,12 +102,11 @@ def process_ast(cursor: Cursor, level: int = 0, order: int = 0, id: int = 0) -> 
 
         if inSameFile(current_token, last_child_token):
             # iterate current_token to keep up with last_child_token
-            while isFirstTokenBeforeNext(current_token, last_child_token):
+            while isTokenBefore(current_token, last_child_token):
                  try:
                      current_token = next(current_tokens)
                  except StopIteration:
                      break
-                     #return node, id, current_token
 
     if level == 0:
         if current_token is not None:
@@ -120,8 +117,8 @@ def process_ast(cursor: Cursor, level: int = 0, order: int = 0, id: int = 0) -> 
                 leaf = TokenNode(level+1, order, current_token)
                 node.add_child(leaf)
                 order += 1
-    # elif current_token is not None:
-    #     if last_child_token is None or str(current_token.location.file) != str(last_child_token.location.file):
+    # elif current_token is not None and last_child_token is not None:
+    #     if not inSameFile(current_token, last_child_token):
     #         leaf = TokenNode(level+1, order, current_token)
     #         node.add_child(leaf)
     #         order += 1
@@ -129,6 +126,5 @@ def process_ast(cursor: Cursor, level: int = 0, order: int = 0, id: int = 0) -> 
     #             leaf = TokenNode(level+1, order, current_token)
     #             node.add_child(leaf)
     #             order += 1
-
 
     return node, id, current_token
