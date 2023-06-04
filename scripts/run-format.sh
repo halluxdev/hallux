@@ -2,4 +2,4 @@
 
 cd "${0%/*}/.."
 
-find . -regex '.*\.\(c\|cpp\|cc\|cxx\|h\|hpp\)' -not -path "./CppParser/*" -not -path "./common/*" -exec clang-format -style=file -i {} \;
+find . -regex '.*\.\(c\|cpp\|cc\|cxx\|h\|hpp\)' -exec clang-format -style=file -i {} \;

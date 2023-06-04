@@ -1,5 +1,5 @@
 #include <iostream>
-wdaedas
+
 int main(int argc, char* argv[])
 {
   std::cout << "This is compilable file (part of CMake project) for testing purposes" << std::endl ;
