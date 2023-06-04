@@ -17,3 +17,17 @@ how to turn tree-like structure into a language model?
 - rather than using transformer directly we may use trainable NLM filter with custom "attention" heads 
 - we may have 2 passes up-down and down-up
 
+## Folder structure
+
+├── python
+├── scripts
+├── src
+├── test
+└── worker
+
+### Worker
+
+Clones repository defined in the config file, runs the build and reacts on the compilation results
+
+`> python worker/worker.py`
+
