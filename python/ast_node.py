@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 from __future__ import annotations
 
 import numpy as np
@@ -307,22 +308,26 @@ class TokenNode(AstNode):
 
     def save(self, file_strteam, location: Location | None = None) -> Location:
         prev_loc = location if location is not None else self.location
-
+        wrote_delim: bool = False
         if str(prev_loc.file) != str(self.location.file):
             file_strteam.write("\n")
-
+            wrote_delim = True
             prev_loc = self.location
             prev_loc.column = 0
 
         while(prev_loc.line < self.location.line):
             file_strteam.write("\n")
+            wrote_delim = True
             prev_loc.line += 1
             prev_loc.column = 0
 
         while(prev_loc.column < self.location.column-1):
             file_strteam.write(" ")
+            wrote_delim = True
             prev_loc.column += 1
 
+        if not wrote_delim:
+            file_strteam.write(" ")
         file_strteam.write(str(self.spelling))
         prev_loc.column += len(self.spelling)
 

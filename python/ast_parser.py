@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 from __future__ import annotations
 
-import copy
 from pathlib import Path
 from typing import Final, Tuple, Any
 from clang.cindex import *
