@@ -2,11 +2,10 @@
 
 cd "${0%/*}/.."
 
-#PROJ_ROOT="."
+HALLUX_ROOT="${HALLUX_ROOT:-$(pwd)}"
 
 rm -rf ./venv
-#python3 -m venv --prompt="Hallux-0.1" "${PROJ_ROOT}/venv"
-python3 -m venv --prompt="Hallux-0.1" "./venv"
+python3 -m venv --prompt="Hallux-0.1" "${HALLUX_ROOT}/venv"
 
 source ./venv/bin/activate
 pip install pip --upgrade
