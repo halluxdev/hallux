@@ -1,7 +1,9 @@
 # hallux
 **AI code generator for C++**
+
 For now, we're only aiming at automatic fixing of compilation errors.
-*In the future generation of new code (in TDD-like manner) is also planned.
+
+*In the future generation of new code (in TDD-like manner) is also planned.*
 
 ## Motivation
 Existing Code-Gen Neural Nets are working in GPT-style (aka Transformer Decoder, aka Continuation Language Model). I.e. they're predicting next tokens, taking into account existing ones.
@@ -17,6 +19,9 @@ Unlike scripting languages like Python, C++ has a compiler which instantly bring
 1. Ability to fix such errors brings important customer value
 2. Compilation result (failed or pass) also brings super-easy ability to train our networks in semi-supervised manner
 3. Compilation result can also be used during inference (code generation) stage, when we check CodeGen results for validity. Even if neural net provides low performance with small probability of success we still able to repeat CodeGen multiple times until success. 
+4. We can use compilation error messages as extra input for our Net, which is not possible in scripting languages 
+5. C++ is widely popular programming language, used by many rich companies (and individuals)
+6. I love C++ more than any other :)) 
 
 ## Folder structure
 
@@ -32,19 +37,43 @@ Clones repository defined in the config file, runs the build and reacts on the c
 
 `> python worker/worker.py`
 
+## TRANSFORMER IDEAS
 
-**idea 1:**
-For transformer-like architecure we may combine tokens coming from AST and tokens coming from spelling into one stream, by using binary flag (one hot) in the token and constraining both embeddigs to be the same size.
+1. Take existing Transformer, like BERT (or its descendant) and fine-tune it for our problem
+2. We may extend existing BERT tokens with tokens coming directly from C++ parser. This will help to learn c++ syntax, and thus probably reduce training costs. 
+3. We may introduce even "bigger" artificial tokens like #include<some-standard-library>. In this way BERT might also learn how includes affect existing (exposed) functions/classes. 
+4. In the data preparation stage we may embed local include files into cpp files, such that whole context is available. This might be a problem though, as such files could be arbitrary large 
+5. We may play with External Attention (which may reduce training cost, if we decide to train from scratch)
+6. KD-Tree Attention with O(N Log N) complexity ? Sparse Attention + Kd Tree looks like an option
+
+## Abstract Syntax Tree (AST-NN)
+  
+* We may "directly" use AST as trainable structure, which has "Branch" and "Leaf" Nodes of different kinds
+* Each kind of node may have their own trainable weights, and thus aggregate information differently.
+* Each C++ file contains different AST tree structure, but they built of the same kinds of "Branches" and "Leafs", thus training on many different datasets (i.e. cpp files) is not a problem
+* It is possible to process whole `Translation Unit`, which has all the context we ever need to fix compilation error  
+* Common includes like #include<string> may be extracted as separatly trainable "Branch" Nodes, which after a while may be fixed and serve as pre-trained standard library things. This would simplify inference later on.
+* We may traverse the whole AST in linear time, aggregating information about everything in one root node. We may specifically add plenty of meat (floats) there. 
+* After aggrergation we may traverse back from-top-to-bottom (maybe with interconnects like in U-NET) fashion in order to classify each node 
+* AST-NN looks like more efficient and easier way to process huge c++ files than a transformer
+* We may emulate trainable Attention mechanisms, by sending messages between nodes
 
 **idea 2:**
 - CNN is like Finite-response Linear filter with trainable kernel
 - RNN is like Infinite-response LF 
-- Transformer is more like trainable Non-local means filter, and that's why it's computationally complex and can only have limited kernel 
-- we may combine these ideas with the fact that code has tree-structure
+- Transformer is more like trainable Non-local means filter, and that's why it's computationally complex and can only have limited kernel size
+- we may combine these ideas with the fact that AST has a tree-structure
 
 **idea 3:**
-how to turn tree-like structure into a language model?
-- first train network on a tree, to predict node type, then stop and train transformers, using input data from previos fixed net
-- 
-- rather than using transformer directly we may use trainable NLM filter with custom "attention" heads 
-- we may have 2 passes up-down and down-up
+how to turn tree-like NN into a generative language model?
+- Add [UNKNOWN], [EXCESSIVE] Nodes (or Leaf Kinds)
+- Train to classify each Normal Node if its [EXCESSIVE] or not
+- Train to classify what Kind each [UNKNOWN] node must have (it could be also [EXCESSIVE], why not)
+- During training we add (introduce) some percent of wrong nodes and then require to classify them as [EXCESSIVE]  
+- During training we remove some nodes and add two or more [UNKNOWN] instead, and require to classify them
+- During inference we shall detect what place(s) is/are broken, using compiler output, and put some [UNKNOWN] nodes in that area. 
+  - In this way trained NN will try to remove any shit it finds excessive and convert several [unkonwn] nodes to those which it thinks shall be there
+  
+
+
+  
