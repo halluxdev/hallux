@@ -1,5 +1,22 @@
 # hallux
 **AI code generator for C++**
+For now, we're only aiming at automatic fixing of compilation errors.
+*In the future generation of new code (in TDD-like manner) is also planned.
+
+## Motivation
+Existing Code-Gen Neural Nets are working in GPT-style (aka Transformer Decoder, aka Continuation Language Model). I.e. they're predicting next tokens, taking into account existing ones.
+This is great approach to write a new function from the scratch, but in real *Software Enginering* life, main complexity lies in the understanding of large corpus of the existing code and applying small appropriate patches to it.
+Another problem with Transformer architectures is that they able to access only token sequencies of a fixed maximum length.
+
+For the useful code generator tool it is essential to understand the "whole scope" of the code it is working with, but more importantly is ability to modify existing and introduce new tokens in the arbitrary place within the code.
+Therefore, instead applying *Transformer Decoder* architectures we might try to use *Transformer Encoder* ones, like BERT and its descendants. 
+
+### Why C++
+Unlike scripting languages like Python, C++ has a compiler which instantly brings number of important benefits.
+
+1. Ability to fix such errors brings important customer value
+2. Compilation result (failed or pass) also brings super-easy ability to train our networks in semi-supervised manner
+3. Compilation result can also be used during inference (code generation) stage, when we check CodeGen results for validity. Even if neural net provides low performance with small probability of success we still able to repeat CodeGen multiple times until success. 
 
 ## Folder structure
 
