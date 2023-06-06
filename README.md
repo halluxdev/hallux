@@ -74,6 +74,17 @@ how to turn tree-like NN into a generative language model?
 - During inference we shall detect what place(s) is/are broken, using compiler output, and put some [UNKNOWN] nodes in that area. 
   - In this way trained NN will try to remove any shit it finds excessive and convert several [unkonwn] nodes to those which it thinks shall be there
   
+**Idea to try**
+https://huggingface.co/models?pipeline_tag=fill-mask
+1. Choose most relevant FILL-MASK model
+2. Fine-tune with C++ corpus
+3. On inference with real problem we use compilation error message to find list of tokens around the error
+4. ...
+5. PROFIT!!  
 
-
+**another stupid idea to try**
+Once we have large c++ corpus and (custom?) tokenizer we may easily train markov-process probability table.
+This is already most stupid, but extremely fast language model. Compiler is binary, and if we not using any optimization compilation is relatively fast too. We may generate billion of variants of code and choose the one, what successfully compiled. Everything is on CPU :)
+  
+  
   
