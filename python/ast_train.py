@@ -6,14 +6,6 @@ from AST.ast_node import Weights, CursorNode, TokenNode
 from AST.ast_parser import parse_cpp_tree, print_cpp_file
 import tensorflow as tf
 
-# tree = parse_cpp_file('../src/hallux.cpp')
-# tree = parse_cpp_tree('../tests/samples/test1.cpp')
-# tree.print()
-# tree = parse_cpp_file('../test/samples/test_incorrect.cpp')
-# print_cpp_file('../test/samples/ISensorProperties.cpp.i')
-
-# tree.print()
-
 
 def main(argv):
     if len(argv) < 2:
@@ -37,8 +29,8 @@ def main(argv):
     tree: CursorNode = parse_cpp_tree(str(filename_cpp))
 
     forward_pass: tf.Tensor = tree.encode(weights)
-    prediction_errors = tree.perturbe(0.15, weights)
-    # Find gradients,
+    prediction_errors = tree.perturbe(0.15, weights, forward_pass)
+    # Find gradients
 
 
 if __name__ == "__main__":
