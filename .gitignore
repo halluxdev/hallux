@@ -6,4 +6,6 @@ Testing/
 venv/
 *.reconstructed
 __pycache__
+*/.pytest_cache/
 repos/
+data/

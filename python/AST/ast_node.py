@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 from __future__ import annotations
-
+from abc import abstractmethod
 import numpy as np
 import tensorflow as tf
 from typing import Any, Final
@@ -16,6 +16,7 @@ BINARY_FLAGS: Final[int] = 16
 SPELLING_FEATURES: Final[int] = 100
 DYNAMIC_FLAGS: Final[int] = 2
 
+
 class EncodeWeights:
     input2features: tf.Variable  # FEATURES_AMNT x (KIND_AMNT + BINARY_FLAGS + SPELLING_FEATURES)
     children2features: tf.Variable  # FEATURES_AMNT x FEATURES_SIZE
@@ -26,6 +27,7 @@ class EncodeWeights:
         # shape2 = [FEATURES_AMNT, FEATURES_AMNT]
         # self.children2features = tf.Variable(initial_value=tf.random.normal(shape=shape2), shape=shape2, validate_shape=True, trainable=True)
         pass
+
 
 class DecodeWeights:
     # in order to decode unknown node, first we need to predict its kind (which dependes on the parents kind)
@@ -42,19 +44,18 @@ class DecodeWeights:
         pass
 
 
-
 # all learnable weights
 class Weights:
     _encode: dict[int, EncodeWeights]  # each kind has its own encoding weight
     _decode: dict[int, DecodeWeights]  # each kind has its own decoding weight
-    _unknown: tf.Variable | None = None # single instance of tf.Tensor describing any unknown node
+    _unknown: tf.Variable | None = None  # single instance of tf.Tensor describing any unknown node
 
-    def encode(self, kind : int) -> EncodeWeights:
+    def encode(self, kind: int) -> EncodeWeights:
         if kind not in self._encode:
             self._encode[kind] = EncodeWeights()
         return self._encode[kind]
 
-    def decode(self, kind : int) -> DecodeWeights:
+    def decode(self, kind: int) -> DecodeWeights:
         if kind not in self._decode:
             self._decode[kind] = DecodeWeights()
         return self._decode[kind]
@@ -66,10 +67,11 @@ class Weights:
 
     def save(self, json_filename):
         with open(json_filename, "w") as write_file:
-            weights_dict = {"encode": self._encode,
-                         "decode": self._decode,
-                         "unknown": self._unknown,
-                         }
+            weights_dict = {
+                "encode": self._encode,
+                "decode": self._decode,
+                "unknown": self._unknown,
+            }
             json.dump(weights_dict, write_file, indent=4)
 
     @staticmethod
@@ -77,9 +79,9 @@ class Weights:
         with open(json_filename, "r") as read_file:
             weights_dict = json.load(read_file)
             weights = Weights()
-            weights._encode=weights_dict["encode"]
-            weights._decode=weights_dict["decode"]
-            weights._unknown=weights_dict["unknown"]
+            weights._encode = weights_dict["encode"]
+            weights._decode = weights_dict["decode"]
+            weights._unknown = weights_dict["unknown"]
             return weights
 
 
@@ -88,7 +90,7 @@ class Location:
     line: int
     column: int
 
-    def __init__(self, location : Any = None):
+    def __init__(self, location: Any = None):
         if location is not None:
             self.file = location.file
             self.column = location.column
@@ -101,15 +103,22 @@ class AstNode:
     kind: int | None = None
     spelling: str | None = None
     location: Location | None = None
-    features : tf.Tensor | None = None
+    features: tf.Tensor | None = None
 
-    def __init__(self, level: int, order: int, kind: int | None = None, spelling: str | None = None, location : Location | None = None):
-        '''
+    def __init__(
+        self,
+        level: int,
+        order: int,
+        kind: int | None = None,
+        spelling: str | None = None,
+        location: Location | None = None,
+    ):
+        """
         :param id: identifier of the node
         :param level: level from the root
-        '''
+        """
 
-        self.level = level #
+        self.level = level  #
         self.order = order
         self.kind = kind
         self.spelling = spelling
@@ -124,6 +133,7 @@ class AstNode:
     # def features(self, weights: Weights) -> tf.Tensor:
     #     pass
 
+    @abstractmethod
     def encode(self, weights: Weights) -> tf.Tensor:
         pass
 
@@ -132,6 +142,7 @@ class AstNode:
 
     def save(self, file_strteam, location: Location | None = None) -> Location:
         pass
+
 
 # # Node which needs to be predicted
 # class UnknownNode(AstNode):
@@ -163,18 +174,18 @@ class CursorNode(AstNode):
     children: list[AstNode] | None = None
 
     def __init__(self, level: int, order: int, cursor: Cursor | None = None, features: tf.Tensor | None = None):
-        '''
+        """
         :param id: identifier of the node
         :param level: level from the root
         :param order: order within siblings
         :param cursor: AST Cursor
-        '''
+        """
         assert cursor is not None or features is not None, "either `cursor` or `features` must be provided"
 
-        super().__init__(level, order, kind=cursor.kind.value, spelling=cursor.spelling, location=Location(cursor.location))
+        super().__init__(
+            level, order, kind=cursor.kind.value, spelling=cursor.spelling, location=Location(cursor.location)
+        )
         self.children: list[AstNode] = []
-
-
 
         # kind_embeddings = np.zeros(CURSOR_KIND_EMB, dtype=np.float32)
         # #kind_embeddings[self.kind] = 1.0
@@ -213,6 +224,9 @@ class CursorNode(AstNode):
     #
     #     return spelling_features
 
+    def perturbe(self, probability: float, weights: Weights, forward_tree: tf.Tensor):
+        pass
+
     def add_child(self, node: AstNode | None):
         if node is not None:
             self.children.append(node)
@@ -237,8 +251,6 @@ class CursorNode(AstNode):
         for child in self.children:
             prev_loc = child.save(file_strteam, prev_loc)
         return prev_loc
-
-
 
     # def encode(self, weights: Weights) -> tf.Tensor:
     #     if self.features is not None:
@@ -271,16 +283,17 @@ class CursorNode(AstNode):
 
 # Node Corresponds to an Ast Token aka Leaf-of-a-tree
 class TokenNode(AstNode):
-
     def __init__(self, level: int, order: int, token: Token | None = None, features: tf.Tensor | None = None):
-        '''
+        """
         :param id: identifier of the node
         :param level: level from the root
         :param order: order within siblings
         :param token: AST Token
-        '''
+        """
         assert token is not None or features is not None, "either `token` or `features` must be provided"
-        super().__init__(level, order, kind=token.kind.value, spelling=token.spelling, location=Location(token.location))
+        super().__init__(
+            level, order, kind=token.kind.value, spelling=token.spelling, location=Location(token.location)
+        )
 
     def print(self, location: Location | None = None) -> Location:
         prev_loc = location if location is not None else self.location
@@ -291,12 +304,12 @@ class TokenNode(AstNode):
             prev_loc = self.location
             prev_loc.column = 0
 
-        while(prev_loc.line < self.location.line):
+        while prev_loc.line < self.location.line:
             print()
             prev_loc.line += 1
             prev_loc.column = 0
 
-        while(prev_loc.column < self.location.column-1):
+        while prev_loc.column < self.location.column - 1:
             print(" ", end="")
             prev_loc.column += 1
 
@@ -304,7 +317,6 @@ class TokenNode(AstNode):
         prev_loc.column += len(self.spelling)
 
         return prev_loc
-
 
     def save(self, file_strteam, location: Location | None = None) -> Location:
         prev_loc = location if location is not None else self.location
@@ -315,13 +327,13 @@ class TokenNode(AstNode):
             prev_loc = self.location
             prev_loc.column = 0
 
-        while(prev_loc.line < self.location.line):
+        while prev_loc.line < self.location.line:
             file_strteam.write("\n")
             wrote_delim = True
             prev_loc.line += 1
             prev_loc.column = 0
 
-        while(prev_loc.column < self.location.column-1):
+        while prev_loc.column < self.location.column - 1:
             file_strteam.write(" ")
             wrote_delim = True
             prev_loc.column += 1
@@ -333,8 +345,7 @@ class TokenNode(AstNode):
 
         return prev_loc
 
-
-    def save2(self, file_strteam, location: Location | None = None):# -> Location:
+    def save2(self, file_strteam, location: Location | None = None):  # -> Location:
         # prev_loc = location if location is not None else self.location
         wrote_delim: bool = False
         # if str(prev_loc.file) != str(self.location.file):
@@ -357,8 +368,6 @@ class TokenNode(AstNode):
         if not wrote_delim:
             file_strteam.write("\n")
         file_strteam.write(str(self.spelling))
-        #prev_loc.column += len(self.spelling)
+        # prev_loc.column += len(self.spelling)
 
-        #return prev_loc
-
-
+        # return prev_loc
