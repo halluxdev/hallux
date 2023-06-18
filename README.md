@@ -1,4 +1,46 @@
-# hallux
+# hallux 
+
+## Virtual AI Developer
+
+The Virtual AI Developer is a revolutionary tool designed to automate and enhance routine tasks in software development. It's like having an extra team member who never sleeps, never tires, and is always focused on improving the quality of your code.
+
+## Key Features
+
+### Code Reviews
+
+Our AI doesn't just review code, it understands it. It can identify potential issues, suggest improvements, and ensure adherence to your specific code guidelines. It's like having a senior developer constantly reviewing your work, helping your team to learn, grow, and produce better code.
+
+### Security Analysis
+
+Our AI is also a security expert. It can analyze your code for potential security issues, helping to protect your software from threats before they become a problem. This is not just about preventing bugs, it's about building trust with your users and protecting your reputation.
+
+### Code Refactoring
+
+Our Virtual AI Developer also excels at code refactoring. It can suggest and implement improvements to your code structure based on your specific guidelines, helping to keep your code clean, efficient, and maintainable. It's like having a seasoned architect constantly optimizing your codebase.
+
+### Fixing Code Smells and Increasing Code Coverage
+Our AI can identify and fix code smells, helping to keep your code clean and readable. It can also help increase code coverage, ensuring that every part of your software is tested and reliable.
+
+### Continuous Learning
+The Virtual AI Developer learns and improves itself from your codebase, commit messages, and review comments. It's constantly evolving and adapting to your team's coding style and practices, making it a truly personalized tool.
+
+### Interactive Feedback
+Our AI interacts with developers as a colleague, providing code review comments and suggestions. It's a collaborative tool that enhances the development process and fosters a culture of continuous improvement.
+
+## Getting Started
+To start using the Virtual AI Developer, follow the installation and setup instructions in our Getting Started Guide.
+
+We believe that our Virtual AI Developer is the future of software development, and we invite you to join us on this exciting journey. If you have any questions or feedback, please feel free to reach out to our support team. Happy coding!
+
+
+
+---
+To be reviewed...
+
+---
+
+
+
 **AI code generator for C++**
 
 For now, we're only aiming at automatic fixing of compilation errors.
