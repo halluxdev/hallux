@@ -30,4 +30,4 @@ jobs:
       run: ctest -C ${{env.BUILD_TYPE}}
 
     - name: Run Hallux
-      uses: halluxai/hallux-action@master
+      uses: halluxai/hallux@master
