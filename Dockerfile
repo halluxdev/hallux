@@ -1,9 +1,9 @@
 FROM python:3.8-slim
 
-WORKDIR /worker
+WORKDIR /app
 
 COPY . .
 
 RUN pip install --no-cache-dir -r requirements.txt
 
-ENTRYPOINT ["python", "main.py"]
+ENTRYPOINT ["python", "/app/worker/main.py"]
