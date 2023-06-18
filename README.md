@@ -45,9 +45,10 @@ Clones repository defined in the config file, runs the build and reacts on the c
 4. In the data preparation stage we may embed local include files into cpp files, such that whole context is available. This might be a problem though, as such files could be arbitrary large 
 5. We may play with External Attention (which may reduce training cost, if we decide to train from scratch)
 6. KD-Tree Attention with O(N Log N) complexity ? Sparse Attention + Kd Tree looks like an option
+   Классический аттеншен "посещает" (софтмаксит) все предыдущие токены. Что если мы скажем что вместо всех N мы тебе подсунем M (M << N) наиболее релевантных. Эдакий софтмакс на минималках. Key and Query высчитываются по предыдущим значениям весов, так что можно сказать чито все Key и все Query мы можем посчитать отдельно за время 2N. Все Keys складываем в KD-Tree (тут уже N * Log N)  и для всех Query лазаем в KDTree и собираем M самых близких (в евклидовом смысле)
+   Дот-продукт собственно и дает самые большие значения самым близким векторам. Вот мы ему их и подсунем
 
 ## Abstract Syntax Tree (AST-NN)
-  
 * We may "directly" use AST as trainable structure, which has "Branch" and "Leaf" Nodes of different kinds
 * Each kind of node may have their own trainable weights, and thus aggregate information differently.
 * Each C++ file contains different AST tree structure, but they built of the same kinds of "Branches" and "Leafs", thus training on many different datasets (i.e. cpp files) is not a problem
@@ -85,6 +86,19 @@ https://huggingface.co/models?pipeline_tag=fill-mask
 **another stupid idea to try**
 Once we have large c++ corpus and (custom?) tokenizer we may easily train markov-process probability table.
 This is already most stupid, but extremely fast language model. Compiler is binary, and if we not using any optimization compilation is relatively fast too. We may generate billion of variants of code and choose the one, what successfully compiled. Everything is on CPU :)
+
+**Test-Driven-Development Assistant: Как бороться с огромным контекстом (token count) в коде?**
+Когда мы хотим подправить функцию так чтобы она удолетворяла новому unit-test нам (вроде-бы) нужно знать весь проект с кодом.   
+Но на самом деле не весь. Чаще всего ошибку можно пофиксить зная только саму функцию (и ее сигнатуру) в которой ошибка.
+Если этого не достаточно, значит нужны сигнатуры других функций, которые есть в области видимости.
+Короче говоря - идея заключается не в том чтобы использовать AST чтобы трейнить ИИ на дереве, а использовать AST чтобы выкинуть весь ненужный для текущей проблемы код.
+Если мы зараннее знаем какой у нас лимит по токенам, мы в первую очередь вырезаем из AST функцию которую надо фиксить, плюс все юнит-тесты.
+Затем если лимит позволяет мы добавляем сигнатуры других функций/классов которые могут быть релевантны. Ну и сортируем их по важности. Сперва самые на наш взгляд важнве, потом все менее и менее важные.  
+
+
+
+
+
   
   
   
