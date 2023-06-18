@@ -31,3 +31,9 @@ jobs:
 
     - name: Run Hallux
       uses: halluxai/hallux@master
+      with:
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        OPENAI_MODEL: gpt-3.5-turbo-0613
