@@ -27,6 +27,6 @@ def make_query():
 openai.api_key = openai_api_key
 
 
-print(make_query())
+# print(make_query())
 
 print("End of worker/main.py")
