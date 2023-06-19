@@ -1,0 +1,203 @@
+#!/bin/env python
+# Runs checks in the current project
+# (possible features: unit-tests / docstrings / compilation errors / linting)
+# Extracts every single message
+# Sends prompt to GPT, receives answer, changes code right in the codebase
+
+
+from __future__ import annotations
+import subprocess
+import os
+import sys
+from typing import Final
+import yaml
+from pathlib import Path
+import openai
+from openai.api_resources import ChatCompletion
+from enum import Enum
+import time
+
+
+class HalluxMode(Enum):
+    fix = 1,
+    propose = 2,
+    agent = 3
+
+
+def load_config() -> tuple[dict | None, Path | None]:
+    curr_path = Path(os.getcwd())
+    while not curr_path.joinpath(".hallux").exists() and curr_path.parent != curr_path:
+        curr_path = curr_path.parent
+    if not curr_path.joinpath(".hallux").exists():
+        return None, None
+    config_file = str(curr_path.joinpath(".hallux"))
+    with open(config_file) as file_stream:
+        yaml_dict = yaml.load(file_stream, Loader=yaml.CLoader)
+    return yaml_dict, curr_path
+
+
+class Hallux:
+    def __init__(self, mode: HalluxMode, config: dict, path: Path):
+        self.mode: Final[HalluxMode] = mode
+        self.model: Final[str] = config["backend"]["model"] if "model" in config["backend"].keys() else None
+        self.config: Final[dict] = config
+        self.path: Final[Path] = path
+        if self.model is None:
+            print("Error: Backend has no model")
+            exit(3)
+
+    def process(self):
+        if "python" in self.config.keys():
+            self.python()
+        if "cpp" in self.config.keys():
+            self.cpp()
+
+    def python(self):
+        if "linting" in self.config["python"].keys():
+            self.python_linting(config["python"]["linting"])
+        if "tests" in config["python"].keys():
+            self.python_tests(config["python"]["tests"])
+        if "docstrings" in config["python"].keys():
+            self.python_docstrings(config["python"]["docstrings"])
+
+    def python_linting(self, params: str | None):
+        if params is None or params == "ruff":
+            self.python_linting_ruff(["ruff", "check", "."])
+        else:
+            print("Can only use RUFF for a python lint")
+            exit(5)
+
+    def python_linting_ruff(self, command):
+        print("Process python linting issues:")
+
+        try:
+            subprocess.check_output(command)
+            print("No python linting issues found")
+        except subprocess.CalledProcessError as e:
+            ruff_output = e.output
+
+            warnings: list[str] = str(ruff_output.decode("utf-8")).split("\n")
+            for warn in warnings[:-2]:
+                # if len(warnings) > 1:
+                #    warn = warnings[0]
+                print(warn)
+                filename = warn.split(" ")[0].split(":")[0]
+                warn_line = int(warn.split(" ")[0].split(":")[1])
+                with open(filename, "rt") as file:
+                    filelines = file.read().split("\n")
+
+                request = "Fix python linting issue, write resulting code only:\n"
+                request = request + warn + "\n"
+                request = request + "Excerpt from the corresponding python file (not full):\n"
+                start_line = max(0, warn_line - 4)
+                end_line = min(len(filelines) - 1, warn_line + 4)
+                added_comment: str = " # line " + str(warn_line)
+                for line in range(start_line, end_line):
+                    request = request + filelines[line]
+                    if line + 1 == warn_line:
+                        request = request + added_comment
+                    request = request + "\n"
+                # print("request")
+                # print(request)
+                # result = ChatCompletion.create(messages=[{"role": "user", "content": request}], model=self.model)
+                # print("result")
+                resulting_code = None
+                # if len(result["choices"]) > 0:
+                #     print(result["choices"])
+                #     for variant in result["choices"]:
+                #         resulting_code = variant["message"]["content"]
+
+                resulting_code = "        try:\n" + \
+                                 "            token1 = next(tokens1)\n" + \
+                                 "            token2 = next(tokens2)\n" + \
+                                 "        except:\n" + \
+                                 "            break\n\n@pytest.mark.parametrize(\n"
+
+                if resulting_code is not None:
+                    if mode == HalluxMode.fix or mode == HalluxMode.agent:
+                        self._replace_lines_in_the_file(filename, start_line, end_line, resulting_code.split("\n"))
+                    else:
+                        self._propose_change_comment(filename, start_line, end_line, resulting_code.split("\n"))
+
+    def _replace_lines_in_the_file(self, filename, start_line, end_line, new_lines, added_comment : str | None = None):
+        with open(filename, "rt") as file:
+            filelines = file.read().split("\n")
+
+        with open(filename, "wt") as file:
+            for line in range(0, start_line + 1):
+                file.write(filelines[line] + "\n")
+
+            for code_line in new_lines[1:]:
+                if added_comment is not None and added_comment in str(code_line):
+                     code_line = code_line[:-len(added_comment)]
+                file.write(code_line + "\n")
+
+            for line in range(end_line, len(filelines)):
+                file.write(filelines[line] + "\n")
+
+            file.close()
+
+    def _propose_change_comment(self, filename: str, start_line: int, end_line: int, new_lines : list[str]):
+        pass
+
+
+    def python_tests(self, params: dict | str):
+        pass
+
+    def python_docstrings(self, params: dict | str):
+        pass
+
+    def cpp(self):
+        # if "cpp" in config.keys():
+        #     if "compile" in config["cpp"].keys():
+        #         cpp_compile(config["cpp"]["compile"], model)
+        #     if "linking" in config["cpp"].keys():
+        #         cpp_linking(config["cpp"]["linking"], model)
+        #     if "tests" in config["cpp"].keys():
+        #         cpp_tests(config["cpp"]["tests"], model)
+        pass
+
+    def cpp_compile(self, params: dict | str):
+        pass
+
+    def cpp_linking(self, params: dict | str):
+        pass
+
+    def cpp_tests(self, params: dict | str):
+        pass
+
+
+if __name__ == "__main__":
+    print("Hallux v0.1 - Convenient Coding Assistant")
+    if len(sys.argv) < 2 or sys.argv[1] not in ["fix", "propose", "agent"]:
+        print("Usage: hallux fix | hallux propose | hallux agent")
+        exit(0)
+
+    config, path = load_config()
+    if config is None:
+        print("Error: config file not found")
+        exit(1)
+
+    mode: HalluxMode
+    if sys.argv[1] == "fix":
+        mode = HalluxMode.fix
+    elif sys.argv[1] == "propose":
+        mode = HalluxMode.propose
+    else:
+        mode = HalluxMode.agent
+
+    os.chdir(str(path))
+
+    openai.api_key = os.getenv("OPENAI_API_KEY")
+
+    hallux = Hallux(mode=mode, config=config, path=path)
+
+    while True:
+        hallux.process()
+
+        if mode == HalluxMode.agent:
+            # git push
+            time.sleep(10)
+            # git pull --rebase
+        else:
+            break

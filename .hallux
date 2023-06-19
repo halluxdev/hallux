@@ -2,7 +2,12 @@ backend:
   model: gpt-3.5-turbo
   max_tokens: 4097
 
+github:
+    github_token:
+
 python:
-  linting:
-    empty: true
+    linting: ruff
+    tests: pytest
+    docstrings: True
+
 
