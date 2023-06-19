@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 from __future__ import annotations
 from abc import abstractmethod
-import numpy as np
 import tensorflow as tf
 from typing import Any, Final
 from clang.cindex import Cursor, Token
@@ -23,9 +22,11 @@ class EncodeWeights:
 
     def __init__(self):
         # shape1 = [FEATURES_AMNT, KIND_AMNT + BINARY_FLAGS + SPELLING_FEATURES]
-        # self.input2features = tf.Variable(initial_value=tf.random.normal(shape=shape1), shape=shape1, validate_shape=True, trainable=True)
+        # self.input2features = tf.Variable(initial_value=tf.random.normal(shape=shape1), shape=shape1,
+        # validate_shape=True, trainable=True)
         # shape2 = [FEATURES_AMNT, FEATURES_AMNT]
-        # self.children2features = tf.Variable(initial_value=tf.random.normal(shape=shape2), shape=shape2, validate_shape=True, trainable=True)
+        # self.children2features = tf.Variable(initial_value=tf.random.normal(shape=shape2), shape=shape2,
+        # validate_shape=True, trainable=True)
         pass
 
 
@@ -40,7 +41,8 @@ class DecodeWeights:
 
     def __init__(self):
         # shape1 = [FEATURES_AMNT + 1, KIND_AMNT]
-        # self.features2child_kind = tf.Variable(initial_value=tf.random.normal(shape=shape1), shape=shape1, validate_shape=True, trainable=True)
+        # self.features2child_kind = tf.Variable(initial_value=tf.random.normal(shape=shape1), shape=shape1,
+        # validate_shape=True, trainable=True)
         pass
 
 
@@ -158,7 +160,8 @@ class AstNode:
 #         if order > 0:
 #             sibling_features: tf.Tensor = tf.zeros(FEATURES_AMNT, dtype=tf.float32)
 #             for i in range(order-1):
-#                 sibling_features += tf.nn.relu(tf.matmul(weights.decode[parent.children[i].kind].features2sibling, parent.children[i].features()))
+#                 sibling_features += tf.nn.relu(tf.matmul(weights.decode[parent.children[i].kind].features2sibling,
+#                 parent.children[i].features()))
 #
 #             features += sibling_features/tf.float32(order)
 #
@@ -191,7 +194,8 @@ class CursorNode(AstNode):
         # #kind_embeddings[self.kind] = 1.0
         # tf_kind_logit = tf.constant(value=kind_embeddings, shape=(CURSOR_KIND_EMB), dtype=tf.float32)
         # tf_binary_flags = tf.constant(value=self.binary_flags(cursor), shape=(BINARY_FLAGS), dtype=tf.float32)
-        # tf_spelling_features = tf.constant(value=self.spelling_features(cursor.spelling), shape=(SPELLING_FEATURES), dtype=tf.float32)
+        # tf_spelling_features = tf.constant(value=self.spelling_features(cursor.spelling), shape=(SPELLING_FEATURES),
+        # dtype=tf.float32)
         # self.tf_input_features: tf.Tensor = tf.concat([tf_kind_logit, tf_binary_flags, tf_spelling_features], axis=0)
 
     # @staticmethod
@@ -234,7 +238,7 @@ class CursorNode(AstNode):
     def print(self, location: Location | None = None) -> Location:
         # CursorNode does not print anything by itself
         prev_loc = location
-        if prev_loc == None or str(prev_loc.file) != str(self.location.file):
+        if prev_loc is None or str(prev_loc.file) != str(self.location.file):
             print(f"/*  {self.location.file}   */")
             prev_loc = self.location
 
@@ -244,7 +248,7 @@ class CursorNode(AstNode):
 
     def save(self, file_strteam, location: Location | None = None) -> Location:
         prev_loc = location
-        if prev_loc == None or str(prev_loc.file) != str(self.location.file):
+        if prev_loc is None or str(prev_loc.file) != str(self.location.file):
             file_strteam.write("\n")
             prev_loc = self.location
 
@@ -263,7 +267,8 @@ class CursorNode(AstNode):
     #         # ToDo: we plan to make in CNN-like manner
     #         children_features: tf.Tensor = tf.zeros(FEATURES_AMNT, dtype=tf.float32)
     #         for child in self.children:
-    #             children_features += tf.nn.relu(tf.matmul(child.encode(weights), weights.encode[self.kind].children2features))
+    #             children_features += tf.nn.relu(tf.matmul(child.encode(weights), weights.encode[self.kind].
+    #             children2features))
     #         children_features /= len(self.children)
     #
     #         self.features += tf.nn.relu(children_features)
@@ -273,7 +278,8 @@ class CursorNode(AstNode):
     # def predict(self, child_num: int, weights: Weights):
     #     assert child_num < len(self.children)
     #     assert isinstance(self.children[child_num], UnknownNode)
-    #     #child_kind : tf.int64 = tf.math.argmax(tf.matmul(weights.decode[self.kind].features2child_kind, self.features))
+    #     #child_kind : tf.int64 = tf.math.argmax(tf.matmul(weights.decode[self.kind].features2child_kind,
+    #     self.features))
     #     #self.children[child_num] =
     #
     # @staticmethod

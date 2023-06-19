@@ -5,14 +5,13 @@
 # 1. create "repos" directly in the hallux folder. (repos is ignored in the .gitignore)
 # 2. git clone any C++ project in separate sub-folder within repos dir
 # 3. configure it properly with cmake, choose make generator
-# 4. use this script to automatically go over all make targets and gather all valid source files/Translation units in "hallus/data" folder within respective subdirectories
+# 4. use this script to automatically go over all make targets and gather all valid source files/Translation
+# units in "hallux/data"  folder within respective subdirectories
 # 5. ...
 # 6. PROFIT!
 
 
 from __future__ import annotations
-import sys
-import shutil
 import subprocess
 import os
 from pathlib import Path
@@ -120,4 +119,4 @@ if "hallux" in pwd_dirs and "build" in pwd_dirs and "repos" in pwd_dirs:
     print(f"processed {processed} targets")
 
 else:
-    print(f"Cannot process current dir")
+    print("Cannot process current dir")

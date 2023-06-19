@@ -69,7 +69,7 @@ def test_parse_cpp_tree_reconstruction(cpp_filename: str):
     [
         pytest.param(str(Path(__file__).resolve().parent.parent.parent.joinpath("samples", "test1.cpp"))),
         pytest.param(str(Path(__file__).resolve().parent.parent.parent.joinpath("samples", "test2.cpp"))),
-        #pytest.param(str(Path(__file__).resolve().parent.parent.parent.joinpath("samples", "test3_big.cpp"))),
+        # pytest.param(str(Path(__file__).resolve().parent.parent.parent.joinpath("samples", "test3_big.cpp"))),
     ],
 )
 def test_parse_cpp_list_reconstruction(cpp_filename: str):

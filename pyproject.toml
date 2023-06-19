@@ -4,4 +4,3 @@ line_length = 120
 [tool.ruff]
 # Same as Black.
 line-length = 120
-

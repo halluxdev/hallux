@@ -2,8 +2,8 @@
 
 import sys
 from pathlib import Path
-from AST.ast_node import Weights, CursorNode, TokenNode
-from AST.ast_parser import parse_cpp_tree, print_cpp_file
+from AST.ast_node import Weights, CursorNode
+from AST.ast_parser import parse_cpp_tree
 import tensorflow as tf
 
 
@@ -31,6 +31,7 @@ def main(argv):
     forward_pass: tf.Tensor = tree.encode(weights)
     prediction_errors = tree.perturbe(0.15, weights, forward_pass)
     # Find gradients
+    print(prediction_errors)
 
 
 if __name__ == "__main__":

@@ -2,9 +2,9 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Final, Tuple, Any
-from clang.cindex import *
-from AST.ast_node import CursorNode, TokenNode, Location
+from typing import Tuple
+from clang.cindex import Index, Config, Cursor, Token
+from AST.ast_node import CursorNode, TokenNode
 
 Config.set_library_file(
     str(
