@@ -20,10 +20,6 @@ jobs:
 
     - name: Run Hallux
       run: python ./worker/main.py
-      # uses: halluxai/hallux@feature/integrate-with-github-api
-      # with:
-      #   github-token: ${{ secrets.GITHUB_TOKEN }}
-      #   pull-request-number: ${{ github.event.pull_request.number }}
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
