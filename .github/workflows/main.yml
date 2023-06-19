@@ -29,13 +29,3 @@ jobs:
       working-directory: ${{github.workspace}}/build
       run: ctest -C ${{env.BUILD_TYPE}}
 
-    - name: Run Hallux
-      uses: halluxai/hallux@feature/integrate-with-github-api
-      with:
-        github-token: ${{ secrets.GITHUB_TOKEN }}
-        pull-request-number: ${{ github.event.pull_request.number }}
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-        OPENAI_MODEL: text-davinci-003
-        PULL_REQUEST_NUMBER: ${{ github.event.pull_request.number }}

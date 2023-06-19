@@ -52,6 +52,7 @@ def pull_request_flow(pull_request_number):
     print(pull_request.title)
     print(pull_request.user.login)
     print(pull_request.body)
+    # print(pull_request)
     modified_files = pull_request.get_files()
     # print(modified_files)
     for file in modified_files:

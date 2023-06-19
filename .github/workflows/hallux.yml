@@ -1,0 +1,27 @@
+name:  Hallux pipeline
+
+on:
+  pull_request:
+    branches: [ master ]
+
+env:
+  BUILD_TYPE: Release
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+
+    - uses: actions/checkout@v2
+
+    - name: Run Hallux
+      uses: halluxai/hallux@feature/integrate-with-github-api
+      with:
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+        pull-request-number: ${{ github.event.pull_request.number }}
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        OPENAI_MODEL: text-davinci-003
+        PULL_REQUEST_NUMBER: ${{ github.event.pull_request.number }}
