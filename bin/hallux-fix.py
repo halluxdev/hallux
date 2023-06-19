@@ -49,19 +49,41 @@ def python_linting(params: dict | str | None, model: Final[str]):
 
             request = "Fix python linting issue, write resulting code only:\n"
             request = request + warn + "\n"
-            request = request + "Excerpt from the corresponding python file:\n"
-            for line in range(warn_line - 3, warn_line + 3):
-                if line > 0 and line < len(filelines):
-                    request = request + filelines[line] + "\n"
-            print("request")
-            print(request)
+            request = request + "Excerpt from the corresponding python file (not full):\n"
+            start_line = max(0, warn_line - 4)
+            end_line = min(len(filelines) - 1, warn_line + 4)
+            added_comment: Final[str] = " # line " + str(warn_line)
+            for line in range(start_line, end_line):
+                request = request + filelines[line]
+                if line + 1 == warn_line:
+                    request = request + added_comment
+                request = request + "\n"
+            # print("request")
+            # print(request)
             result = ChatCompletion.create(messages=[{"role": "user", "content": request}], model=model)
             # print("result")
-            # print(result)
+            resulting_code = None
             if len(result["choices"]) > 0:
+                print(result["choices"])
                 for variant in result["choices"]:
                     resulting_code = variant["message"]["content"]
-                    print(resulting_code.split("\\n"))
+                    # print(resulting_code)
+
+            if resulting_code is not None:
+                resulting_lines = resulting_code.split("\n")
+                with open(filename, "wt") as file:
+                    for line in range(0, start_line + 1):
+                        file.write(filelines[line] + "\n")
+
+                    for code_line in resulting_lines[1:]:
+                        # if str(code_line).__contains__(added_comment):
+                        #     code_line = code_line[:-len(added_comment)]
+                        file.write(code_line + "\n")
+
+                    for line in range(end_line, len(filelines)):
+                        file.write(filelines[line] + "\n")
+
+                    file.close()
 
 
 def python_tests(params: dict | str, model: Final[str]):
