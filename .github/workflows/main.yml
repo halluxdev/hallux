@@ -36,4 +36,4 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-        OPENAI_MODEL: gpt-3.5-turbo
+        OPENAI_MODEL: text-davinci-003
