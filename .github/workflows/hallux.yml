@@ -16,7 +16,8 @@ jobs:
     - uses: actions/checkout@v2
 
     - name: Run Hallux
-      uses: halluxai/hallux@feature/integrate-with-github-api
+      run: python ./worker/main.py
+      # uses: halluxai/hallux@feature/integrate-with-github-api
       with:
         github-token: ${{ secrets.GITHUB_TOKEN }}
         pull-request-number: ${{ github.event.pull_request.number }}
