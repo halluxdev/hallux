@@ -5,11 +5,12 @@ import yaml
 import os
 import shutil
 
-
+# Execute shell command in subprocess and return the output
 def execute_command(cmd, print_output=True):
     process = Popen(cmd, stdin=PIPE, stdout=PIPE, stderr=PIPE, shell=True)
     output, error = process.communicate()
 
+    # Check if the command returned an error
     if process.returncode != 0:
         print(f"Error executing command: {cmd}")
         print(error.decode())
@@ -21,25 +22,21 @@ def execute_command(cmd, print_output=True):
     return output.decode()
 
 
+# Checks for changes in a Git repository and builds the project
 def check_for_changes(repo, work_dir):
-    # Remove the directory and its contents
     print(f"Cleaning working directory {work_dir}...")
     if os.path.exists(work_dir) and work_dir.startswith("/tmp/"):
         shutil.rmtree(work_dir)
 
-    # Create the directory and its parent directories if they don't exist
     os.makedirs(work_dir, exist_ok=True)
 
-    # clone repo into work_dir
     print("Cloning repository...")
     cmd = f"git clone {repo} {work_dir}"
     execute_command(cmd)
 
-    # list files in work_dir
     cmd = f"tree {work_dir}"
     execute_command(cmd)
 
-    # build the project
     print("Building project...")
     cmd = f"scripts/run-build.sh {work_dir}"
     execute_command(cmd)
@@ -58,14 +55,10 @@ def main():
             return
 
     print(f"Repo: {repo} {work_dir}")
+
+    # Check for changes and build the project
     check_for_changes(repo, work_dir)
 
-    # Polling to be added later
-    # schedule.every(1).minutes.do(check_for_changes, repo, work_dir)
-
-    while True:
-        schedule.run_pending()
-        time.sleep(1)
 
 
 if __name__ == "__main__":
