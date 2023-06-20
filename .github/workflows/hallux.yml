@@ -21,7 +21,7 @@ jobs:
     - name: Run Hallux
       run: python ./worker/main.py
       env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GITHUB_TOKEN: ${{ secrets.HALLUX_GITHUB_TOKEN }}
         OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
         OPENAI_MODEL: text-davinci-003
         PULL_REQUEST_NUMBER: ${{ github.event.pull_request.number }}
