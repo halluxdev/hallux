@@ -1,20 +1,25 @@
 #!/bin/env python
-# Runs checks in the current project
-# (possible features: unit-tests / docstrings / compilation errors / linting)
-# Extracts every single message
-# Sends prompt to GPT, receives answer, changes code right in the codebase
+# Copyright: Hallux team, 2023
+
+# MAIN COMMAND-LINE EXECUTABLE
+# - Runs checks in the current folder (linting / unit-tests / docstrings / compilation errors)
+# - Extracts every single message
+# - Makes a prompt for every message
+# - Sends prompt to GPT, receives answer,
+# - Changes code right in the codebase or sends this change as Github Web GUI proposal
 
 
 from __future__ import annotations
 import subprocess
 import os
 import sys
-from abc import ABC, abstractmethod
+# from abc import ABC, abstractmethod
 from typing import Final
 import yaml
 from pathlib import Path
 import openai
 from openai.api_resources import ChatCompletion
+from diff_target import DiffTarget, FilesystemTarget, GitCommitTarget, GithubProposalTraget
 
 
 def load_config() -> tuple[dict | None, Path | None]:
@@ -29,57 +34,31 @@ def load_config() -> tuple[dict | None, Path | None]:
     return yaml_dict, curr_path
 
 
-
-class DiffTarget(ABC):
-    @abstractmethod
-    def apply_diff(self, filename : str, start_line: int, end_line: int, new_lines: list[str], message: str) -> None:
-        pass
-
-
-class FilesystemTarget(DiffTarget):
-    '''
-    Saves diffs directly into filesystem
-    '''
-    def __init__(self):
-        pass
-
-    def apply_diff(self, filename : str, start_line: int, end_line: int, new_lines: list[str], message: str) -> None:
-
-        with open(filename, "rt") as file:
-            filelines = file.read().split("\n")
-
-        with open(filename, "wt") as file:
-            for line in range(0, start_line + 1):
-                file.write(filelines[line] + "\n")
-
-            for code_line in new_lines[1:]:
-                file.write(code_line + "\n")
-
-            for line in range(end_line, len(filelines)):
-                file.write(filelines[line] + "\n")
-
-            file.close()
-
-
-class GitCommitTarget(FilesystemTarget):
-    '''
-    Saves diffs into git commits
-    '''
-
-    def __init__(self):
-        FilesystemTarget.__init__(self)
-
-
-    def apply_diff(self, filename : str, start_line: int, end_line: int, new_lines: list[str], message: str) -> None:
-            FilesystemTarget.apply_diff(filename, start_line, end_line, new_lines, message)
-            subprocess.check_output(["git", "add", filename])
-            subprocess.check_output(["git", "commit", "-m", f'"{message}"'])
-
-
-class GithubProposalTraget(DiffTarget):
-    def __init__(self):
-        pass
-
+#
+#
+# class PromptExecutor(ABC):
+#     def __init__(self):
+#         pass
+#
+#     @abstractmethod
+#     def process(self):
+#         pass
+#
+# class FeatureExecutor(ABC):
+#     def __init__(self):
+#         pass
+#
+#     @abstractmethod
+#     def process(self):
+#         pass
+#
+#
+# class PythonRuffLinting(FeatureExecutor):
+#     def __init__(self, params, diff_target: DiffTarget):
+#         super().__init__()
+#         self.diff_target = diff_target
+#
+#     def process(self):
 
 
 
@@ -126,8 +105,6 @@ class Hallux:
 
             warnings: list[str] = str(ruff_output.decode("utf-8")).split("\n")
             for warn in warnings[:-2]:
-                # if len(warnings) > 1:
-                #    warn = warnings[0]
                 print(warn)
                 filename = warn.split(" ")[0].split(":")[0]
                 warn_line = int(warn.split(" ")[0].split(":")[1])
@@ -177,6 +154,8 @@ class Hallux:
                             break
                     self.diff_target.apply_diff(filename, start_line, end_line, resulting_lines, warn)
 
+                if self.debug:
+                    break
 
     def python_tests(self, params: dict | str):
         pass
@@ -207,7 +186,7 @@ class Hallux:
 if __name__ == "__main__":
     print("Hallux v0.1 - Convenient Coding Assistant")
     if len(sys.argv) < 2 or sys.argv[1] not in ["fix", "propose", "commit"]:
-        print("Usage: hallux fix | hallux propose | hallux commit")
+        print("Usage: hallux fix | hallux commit  | hallux propose Github_PullRequest_ID")
         exit(0)
 
     config, path = load_config()
@@ -222,7 +201,7 @@ if __name__ == "__main__":
     elif sys.argv[1] == "commit":
         target = GitCommitTarget()
     else:
-        target = GithubProposalTraget()
+        target = GithubProposalTraget(sys.argv[2])
 
     os.chdir(str(path))
 
