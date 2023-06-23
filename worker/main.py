@@ -15,8 +15,7 @@ if openai_api_key is None:
 openai.api_key = openai_api_key
 
 
-pull_request_number = os.getenv('PULL_REQUEST_NUMBER')
-
+pull_request_number = os.getenv("PULL_REQUEST_NUMBER")
 
 
 def make_query():
@@ -30,8 +29,8 @@ def make_query():
 
 # Pull request flow
 
-def pull_request_flow(pull_request_number):
 
+def pull_request_flow(pull_request_number):
     # First create a Github instance using an access token
     g = Github(github_token)
 
