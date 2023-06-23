@@ -15,19 +15,17 @@ import copy
 import subprocess
 import os
 import sys
-import tempfile
 
 from typing import Final
 import yaml
 import re
 from pathlib import Path
 import openai
-from numpy.core.defchararray import isnumeric
 
 from query_backend import QueryBackend, OpenAiChatGPT
 from diff_target import DiffTarget, FilesystemTarget, GitCommitTarget, GithubProposalTraget
-from cpp import CppExecutor
-
+from cpp import CppProcessor
+from python import PythonProcessor
 
 
 def load_config() -> tuple[dict | None, Path | None]:
@@ -52,121 +50,11 @@ class Hallux:
 
     def process(self):
         if "python" in self.config.keys():
-            self.python(self.config["python"])
+            python = PythonProcessor(self.query_backend, self.diff_target, self.base_path, self.config["cpp"], self.debug)
+            python.process()
         if "cpp" in self.config.keys():
-            cpp = CppExecutor(self.query_backend, self.diff_target, self.base_path, self.config["cpp"], self.debug)
+            cpp = CppProcessor(self.query_backend, self.diff_target, self.base_path, self.config["cpp"], self.debug)
             cpp.process()
-
-    def python(self, config: dict):
-        print("Process Python issues:")
-        if "linting" in config.keys():
-            self.python_linting(config["linting"])
-        if "tests" in config.keys():
-            self.python_tests(config["tests"])
-        if "docstrings" in config:
-            self.python_docstrings(config["docstrings"])
-
-    def python_linting(self, params: str | None):
-        if params is None or params == "ruff":
-            self.python_linting_ruff(["ruff", "check", "."])
-        else:
-            print("We only support RUFF for python lint")
-            exit(5)
-
-    @staticmethod
-    def read_lines(filename: str, line: int, raidus: int, add_comment:str|None = None) -> tuple[int, int, list[str], list[str]]:
-        with open(filename, "rt") as file:
-            filelines = file.read().split("\n")
-        start_line = max(0, line - raidus)
-        end_line = min(len(filelines) - 1, line + raidus)
-        requested_lines = copy.deepcopy(filelines[start_line:end_line])
-        requested_lines[line-start_line+1] += add_comment
-        return start_line, end_line, requested_lines, filelines
-
-    @staticmethod
-    def prepare_lines(query_result: str, remove_comment:str|None = None) -> list[str]:
-        resulting_lines = query_result.split("\n")
-        for i in range(len(resulting_lines)):
-            line : str = resulting_lines[i]
-            if line.endswith(remove_comment):
-                resulting_lines[i] = line[:-len(remove_comment)]
-                break
-        return resulting_lines
-
-    def python_linting_ruff(self, command):
-        print("Process python linting issues:")
-
-        try:
-            subprocess.check_output(command)
-            print("No python linting issues found")
-        except subprocess.CalledProcessError as e:
-            ruff_output = e.output
-
-            warnings: list[str] = str(ruff_output.decode("utf-8")).split("\n")
-            for warn in warnings[:-2]:
-                print(warn)
-                filename = warn.split(" ")[0].split(":")[0]
-                warn_line = int(warn.split(" ")[0].split(":")[1])
-                added_comment: str = " # line " + str(warn_line)
-                start_line, end_line, warnlines, filelines = self.read_lines(filename, warn_line, 4, added_comment)
-
-                # with open(filename, "rt") as file:
-                #     filelines = file.read().split("\n")
-
-                request = "Fix python linting issue, write resulting code only:\n"
-                request = request + warn + "\n"
-                request = request + "Excerpt from the corresponding python file (not full):\n"
-
-                for line in warnlines:
-                    request = request + line + "\n"
-
-                print("request")
-                print(request)
-
-                result : str
-
-                if self.debug:
-                    result = ["        try:\n" + \
-                                     "            token1 = next(tokens1)\n" + \
-                                     "            token2 = next(tokens2)\n" + \
-                                     "        except:\n" + \
-                                     "            break\n\n@pytest.mark.parametrize(\n"]
-
-                else:
-                    result = self.query_backend.query(request)
-
-                    # result = ChatCompletion.create(messages=[{"role": "user", "content": request}], model=self.model)
-                    # print("result")
-                    # print(result)
-                    #
-                    # if len(result["choices"]) > 0:
-                    #     print(result["choices"])
-                    #     for variant in result["choices"]:
-                    #         resulting_code = variant["message"]["content"]
-
-
-                if len(result) > 0:
-                    #resulting_code : str = result[0]
-                    # resulting_lines = resulting_code.split("\n")
-                    # for i in range(len(resulting_lines)):
-                    #     line : str = resulting_lines[i]
-                    #     if line.endswith(added_comment):
-                    #         resulting_lines[i] = line[:-len(added_comment)]
-                    #         break
-                    resulting_lines = self.prepare_lines(result[0], added_comment)
-
-                    self.diff_target.apply_diff(filename, start_line, end_line, resulting_lines, warn)
-
-                if self.debug:
-                    break
-
-    def python_tests(self, params: dict | str):
-        pass
-
-    def python_docstrings(self, params: dict | str):
-        pass
-
-
 
 
 

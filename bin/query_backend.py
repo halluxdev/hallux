@@ -8,7 +8,7 @@ from openai.api_resources import ChatCompletion
 
 class QueryBackend(ABC):
     @abstractmethod
-    def query(self, request: str) -> str | None:
+    def query(self, request: str) -> list[str] | None:
         pass
 
 

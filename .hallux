@@ -8,11 +8,11 @@ github:
 
 cpp:
     makefile_dir: /tmp/hallux/build
-    compile:
+    compile: gcc-make
 
-#python:
-#    linting: ruff
-#    tests: pytest
+python:
+    linting: ruff
+    tests: pytest
 #    docstrings: True
 
 
