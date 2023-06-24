@@ -10,15 +10,10 @@
 
 
 from __future__ import annotations
-
-import copy
-import subprocess
 import os
 import sys
-
 from typing import Final
 import yaml
-import re
 from pathlib import Path
 import openai
 
@@ -50,7 +45,7 @@ class Hallux:
 
     def process(self):
         if "python" in self.config.keys():
-            python = PythonProcessor(self.query_backend, self.diff_target, self.base_path, self.config["cpp"], self.debug)
+            python = PythonProcessor(self.query_backend, self.diff_target, self.base_path, self.config["python"], self.debug)
             python.process()
         if "cpp" in self.config.keys():
             cpp = CppProcessor(self.query_backend, self.diff_target, self.base_path, self.config["cpp"], self.debug)

@@ -180,10 +180,12 @@ class CppProcessor(CodeProcessor):
                 print(request)
                 result: list[str]
                 if self.debug:
-                    result = ['void print_usage(char* argv[])\n{\n' +
-                     '  std::cout << "Usage: " << argv[0] << " filename.cpp" << std::endl;\n'+
-                     '  return; // fix the error by removing "1"\n}\n\n'+
-                     'int main(int argc, char* argv[])\n{']
+                    result = [
+                        "void print_usage(char* argv[])\n{\n"
+                        + '  std::cout << "Usage: " << argv[0] << " filename.cpp" << std::endl;\n'
+                        + '  return; // fix the error by removing "1"\n}\n\n'
+                        + "int main(int argc, char* argv[])\n{"
+                    ]
                 else:
                     result = self.query_backend.query(request)
                 print("result")

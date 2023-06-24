@@ -6,10 +6,6 @@ from query_backend import QueryBackend
 from diff_target import DiffTarget
 from code_processor import CodeProcessor
 import subprocess
-
-# import sys
-
-# from typing import Any
 from pathlib import Path
 
 
@@ -32,16 +28,15 @@ class PythonProcessor(CodeProcessor):
         if "docstrings" in self.config:
             self.python_docstrings(self.config["docstrings"])
 
-
     def python_linting(self, config):
         if config != "ruff":
             print("We only support RUFF for python lint")
-            exit()
+            exit(5)
 
         print("Process python linting issues:")
 
         try:
-            subprocess.check_output([])
+            subprocess.check_output(["ruff", "check", "."])
             print("No python linting issues found")
         except subprocess.CalledProcessError as e:
             ruff_output = e.output
@@ -53,9 +48,6 @@ class PythonProcessor(CodeProcessor):
                 warn_line = int(warn.split(" ")[0].split(":")[1])
                 added_comment: str = " # line " + str(warn_line)
                 start_line, end_line, warnlines, filelines = self.read_lines(filename, warn_line, 4, added_comment)
-
-                # with open(filename, "rt") as file:
-                #     filelines = file.read().split("\n")
 
                 request = "Fix python linting issue, write resulting code only:\n"
                 request = request + warn + "\n"
@@ -77,29 +69,11 @@ class PythonProcessor(CodeProcessor):
                         + "        except:\n"
                         + "            break\n\n@pytest.mark.parametrize(\n"
                     ]
-
                 else:
                     result = self.query_backend.query(request)
 
-                    # result = ChatCompletion.create(messages=[{"role": "user", "content": request}], model=self.model)
-                    # print("result")
-                    # print(result)
-                    #
-                    # if len(result["choices"]) > 0:
-                    #     print(result["choices"])
-                    #     for variant in result["choices"]:
-                    #         resulting_code = variant["message"]["content"]
-
                 if len(result) > 0:
-                    # resulting_code : str = result[0]
-                    # resulting_lines = resulting_code.split("\n")
-                    # for i in range(len(resulting_lines)):
-                    #     line : str = resulting_lines[i]
-                    #     if line.endswith(added_comment):
-                    #         resulting_lines[i] = line[:-len(added_comment)]
-                    #         break
                     resulting_lines = self.prepare_lines(result[0], added_comment)
-
                     self.diff_target.apply_diff(filename, start_line, end_line, resulting_lines, warn)
 
                 if self.debug:

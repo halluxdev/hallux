@@ -1,6 +1,14 @@
 #!/bin/env python
 # Copyright: Hallux team, 2023
 
+# We have several options where (and how) to send found fixes.
+# 1. Most primitive one - it simply to re-write local files
+# 2. Little more complicated - rewrite local files, but also make git commit on every change
+# 3. Submit all changes onto Github Web Interface as proposals/suggestions
+#    This last one requires some extra configuring to be done
+
+# All those approaches are hidden after DiffTarget interface
+
 
 from __future__ import annotations
 from abc import ABC, abstractmethod
