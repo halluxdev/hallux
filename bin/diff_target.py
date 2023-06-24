@@ -63,6 +63,8 @@ class FilesystemTarget(DiffTarget):
             with open(self.filename, "wt") as file:
                 for line in self.filelines:
                     file.write(line + "\n")
+            self.filename = None
+            self.filelines = []
 
     def commit_diff(self) -> None:
         self.filename = None

@@ -17,8 +17,8 @@ from pathlib import Path
 
 from query_backend import QueryBackend, OpenAiChatGPT, DummyBackend
 from diff_target import DiffTarget, FilesystemTarget, GitCommitTarget, GithubProposalTraget
-from cpp import CppProcessor
-from python import PythonProcessor
+from cpp.cpp import CppProcessor
+from python.python import PythonProcessor
 
 DEBUG : Final[bool] = False
 

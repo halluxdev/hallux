@@ -1,0 +1,92 @@
+#!/bin/env python
+# Copyright: Hallux team, 2023
+
+from __future__ import annotations
+
+from query_backend import QueryBackend
+from diff_target import DiffTarget
+from code_processor import CodeProcessor, IssueSolver
+from issue import IssueDescriptor
+from pathlib import Path
+import subprocess
+
+
+class MakeCompile_IssueSolver(IssueSolver):
+    def __init__(self, make_target: str):
+        self.make_target = make_target
+
+    def list_issues(self) -> list[IssueDescriptor]:
+        issues: list[IssueDescriptor] = []
+        try:
+            subprocess.check_output(["make", self.make_target], stderr=subprocess.STDOUT)
+        except subprocess.CalledProcessError as e:
+            make_output: str = e.output.decode("utf-8")
+            issues.extend(CppIssueDescriptor.parseMakeIssues(make_output))
+
+        return issues
+
+
+class CppIssueDescriptor(IssueDescriptor):
+    def __init__(self, filename: str, issue_line: int = 0, description: str = ""):
+        super().__init__(
+            language="cpp", tool="compile", filename=filename, issue_line=issue_line, description=description
+        )
+
+    def try_fixing(self, query_backend: QueryBackend, diff_target: DiffTarget):
+        request = "Fix gcc compilation issue, write resulting code only:\n"
+        for line in self.message_lines:
+            request = request + line + "\n"
+        request = request + "Excerpt from the corresponding cpp file (not full):\n"
+        line_comment: str = f" // line {str(self.issue_line)}"
+        start_line, end_line, requested_codelines, _ = CodeProcessor.read_lines(
+            self.filename, self.issue_line, 4, line_comment
+        )
+        for line in requested_codelines:
+            request = request + line + "\n"
+        result: list[str] = query_backend.query(request, self)
+
+        if self.debug:
+            print("request")
+            print(request)
+            print("result")
+            print(result)
+
+        if len(result) > 0:
+            resulting_lines = CodeProcessor.prepare_lines(result[0], line_comment)
+            diff_target.apply_diff(self.filename, start_line, end_line, resulting_lines, self.description)
+
+    @staticmethod
+    def parseMakeIssues(make_output: str, debug: bool = False) -> list[CppIssueDescriptor]:
+        issues: list[CppIssueDescriptor] = []
+        output_lines: list[str] = make_output.split("\n")
+        current_issue: CppIssueDescriptor | None = None
+
+        for line_num in range(len(output_lines)):
+            err_line_list = output_lines[line_num].split(":")
+            if (
+                len(err_line_list) > 4
+                and Path(err_line_list[0]).exists()
+                and err_line_list[1].isdecimal()
+                and err_line_list[2].isdecimal()
+                and (err_line_list[3] == " error" or err_line_list[3] == " warning")
+            ):
+                if current_issue is not None:
+                    current_issue.message_lines = current_issue.message_lines[:-1]
+                    issues.append(current_issue)
+
+                current_issue = CppIssueDescriptor(
+                    filename=err_line_list[0],
+                    issue_line=int(err_line_list[1]),
+                    description=str(":".join(err_line_list[4:]).lstrip(" ")),
+                )
+                current_issue.message_lines = [output_lines[line_num - 1]] if line_num > 0 else []
+                current_issue.message_lines.append(output_lines[line_num])
+                current_issue.debug = debug
+
+            elif current_issue is not None:
+                current_issue.message_lines.append(output_lines[line_num])
+
+        if current_issue is not None:
+            issues.append(current_issue)
+
+        return issues

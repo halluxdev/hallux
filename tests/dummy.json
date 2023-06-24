@@ -7,7 +7,7 @@
           "void print_usage(char* argv[])\n{\n  std::cout << \"Usage: \" << argv[0] << \" filename.cpp\" << std::endl;\n  return;\n}\n\nint main(int argc, char* argv[])\n{"
         ],
         "too few arguments to function ‘void print_usage(char**)’": [
-          "aaaaa"
+          "  if (argc < 2)\n  {\n    print_usage(argv);\n  }\n\n  missingFunction(argc);\n"
         ],
         "expected ‘;’ before ‘}’ token": [
           "aaaaa"
