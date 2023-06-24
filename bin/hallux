@@ -8,40 +8,27 @@
 # - Sends prompt to GPT, receives answer,
 # - Changes code right in the codebase or sends this change as Github Web GUI proposal
 
-
 from __future__ import annotations
 import os
 import sys
 from typing import Final
 import yaml
 from pathlib import Path
-import openai
 
-from query_backend import QueryBackend, OpenAiChatGPT
+from query_backend import QueryBackend, OpenAiChatGPT, DummyBackend
 from diff_target import DiffTarget, FilesystemTarget, GitCommitTarget, GithubProposalTraget
 from cpp import CppProcessor
 from python import PythonProcessor
 
-
-def load_config() -> tuple[dict | None, Path | None]:
-    curr_path = Path(os.getcwd())
-    while not curr_path.joinpath(".hallux").exists() and curr_path.parent != curr_path:
-        curr_path = curr_path.parent
-    if not curr_path.joinpath(".hallux").exists():
-        return None, None
-    config_file = str(curr_path.joinpath(".hallux"))
-    with open(config_file) as file_stream:
-        yaml_dict = yaml.load(file_stream, Loader=yaml.CLoader)
-    return yaml_dict, curr_path
-
+DEBUG : Final[bool] = False
 
 class Hallux:
-    def __init__(self, query_backend: QueryBackend, config: dict, base_path: Path, diff_target: DiffTarget):
+    def __init__(self, query_backend: QueryBackend, config: dict, base_path: Path, diff_target: DiffTarget, debug : bool = False):
         self.query_backend = query_backend
         self.config: Final[dict] = config
         self.base_path: Final[Path] = base_path
         self.diff_target: Final[DiffTarget] = diff_target
-        self.debug: bool = True
+        self.debug: bool = debug
 
     def process(self):
         if "python" in self.config.keys():
@@ -51,24 +38,45 @@ class Hallux:
             cpp = CppProcessor(self.query_backend, self.diff_target, self.base_path, self.config["cpp"], self.debug)
             cpp.process()
 
+    @staticmethod
+    def find_config() -> tuple[dict | None, Path | None]:
+        curr_path = Path(os.getcwd())
+        while not curr_path.joinpath(".hallux").exists() and curr_path.parent != curr_path:
+            curr_path = curr_path.parent
+        if not curr_path.joinpath(".hallux").exists():
+            return None, None
+        config_file = str(curr_path.joinpath(".hallux"))
+        with open(config_file) as file_stream:
+            yaml_dict = yaml.load(file_stream, Loader=yaml.CLoader)
+        return yaml_dict, curr_path
 
 
 if __name__ == "__main__":
-    print("Hallux v0.1 - Convenient Coding Assistant")
     if len(sys.argv) < 2 or sys.argv[1] not in ["fix", "propose", "commit"]:
-        print("Usage: hallux fix | hallux commit  | hallux propose Github_PullRequest_ID")
+        print("Hallux v0.1 - Convenient Coding Assistant")
+        print("Usage: hallux fix")
+        print("       hallux commit")
+        print("       hallux propose Github_PullRequest_ID")
+        #print(" [WIP] hallux review Github_PullRequest_ID")
+        #print(" [WIP] hallux tdd cpp-gtest|python-pytest target-name")
+
+        print("hallux fix : fixes issues in the current filesystem")
+        print("hallux commit : when run from GIT repo, fixes issues and submit them as git commits")
+        print("hallux propose : submit fixes as proposals to Github Web Pull Request GUI")
+        #print("hallux review : submit fixes as proposals to Github Web Pull Request GUI")
         exit(0)
 
-    config, path = load_config()
+    config, path = Hallux.find_config()
     if config is None:
         print("Error: config file not found")
         exit(1)
 
-    if not "backend" in config or "openai" not in config["backend"]:
+    if not "backend" in config:
         print("Backend is not properly configured")
         exit(2)
 
-    query_backend: QueryBackend = OpenAiChatGPT(config["backend"]["openai"])
+    query_backend: QueryBackend = OpenAiChatGPT(config["backend"]["openai"]) if "openai" in config["backend"] else \
+        DummyBackend(config["backend"]["dummy"])
 
     target: DiffTarget
 
@@ -76,12 +84,13 @@ if __name__ == "__main__":
         target = FilesystemTarget()
     elif sys.argv[1] == "commit":
         target = GitCommitTarget()
-    else:
+    elif sys.argv[1] == "propose":
         target = GithubProposalTraget(sys.argv[2])
+    else:
+        raise Exception(f"hallux: unknown command: {sys.argv[1]}")
 
-    openai.api_key = os.getenv("OPENAI_API_KEY")
 
-    hallux = Hallux(query_backend=query_backend, config=config, base_path=path, diff_target=target)
+    hallux = Hallux(query_backend=query_backend, config=config, base_path=path, diff_target=target, debug=DEBUG)
 
     hallux.process()
 

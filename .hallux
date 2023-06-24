@@ -1,7 +1,9 @@
 backend:
-  openai:
-      model: gpt-3.5-turbo
-      max_tokens: 4097
+    dummy: /home/sergey/git/hallux/tests/dummy.json
+
+#  openai:
+#      model: gpt-3.5-turbo
+#      max_tokens: 4097
 
 github:
     github_token:
@@ -10,9 +12,9 @@ cpp:
     makefile_dir: /tmp/hallux/build
     compile: gcc-make
 
-python:
-    linting: ruff
-    tests: pytest
+#python:
+#    linting: ruff
+#    tests: pytest
 #    docstrings: True
 
 
