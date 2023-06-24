@@ -1,3 +1,7 @@
+Next steps: 
+- Python runtime errors (traceback errors) 
+- JUnit XML 
+
 
 ## Motivation
 Existing Code-Gen Neural Nets are working in GPT-style (aka Transformer Decoder, aka Continuation Language Model). I.e. they're predicting next tokens, taking into account existing ones.
