@@ -2,6 +2,8 @@
 # Copyright: Hallux team, 2023
 
 from __future__ import annotations
+
+from dataclasses import dataclass, field
 from query_backend import QueryBackend
 from diff_target import DiffTarget
 from code_processor import CodeProcessor
@@ -9,6 +11,84 @@ import subprocess
 import os
 import tempfile
 from pathlib import Path
+
+
+@dataclass
+class CppIssueDescriptor:
+    make_target: str
+    filename: str
+    err_line: int = 0
+    err_column: int = 0
+    is_error: bool = True
+    issue_desc: str = ""
+    message_lines: list[str] = field(default_factory=list)
+
+    def try_fixing(self, query_backend: QueryBackend, diff_target: DiffTarget, debug_answer: str | None = None):
+        request = "Fix gcc compilation issue, write resulting code only:\n"
+        for line in self.message_lines:
+            request = request + line + "\n"
+        request = request + "Excerpt from the corresponding cpp file (not full):\n"
+        line_comment: str = f" // line {str(self.err_line)}"
+        start_line, end_line, requested_codelines, _ = CodeProcessor.read_lines(
+            self.filename, self.err_line, 4, line_comment
+        )
+        for line in requested_codelines:
+            request = request + line + "\n"
+        print("request")
+        print(request)
+        result: list[str]
+        if debug_answer is not None:
+            result = [
+                "void print_usage(char* argv[])\n{\n"
+                + '  std::cout << "Usage: " << argv[0] << " filename.cpp" << std::endl;\n'
+                + "  return;\n}\n\n"
+                + "int main(int argc, char* argv[])\n{"
+            ]
+        else:
+            result = query_backend.query(request)
+        print("result")
+        print(result)
+
+        if len(result) > 0:
+            resulting_lines = CodeProcessor.prepare_lines(result[0], line_comment)
+            diff_target.apply_diff(self.filename, start_line, end_line, resulting_lines, self.issue_desc)
+
+    @staticmethod
+    def parseMakeIssues(make_target: str, make_output: str) -> list[CppIssueDescriptor]:
+        issues: list[CppIssueDescriptor] = []
+        output_lines: list[str] = make_output.split("\n")
+        current_issue: CppIssueDescriptor | None = None
+
+        for line_num in range(len(output_lines)):
+            err_line_list = output_lines[line_num].split(":")
+            if (
+                len(err_line_list) > 4
+                and Path(err_line_list[0]).exists()
+                and err_line_list[1].isdecimal()
+                and err_line_list[2].isdecimal()
+                and (err_line_list[3] == " error" or err_line_list[3] == " warning")
+            ):
+                if current_issue is not None:
+                    current_issue.message_lines = current_issue.message_lines[:-1]
+                    issues.append(current_issue)
+
+                print(output_lines[line_num])
+                current_issue = CppIssueDescriptor(
+                    make_target=make_target,
+                    filename=err_line_list[0],
+                    err_line=int(err_line_list[1]),
+                    err_column=int(err_line_list[2]),
+                )
+                current_issue.issue_desc = ":".join(err_line_list[4:])
+                current_issue.is_error = err_line_list[3] == " error"
+                current_issue.message_lines = [output_lines[line_num - 1]] if line_num > 0 else []
+                current_issue.message_lines.append(output_lines[line_num])
+
+            elif current_issue is not None:
+                current_issue.message_lines.append(output_lines[line_num])
+
+        print(f"{len(issues)} issues found")
+        return issues
 
 
 class CppProcessor(CodeProcessor):
@@ -37,7 +117,7 @@ class CppProcessor(CodeProcessor):
             return
 
         if "compile" in self.config.keys():
-            self.cpp_compile(self.config["compile"], makefile_dir)
+            self.process_compile_issues_reqursively(self.config["compile"], makefile_dir)
         if "linking" in self.config.keys():
             self.cpp_linking(self.config["linking"])
         if "tests" in self.config.keys():
@@ -58,6 +138,58 @@ class CppProcessor(CodeProcessor):
 
         return makefile_dir
 
+    def process_compile_issues_reqursively(self, params: dict | str, makefile_dir: Path):
+        os.chdir(str(makefile_dir))
+        targets: list[str] = self.list_compile_targets(params)
+        target: str
+        for target in targets:
+            target_issues: list[CppIssueDescriptor] = self.list_target_issues(target)
+
+            issue_index: int = 0
+            while issue_index < len(target_issues):
+                issue = target_issues[issue_index]
+                issue.try_fixing(
+                    diff_target=self.diff_target, query_backend=self.query_backend, debug_answer=self.debug
+                )
+                new_target_issues: list[CppIssueDescriptor] = self.list_target_issues(target)
+
+                if len(new_target_issues) < len(target_issues):
+                    self.diff_target.commit_diff()
+                    target_issues = new_target_issues
+                    # Do not touch issue_index
+                else:
+                    self.diff_target.revert_diff()
+                    issue_index += 1
+
+                if self.debug:
+                    break
+
+            if self.debug:
+                break
+
+    def list_compile_targets(self, params: dict | str):
+        make_output = subprocess.check_output(["make", "help"])
+        targets: list[str] = str(make_output.decode("utf-8")).split("\n")
+        output_targets: list[str] = []
+        target: str
+        for target in targets:
+            if target.endswith(".o"):
+                target = target.lstrip(".")
+                target = target.lstrip(" ")
+                output_targets.append(target)
+        return output_targets
+
+    def list_target_issues(self, target: str) -> list[CppIssueDescriptor]:
+        issues: list[CppIssueDescriptor] = []
+        try:
+            subprocess.check_output(["make", target], stderr=subprocess.STDOUT)
+        except subprocess.CalledProcessError as e:
+            make_output: str = e.output.decode("utf-8")
+            print("Compilation errors found:")
+            issues.extend(CppIssueDescriptor.parseMakeIssues(target, make_output))
+
+        return issues
+
     def cpp_compile(self, params: dict | str, makefile_dir: Path):
         os.chdir(str(makefile_dir))
         make_output = subprocess.check_output(["make", "help"])
@@ -68,27 +200,6 @@ class CppProcessor(CodeProcessor):
                 target = target.lstrip(".")
                 target = target.lstrip(" ")
                 self.compile_make_target(target)
-
-    # def find_cpp_file(self, make_target: str) -> Path | None:
-    #     make_target = make_target[:-2]
-    #     target_list : list[str] = make_target.split("/")
-    #     path = self.base_path
-    #     while len(target_list) > 1:
-    #         if path.joinpath(target_list[0]).exists():
-    #             path = path.joinpath(target_list[0])
-    #             target_list = target_list[1:]
-    #
-    #     if isinstance(target_list, list):
-    #         target_name = target_list[0]
-    #     else:
-    #         target_name = target_list
-    #
-    #     repo_files: list[str] = os.listdir(str(path))
-    #     for filename in repo_files:
-    #         if filename.startswith(target_name):
-    #             return path.joinpath(filename)
-    #
-    #     return None
 
     def parse_compilation_error(self, make_output: str) -> tuple[list[list[str]], list[list[str]]]:
         output_lines: list[str] = make_output.split("\n")
