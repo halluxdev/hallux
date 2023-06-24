@@ -2,7 +2,7 @@
   "cpp":
   {
     "compile": {
-      "/home/sergey/git/hallux/cpp/test_cpp_project.cpp": {
+      "cpp/test_cpp_project.cpp": {
         "return-statement with a value, in function returning ‘void’ [-fpermissive]": [
           "void print_usage(char* argv[])\n{\n  std::cout << \"Usage: \" << argv[0] << \" filename.cpp\" << std::endl;\n  return;\n}\n\nint main(int argc, char* argv[])\n{"
         ],
@@ -19,6 +19,9 @@
   {
     "ruff":
     {
+      "tests/python/AST/parse_cpp_tree_test.py": {
+        "E722 Do not use bare `except`": ["        try:\n            token1 = next(tokens1)\n            token2 = next(tokens2)\n        except StopIteration:\n            break\n\n\n@pytest.mark.parametrize("]
+      }
 
     }
   }

@@ -10,11 +10,9 @@ github:
 
 cpp:
     makefile_dir: /tmp/hallux/build
-    compile: gcc-make
+    compile: .
 
-#python:
-#    linting: ruff
-#    tests: pytest
-#    docstrings: True
+python:
+    ruff: .
 
 

@@ -76,7 +76,7 @@ if __name__ == "__main__":
         exit(2)
 
     query_backend: QueryBackend = OpenAiChatGPT(config["backend"]["openai"]) if "openai" in config["backend"] else \
-        DummyBackend(config["backend"]["dummy"])
+        DummyBackend(config["backend"]["dummy"], base_path=path)
 
     target: DiffTarget
 

@@ -5,7 +5,7 @@ from __future__ import annotations
 
 from query_backend import QueryBackend
 from diff_target import DiffTarget
-from code_processor import CodeProcessor, IssueSolver
+from issue_solver import IssueSolver
 from issue import IssueDescriptor
 from pathlib import Path
 import subprocess
@@ -36,9 +36,9 @@ class CppIssueDescriptor(IssueDescriptor):
         request = "Fix gcc compilation issue, write resulting code only:\n"
         for line in self.message_lines:
             request = request + line + "\n"
-        request = request + "Excerpt from the corresponding cpp file (not full):\n"
+        request = request + "Corresponding c++ code (not full):\n"
         line_comment: str = f" // line {str(self.issue_line)}"
-        start_line, end_line, requested_codelines, _ = CodeProcessor.read_lines(
+        start_line, end_line, requested_codelines, _ = IssueDescriptor.read_lines(
             self.filename, self.issue_line, 4, line_comment
         )
         for line in requested_codelines:
@@ -52,7 +52,7 @@ class CppIssueDescriptor(IssueDescriptor):
             print(result)
 
         if len(result) > 0:
-            resulting_lines = CodeProcessor.prepare_lines(result[0], line_comment)
+            resulting_lines = IssueDescriptor.prepare_lines(result[0], line_comment)
             diff_target.apply_diff(self.filename, start_line, end_line, resulting_lines, self.description)
 
     @staticmethod

@@ -6,6 +6,7 @@ import json
 from abc import ABC, abstractmethod
 import openai
 import os
+from pathlib import Path
 from openai.api_resources import ChatCompletion
 from issue import IssueDescriptor
 
@@ -33,8 +34,9 @@ class OpenAiChatGPT(QueryBackend):
 
 
 class DummyBackend(QueryBackend):
-    def __init__(self, filename: str):
+    def __init__(self, filename: str, base_path: Path):
         self.filename: str = filename
+        self.base_path = base_path
         with open(self.filename, "rt") as file:
             self.json = json.load(file)
 
@@ -44,9 +46,15 @@ class DummyBackend(QueryBackend):
                 language = self.json[issue.language]
                 if issue.tool in language:
                     tool = language[issue.tool]
-                    if issue.filename in tool:
-                        filename = tool[issue.filename]
-                        if issue.description in filename:
-                            return filename[issue.description]
+                    issue_file = (
+                        Path(issue.filename)
+                        if Path(issue.filename).exists()
+                        else self.base_path.joinpath(issue.filename)
+                    )
+                    for filename, file_issues in tool.items():
+                        answer_file = self.base_path.joinpath(filename)
+                        if issue_file.samefile(answer_file):
+                            if issue.description in file_issues:
+                                return file_issues[issue.description]
 
         return []
