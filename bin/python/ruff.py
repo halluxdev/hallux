@@ -11,13 +11,13 @@ import subprocess
 
 
 class Ruff_IssueSolver(IssueSolver):
-    def __init__(self, make_target: str):
-        self.make_target = make_target
+    def __init__(self, ruff_dir: str | None = None):
+        self.ruff_dir : str = ruff_dir if ruff_dir is not None else "."
 
     def list_issues(self) -> list[IssueDescriptor]:
         issues: list[IssueDescriptor] = []
         try:
-            ruff_output = subprocess.check_output(["ruff", "check", "."])
+            ruff_output = subprocess.check_output(["ruff", "check", self.ruff_dir])
             # print("No python linting issues found")
         except subprocess.CalledProcessError as e:
             ruff_output = e.output

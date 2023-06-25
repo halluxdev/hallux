@@ -1,5 +1,5 @@
 backend:
-    dummy: /home/sergey/git/hallux/tests/dummy.json
+    dummy: dummy.json
 
 #  openai:
 #      model: gpt-3.5-turbo
@@ -13,6 +13,6 @@ cpp:
     compile: .
 
 python:
-    ruff: .
+    ruff: python # directory name to work with may be just "."
 
 

@@ -19,7 +19,7 @@
   {
     "ruff":
     {
-      "tests/python/AST/parse_cpp_tree_test.py": {
+      "python/parse_cpp_tree_test.py": {
         "E722 Do not use bare `except`": ["        try:\n            token1 = next(tokens1)\n            token2 = next(tokens2)\n        except StopIteration:\n            break\n\n\n@pytest.mark.parametrize("]
       }
 
