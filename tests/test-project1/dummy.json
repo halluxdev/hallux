@@ -10,7 +10,7 @@
           "  if (argc < 2)\n  {\n    print_usage(argv);\n  }\n\n  missingFunction(argc);\n"
         ],
         "expected ‘;’ before ‘}’ token": [
-          "aaaaa"
+          "  \n  missingFunction(argc);\n\n  return 0;\n}"
         ]
       }
     }

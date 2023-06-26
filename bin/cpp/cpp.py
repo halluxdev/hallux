@@ -21,31 +21,44 @@ class CppProcessor(CodeProcessor):
         self.base_path: Path = base_path
 
     def process(self) -> None:
+        os.chdir(str(self.base_path))
         print("Process C++ issues:")
-        makefile_dir: Path
-        if "makefile_dir" in self.config.keys():
-            makefile_dir = Path(self.config["makefile_dir"])
-        elif self.base_path.joinpath("CMakeLists.txt").exists():
-            makefile_dir = Path(self.prepare_makefile_dir())
+        makefile_path: Path
+        if "makefile" in self.config.keys():
+            makefile_path = Path(self.config["makefile"])
+        elif "cmake" in self.config.keys():
+            if self.base_path.joinpath("CMakeLists.txt").exists():
+                makefile_path = self.cmake_prepare_makefile(str(self.config["cmake"]))
+            else:
+                print("Cannot find CMakeLists.txt")
+                exit(5)
         else:
-            print("C++ is enabled, but not `makefile_dir` specified nor CMakeLists.txt was found")
-            return
+            print("C++ is enabled, but not `makefile` specified nor 'cmake' was found")
+            exit(5)
 
-        if not makefile_dir.joinpath("Makefile"):
-            print(f"{str(makefile_dir.joinpath('Makefile'))} does not exist")
-            return
+        if not makefile_path.exists():
+            print(f"{str(makefile_path)} does not exist")
+            exit(5)
 
         if "compile" in self.config.keys():
-            self.solve_make_compile(self.config["compile"], makefile_dir)
+            self.solve_make_compile(self.config["compile"], makefile_path.parent)
 
         if "linking" in self.config.keys():
             self.cpp_linking(self.config["linking"])
 
-    def prepare_makefile_dir(self) -> str | None:
+    def cmake_prepare_makefile(self, cmake_path: str = ".") -> Path | None:
+        if self.base_path.joinpath(cmake_path).joinpath("CMakeLists.txt").exists():
+            cmake_path = self.base_path.joinpath(cmake_path)
+        elif Path(cmake_path).joinpath("CMakeLists.txt").exists():
+            cmake_path = Path(cmake_path)
+        else:
+            print("Cannot find CMakeLists.txt")
+            exit(5)
+
         makefile_dir = tempfile.mkdtemp(dir="/tmp/hallux")
         os.chdir(makefile_dir)
         try:
-            subprocess.check_output(["cmake", f"{str(self.base_path)}"])
+            subprocess.check_output(["cmake", f"{str(cmake_path)}"])
             print("CMake initialized succesfully")
         except subprocess.CalledProcessError as e:
             cmake_output = e.output.decode("utf-8")
@@ -54,7 +67,7 @@ class CppProcessor(CodeProcessor):
             exit(5)
             return None
 
-        return makefile_dir
+        return Path(makefile_dir).joinpath("Makefile")
 
     def solve_make_compile(self, params: dict | str, makefile_dir: Path):
         os.chdir(str(makefile_dir))
