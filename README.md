@@ -47,6 +47,11 @@ You may try to use `hallux` as your pair-coding buddy
 * **worker** daemon app working as interface to external world 
 
 
-  
-  
-  
+## Installation
+
+Execute
+`./scripts/setup-python.sh`
+
+You might need to add: `export PATH="/Path/to/hallux/bin:$PATH"`
+into your `~/.bashrc` or `~/.zshrc` file
+
