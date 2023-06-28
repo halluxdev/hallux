@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
-source venv/bin/activate
+source ./activate.sh
 
-python -m pytest tests/hallux_fix_test.py 
+python -m pytest tests/integration/
 
 

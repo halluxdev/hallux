@@ -80,4 +80,3 @@ def test_parse_cpp_list_reconstruction(cpp_filename: str):
             node.save2(f)
 
     assert_cpp_files_similar(cpp_filename, tmp_filename)
-

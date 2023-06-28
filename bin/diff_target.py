@@ -13,6 +13,8 @@
 from __future__ import annotations
 from abc import ABC, abstractmethod
 import subprocess
+import os
+from pathlib import Path
 
 
 class DiffTarget(ABC):
@@ -89,9 +91,13 @@ class GitCommitTarget(FilesystemTarget):
         self.message = ""
 
     def commit_diff(self) -> None:
-        subprocess.check_output(["git", "add", self.filename])
+        curr_dir: str = os.getcwd()
+        git_dir: str = str(Path(self.filename).parent)
+        os.chdir(git_dir)
+        subprocess.check_output(["git", "add", os.path.relpath(self.filename, start=git_dir)])
         subprocess.check_output(["git", "commit", "-m", f'"{self.message}"'])
         FilesystemTarget.commit_diff(self)
+        os.chdir(curr_dir)
 
 
 class GithubProposalTraget(DiffTarget):
