@@ -12,7 +12,7 @@ import subprocess
 
 class Ruff_IssueSolver(IssueSolver):
     def __init__(self, ruff_dir: str | None = None):
-        self.ruff_dir : str = ruff_dir if ruff_dir is not None else "."
+        self.ruff_dir: str = ruff_dir if ruff_dir is not None else "."
 
     def list_issues(self) -> list[IssueDescriptor]:
         issues: list[IssueDescriptor] = []

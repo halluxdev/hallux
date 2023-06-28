@@ -3,6 +3,7 @@
 
 from __future__ import annotations
 
+from code_processor import set_directory
 from query_backend import QueryBackend
 from diff_target import DiffTarget
 from issue_solver import IssueSolver
@@ -12,16 +13,24 @@ import subprocess
 
 
 class MakeCompile_IssueSolver(IssueSolver):
-    def __init__(self, make_target: str):
+    def __init__(self, make_target: str, base_path: Path, makefile_dir: Path):
         self.make_target = make_target
+        self.base_path = base_path
+        self.makefile_dir = makefile_dir
+
+    def solve_issues(self, diff_target: DiffTarget, query_backend: QueryBackend):
+        with set_directory(self.base_path):
+            super().solve_issues(diff_target, query_backend)
 
     def list_issues(self) -> list[IssueDescriptor]:
         issues: list[IssueDescriptor] = []
-        try:
-            subprocess.check_output(["make", self.make_target], stderr=subprocess.STDOUT)
-        except subprocess.CalledProcessError as e:
-            make_output: str = e.output.decode("utf-8")
-            issues.extend(CppIssueDescriptor.parseMakeIssues(make_output))
+
+        with set_directory(self.makefile_dir):
+            try:
+                subprocess.check_output(["make", self.make_target], stderr=subprocess.STDOUT)
+            except subprocess.CalledProcessError as e:
+                make_output: str = e.output.decode("utf-8")
+                issues.extend(CppIssueDescriptor.parseMakeIssues(make_output))
 
         return issues
 

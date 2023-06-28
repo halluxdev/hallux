@@ -10,6 +10,7 @@ import os
 from pathlib import Path
 import subprocess
 
+
 def test_hallux_fix(proj_name: str = "test-project1"):
     if not Path("/tmp/hallux").exists():
         Path("/tmp/hallux").mkdir()
@@ -18,7 +19,7 @@ def test_hallux_fix(proj_name: str = "test-project1"):
     proj_dir = Path(__file__).resolve().parent.joinpath(proj_name)
     shutil.copytree(str(proj_dir), tmp_dir, ignore_dangling_symlinks=False, dirs_exist_ok=True)
     os.chdir(tmp_dir)
-    returncode : int = 0
+    returncode: int = 0
     try:
         subprocess.check_output(["ruff", "check", "."])
     except subprocess.CalledProcessError as e:
@@ -32,9 +33,9 @@ def test_hallux_fix(proj_name: str = "test-project1"):
     try:
         subprocess.check_output(["cmake", tmp_dir])
     except subprocess.CalledProcessError as e:
-        pytest.fail(e, pytrace=True) # cmake shall not fail
+        pytest.fail(e, pytrace=True)  # cmake shall not fail
 
-    make_succesfull : bool = True
+    make_succesfull: bool = True
     try:
         subprocess.check_output(["make", "cpp/test_cpp_project.o"])
     except subprocess.CalledProcessError as e:
@@ -48,18 +49,16 @@ def test_hallux_fix(proj_name: str = "test-project1"):
     try:
         subprocess.check_output(["hallux", "fix"])
     except subprocess.CalledProcessError as e:
-        pytest.fail(e, pytrace=True) # hallux must not fail ?
+        pytest.fail(e, pytrace=True)  # hallux must not fail ?
 
     try:
         subprocess.check_output(["ruff", "check", "."])
     except subprocess.CalledProcessError as e:
-        pytest.fail(e, pytrace=True) # ruff must not find any issues
+        pytest.fail(e, pytrace=True)  # ruff must not find any issues
 
     os.chdir(cmake_tmp_dir)
 
     try:
         subprocess.check_output(["make", "cpp/test_cpp_project.o"])
     except subprocess.CalledProcessError as e:
-        pytest.fail(e, pytrace=True) # make must not find any issues
-
-
+        pytest.fail(e, pytrace=True)  # make must not find any issues
