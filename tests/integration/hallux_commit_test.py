@@ -44,7 +44,9 @@ def test_hallux_commit(proj_name: str = "test-project1", tmp_proj_dir: str | Non
         except subprocess.CalledProcessError as e:
             pytest.fail(e, pytrace=True)  # Cannot call `git log`
 
-        assert len(git_log_output.split("\n")) == 1 + 1, git_log_output  # we have exactly one commit in the repo (+1 empty line)
+        assert (
+            len(git_log_output.split("\n")) == 1 + 1
+        ), git_log_output  # we have exactly one commit in the repo (+1 empty line)
 
     test_hallux_fix(proj_name, tmp_proj_dir, command="commit")
 
@@ -54,4 +56,6 @@ def test_hallux_commit(proj_name: str = "test-project1", tmp_proj_dir: str | Non
         except subprocess.CalledProcessError as e:
             pytest.fail(e, pytrace=True)  # Cannot call `git log`
 
-        assert len(git_log_output.split("\n")) == 5 + 1, git_log_output # we have exactly 5 commits in the repo (+1 empty line)
+        assert (
+            len(git_log_output.split("\n")) == 5 + 1
+        ), git_log_output  # we have exactly 5 commits in the repo (+1 empty line)

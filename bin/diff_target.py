@@ -1,4 +1,3 @@
-#!/bin/env python
 # Copyright: Hallux team, 2023
 
 # We have several options where (and how) to send found fixes.

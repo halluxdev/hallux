@@ -54,7 +54,6 @@ def test_hallux_fix(proj_name: str = "test-project1", tmp_proj_dir: str | None =
     assert not make_succesfull, f"Initial state of {proj_name} Have no issues for cpp/test_cpp_project.o"
     assert returncode == 2
 
-
     # run hallux from the temporal project directory
     with set_directory(Path(tmp_proj_dir)):
         try:

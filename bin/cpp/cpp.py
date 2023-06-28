@@ -1,4 +1,3 @@
-#!/bin/env python
 # Copyright: Hallux team, 2023
 
 from __future__ import annotations
