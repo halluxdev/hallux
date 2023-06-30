@@ -21,6 +21,7 @@ from cpp.cpp import CppProcessor
 from python.python import PythonProcessor
 
 DEBUG : Final[bool] = False
+HALLUX_CONFIG_FILE = ".hallux"
 
 class Hallux:
     def __init__(self, query_backend: QueryBackend, config: dict, base_path: Path, diff_target: DiffTarget, debug : bool = False):
@@ -41,11 +42,11 @@ class Hallux:
     @staticmethod
     def find_config() -> tuple[dict | None, Path | None]:
         curr_path = Path(os.getcwd())
-        while not curr_path.joinpath(".hallux").exists() and curr_path.parent != curr_path:
+        while not curr_path.joinpath(HALLUX_CONFIG_FILE).exists() and curr_path.parent != curr_path:
             curr_path = curr_path.parent
-        if not curr_path.joinpath(".hallux").exists():
+        if not curr_path.joinpath(HALLUX_CONFIG_FILE).exists():
             return None, None
-        config_file = str(curr_path.joinpath(".hallux"))
+        config_file = str(curr_path.joinpath(HALLUX_CONFIG_FILE))
         with open(config_file) as file_stream:
             yaml_dict = yaml.load(file_stream, Loader=yaml.CLoader)
         return yaml_dict, curr_path
@@ -71,7 +72,7 @@ if __name__ == "__main__":
         print("Error: config file not found")
         exit(1)
 
-    if not "backend" in config:
+    if "backend" not in config:
         print("Backend is not properly configured")
         exit(2)
 
