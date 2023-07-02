@@ -69,7 +69,6 @@ def pull_request_flow():
             if file.filename == "worker/main.py":
                 add_pull_request_comment("This line can be improved. Here's a proposed change.", file.filename, 37)
 
-
     # print(pull_request.get_files())
 
 
@@ -87,6 +86,7 @@ def add_pull_request_comment(comment_body, file_path, line_number):
         print(f"Comment added on line {line_number} of {target_file.filename}: {comment.html_url}")
     else:
         print(f"File {file_path} not found in the pull request.")
+
 
 # Usage example
 # pull_request_number = 1  # Replace with the actual pull request number

@@ -5,6 +5,7 @@ import yaml
 import os
 import shutil
 
+
 # Execute shell command in subprocess and return the output
 def execute_command(cmd, print_output=True):
     process = Popen(cmd, stdin=PIPE, stdout=PIPE, stderr=PIPE, shell=True)
@@ -58,7 +59,6 @@ def main():
 
     # Check for changes and build the project
     check_for_changes(repo, work_dir)
-
 
 
 if __name__ == "__main__":
