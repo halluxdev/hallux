@@ -86,7 +86,10 @@ if __name__ == "__main__":
     elif sys.argv[1] == "commit":
         target = GitCommitTarget()
     elif sys.argv[1] == "propose":
-        target = GithubProposalTraget(sys.argv[2])
+        if "github" in config.keys():
+            target = GithubProposalTraget(config["github"], int(sys.argv[2]))
+        else:
+            raise Exception(f"hallux propose is not properly configured")
     else:
         raise Exception(f"hallux: unknown command: {sys.argv[1]}")
 

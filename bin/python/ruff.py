@@ -17,18 +17,10 @@ class Ruff_IssueSolver(IssueSolver):
         issues: list[IssueDescriptor] = []
         try:
             ruff_output = subprocess.check_output(["ruff", "check", self.ruff_dir])
-            # print("No python linting issues found")
         except subprocess.CalledProcessError as e:
             ruff_output = e.output
 
         issues.extend(RuffIssue.parseRuffIssues(ruff_output.decode("utf-8")))
-
-        # try:
-        #     subprocess.check_output(["ruff", "check", "."])
-        #     print("No python linting issues found")
-        # except subprocess.CalledProcessError as e:
-        #     ruff_output = e.output.decode("utf-8")
-        #     issues.extend(RuffIssue.parseRuffIssues(ruff_output))
 
         return issues
 
@@ -40,18 +32,18 @@ class RuffIssue(IssueDescriptor):
         )
 
     def try_fixing(self, query_backend: QueryBackend, diff_target: DiffTarget):
-        request = "Fix python linting issue, write resulting code only:\n"
-        request = request + self.description + "\n"
-        request = request + "Corresponding python code (not full):\n"
-        # line_comment: str = f" // line {str(self.issue_line)}"
+        request = "Fix python linting issue: " + self.description + "\n"
+        request = request + "from corresponding python code:\n```\n"
         start_line, end_line, requested_codelines, _ = IssueDescriptor.read_lines(self.filename, self.issue_line, 4)
         for line in requested_codelines:
             request = request + line + "\n"
+        request = request + "```\nWrite back fixed code ONLY:\n"
+
         result: list[str] = query_backend.query(request, self)
 
         if len(result) > 0:
-            resulting_lines = IssueDescriptor.prepare_lines(result[0])
-            diff_target.apply_diff(self.filename, start_line, end_line, resulting_lines, self.description)
+            proposed_lines = IssueDescriptor.prepare_lines(result[0])
+            diff_target.apply_diff(self.filename, start_line, end_line, proposed_lines, self.description)
 
     @staticmethod
     def parseRuffIssues(ruff_output: str) -> list[RuffIssue]:
@@ -59,8 +51,13 @@ class RuffIssue(IssueDescriptor):
         warnings: list[str] = ruff_output.split("\n")
         for warn in warnings[:-2]:
             warn_arr = warn.split(" ")
-            filename = warn_arr[0].split(":")[0]
-            issue_line = int(warn_arr[0].split(":")[1])
+            if len(warn_arr) < 3:
+                break
+            filename_line_col = warn_arr[0].split(":")
+            if len(filename_line_col) < 3:
+                break
+            filename = filename_line_col[0]
+            issue_line = int(filename_line_col[1])
 
             issue = RuffIssue(
                 filename=filename,

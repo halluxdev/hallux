@@ -25,12 +25,13 @@ class IssueSolver(ABC):
 
             if len(new_target_issues) < len(target_issues):
                 # Number of issues decreased => FIX SUCCESFULL
-                diff_target.commit_diff()
-                target_issues = new_target_issues
+                increment_index = diff_target.commit_diff()
+                if increment_index:
+                    issue_index += 1
                 print(f"{issue.filename}:{issue.issue_line}: {issue.description} : successfully fixed")
-                # Do not touch issue_index
             else:
                 diff_target.revert_diff()
                 issue_index += 1
-                target_issues = self.list_issues()
                 print(f"{issue.filename}:{issue.issue_line}: {issue.description} : unable to fix")
+
+            target_issues = self.list_issues()
