@@ -8,11 +8,11 @@ backend:
 github:
     github_token:
 
-cpp:
+# cpp:
 #    makefile: /path/to/the/Makefile
 # or alternatively:
-    cmake: .
-    compile: True
+    # cmake: .
+    # compile: True
 
 python:
     ruff: python # directory name to work with, may be just "."

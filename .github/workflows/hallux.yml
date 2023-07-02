@@ -21,17 +21,17 @@ jobs:
       run: pip install --no-cache-dir -r requirements.txt
 
     - name: Unit-Tests
-      run: |        
+      run: |
         export PATH=$(pwd)/bin:$PATH
         export PYTHONPATH=$(pwd)/bin:${PYTHONPATH}
-        python -m pytest tests/unit 
+        python -m pytest tests/unit
 
     - name: Integration Tests
       run: |
         export PATH=$(pwd)/bin:$PATH
         export PYTHONPATH=$(pwd)/bin:${PYTHONPATH}
-        python -m pytest tests/integration/hallux_fix_test.py 
-        
+        python -m pytest tests/integration/hallux_fix_test.py
+
 
 #    - name: Run Hallux
 #      run: python ./worker/main.py
