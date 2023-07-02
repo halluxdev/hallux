@@ -40,20 +40,21 @@ class DummyBackend(QueryBackend):
             self.json = json.load(file)
 
     def query(self, request: str, issue: IssueDescriptor | None = None) -> list[str]:
-        if issue is not None:
-            if issue.language in self.json:
-                language = self.json[issue.language]
-                if issue.tool in language:
-                    tool = language[issue.tool]
-                    issue_file = (
-                        Path(issue.filename)
-                        if Path(issue.filename).exists()
-                        else self.base_path.joinpath(issue.filename)
-                    )
-                    for filename, file_issues in tool.items():
-                        answer_file = self.base_path.joinpath(filename)
-                        if issue_file.samefile(answer_file):
-                            if issue.description in file_issues:
-                                return file_issues[issue.description]
+        if issue is None:
+            return []
+
+        language = self.json.get(issue.language)
+        if language is None:
+            return []
+
+        tool = language.get(issue.tool)
+        if tool is None:
+            return []
+
+        issue_file = Path(issue.filename) if Path(issue.filename).exists() else self.base_path.joinpath(issue.filename)
+        for filename, file_issues in tool.items():
+            answer_file = self.base_path.joinpath(filename)
+            if issue_file.samefile(answer_file) and issue.description in file_issues:
+                return file_issues[issue.description]
 
         return []
