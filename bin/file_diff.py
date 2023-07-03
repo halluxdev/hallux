@@ -53,60 +53,117 @@ class FileDiff:
         proposed_lines: list[str] = query_result.split("\n")
         if proposed_lines[0].startswith("```"):
             proposed_lines = proposed_lines[1:-1]  # remove first and last line
-            # if new last line is still ``` (this happens if there used to be \n after ```)
-            if proposed_lines[-1].startswith("```"):  # remove last line once again
-                proposed_lines = proposed_lines[:-1]
+            if proposed_lines[-1].startswith("```"):
+                # if new last line is still ``` (this happens if there was "\n" after ```)
+                proposed_lines = proposed_lines[:-1]  # remove last line once again
 
         # remove issue_line_comment if it was added
+        issue_line_found: int | None = None
         if self.issue_line_comment is not None:
             for i in range(len(proposed_lines)):
                 line: str = proposed_lines[i]
                 if line.endswith(self.issue_line_comment):
                     proposed_lines[i] = line[: -len(self.issue_line_comment)]
+                    issue_line_found = i
                     break
 
+        result: bool = True
         if try_merging_lines:
-            # merge starting code
-            line_diff: list[str] = list(difflib.ndiff(self.issue_lines, proposed_lines))
-            issue_index: int = 0
-            prop_index: int = 0
+            if issue_line_found is not None:
+                result = self._merge_from_issue_line(proposed_lines, issue_line_found)
+            else:
+                result = self._merge_from_both_ends(proposed_lines)
+        return result
 
-            for i in range(len(line_diff)):  # loop until we find matching line
-                if line_diff[i].startswith("+ "):
-                    prop_index += 1
-                elif line_diff[i].startswith("- "):
-                    issue_index += 1
-                elif line_diff[i].startswith("  "):
-                    proposed_lines = self.issue_lines[:issue_index] + proposed_lines[prop_index:]
-                    break
-                else:
-                    prop_index += 1
-                    issue_index += 1
+    def _merge_from_both_ends(self, proposed_lines: list[str]) -> bool:
+        # merge starting code
+        line_diff: list[str] = list(difflib.ndiff(self.issue_lines, proposed_lines))
+        issue_index: int = 0
+        prop_index: int = 0
 
-            if issue_index > self.safety_radius:
-                # unsuccessful merge
-                return False
+        for i in range(len(line_diff)):  # loop until we find matching line
+            if line_diff[i].startswith("+ "):
+                prop_index += 1
+            elif line_diff[i].startswith("- "):
+                issue_index += 1
+            elif line_diff[i].startswith("  "):
+                proposed_lines = self.issue_lines[:issue_index] + proposed_lines[prop_index:]
+                break
+            else:
+                prop_index += 1
+                issue_index += 1
 
-            # merge ending code
-            line_diff: list[str] = list(difflib.ndiff(self.issue_lines, proposed_lines))
-            issue_index = 0
-            prop_index = 0
+        if issue_index > self.safety_radius:
+            # unsuccessful merge
+            return False
 
-            for i in range(len(line_diff)):  # loop until we find matching line
-                if line_diff[-i - 1].startswith("+ "):
-                    prop_index += 1
-                elif line_diff[-i - 1].startswith("- "):
-                    issue_index += 1
-                elif line_diff[-i - 1].startswith("  "):
-                    proposed_lines = proposed_lines[: -prop_index - 1] + self.issue_lines[-issue_index - 1 :]
-                    break
-                else:
-                    prop_index += 1
-                    issue_index += 1
+        # merge ending code
+        line_diff: list[str] = list(difflib.ndiff(self.issue_lines, proposed_lines))
+        issue_index = 0
+        prop_index = 0
 
-            if issue_index > self.safety_radius:
-                # unsuccessful merge
-                return False
+        for i in range(len(line_diff)):  # loop until we find matching line
+            if line_diff[-i - 1].startswith("+ "):
+                prop_index += 1
+            elif line_diff[-i - 1].startswith("- "):
+                issue_index += 1
+            elif line_diff[-i - 1].startswith("  "):
+                proposed_lines = proposed_lines[: -prop_index - 1] + self.issue_lines[-issue_index - 1 :]
+                break
+            else:
+                prop_index += 1
+                issue_index += 1
+
+        if issue_index > self.safety_radius:
+            # unsuccessful merge
+            return False
 
         self.proposed_lines = proposed_lines
+        return True
+
+    # NEW FUNCTION
+    def _merge_from_issue_line(self, proposed_lines: list[str], found_issue_line_index: int) -> bool:
+        """
+        If we can find original issue_line within the proposed_lines, we may use it for better merge between issue_lines and proposed_lines
+        :param proposed_lines:
+        :param found_issue_line_index:
+        :return:
+        """
+
+        def find_first_match(list1: list[str], list2: list[str]) -> tuple[int, int]:
+            index1: int = 0
+            index2: int = 0
+            line_diff: list[str] = list(difflib.ndiff(list1, list2))
+            for i in range(len(line_diff)):  # loop until we find matching line
+                if line_diff[i].startswith("+ "):
+                    index2 += 1
+                elif line_diff[i].startswith("- "):
+                    index1 += 1
+                elif line_diff[i].startswith("  "):
+                    return index1, index2
+                else:
+                    index1 += 1
+                    index2 += 1
+            return index1, index2
+
+        orig_issue_line_index: Final[int] = self.issue_line - self.start_line
+        issue_lines_start = self.issue_lines[:orig_issue_line_index]
+        proposed_lines_start = proposed_lines[:found_issue_line_index]
+        issue_lines_start.reverse()
+        proposed_lines_start.reverse()
+
+        issue_lines_end = self.issue_lines[orig_issue_line_index:]
+        proposed_lines_end = proposed_lines[found_issue_line_index:]
+
+        issue_index_above, proposed_index_above = find_first_match(issue_lines_start, proposed_lines_start)
+        issue_index_below, proposed_index_below = find_first_match(issue_lines_end, proposed_lines_end)
+
+        self.proposed_lines = (
+            self.issue_lines[: orig_issue_line_index - issue_index_above]
+            + proposed_lines[
+                found_issue_line_index - proposed_index_above : found_issue_line_index + proposed_index_below
+            ]
+            + self.issue_lines[orig_issue_line_index + issue_index_below :]
+        )
+
         return True

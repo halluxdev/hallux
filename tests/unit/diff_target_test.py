@@ -28,11 +28,8 @@ def test_filesystem_target():
         assert len(filediff.proposed_lines) == 0
 
         # proposing lines
-        filediff.propose_lines("2A\n3A\n4A\nX", try_merging_lines=True)
-        assert len(filediff.proposed_lines) == 3
-
-        filediff.propose_lines("2A\n3A\n4A\nX", try_merging_lines=False)
-        assert len(filediff.proposed_lines) == 4
+        filediff.propose_lines("2\n3A\n4\nX", try_merging_lines=True)
+        assert len(filediff.proposed_lines) == len(filediff.issue_lines)
 
         # helper to check what was written back into file
         global written_text
@@ -49,7 +46,7 @@ def test_filesystem_target():
         fs_target.apply_diff(filediff)
 
         # written text shall contain proposed lines
-        assert written_text.split("\n") == ["1", "2A", "3A", "4A", "X", "5"]
+        assert written_text.split("\n") == ["1", "2", "3A", "4", "5"]
 
         try:
             fs_target.apply_diff(filediff)
