@@ -24,7 +24,11 @@ jobs:
       run: |
         export PATH=$(pwd)/bin:$PATH
         export PYTHONPATH=$(pwd)/bin:${PYTHONPATH}
-        python -m pytest tests/unit
+        python -m coverage run -m pytest tests/unit
+
+    - name: Fail if coverage is less than 80%
+      run: |
+        coverage report --fail-under=80
 
     - name: Integration Tests
       run: |
