@@ -1,5 +1,6 @@
 {
-  "cpp": {
+  "cpp":
+  {
     "compile": {
       "cpp/test_cpp_project.cpp": {
         "return-statement with a value, in function returning ‘void’ [-fpermissive]": [
