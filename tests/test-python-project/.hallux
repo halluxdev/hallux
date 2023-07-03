@@ -1,0 +1,14 @@
+backend:
+    dummy: dummy.json
+
+#  openai:
+#      model: gpt-3.5-turbo
+#      max_tokens: 4097
+
+github:
+    github_token:
+
+python:
+    ruff: python # directory name to work with, may be just "."
+
+

@@ -14,7 +14,4 @@ cpp:
     cmake: .
     compile: True
 
-python:
-    ruff: python # directory name to work with, may be just "."
-
 

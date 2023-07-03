@@ -11,10 +11,10 @@ from pathlib import Path
 import subprocess
 from code_processor import set_directory
 
-from integration.hallux_fix_test import test_hallux_fix
+from integration.hallux_fix_test import test_hallux_fix_python, test_hallux_fix_cpp
 
 
-def test_hallux_commit(proj_name: str = "test-project1", tmp_proj_dir: str | None = None):
+def test_hallux_commit_cpp(proj_name: str = "test-cpp-project", tmp_proj_dir: str | None = None):
     if tmp_proj_dir is None:
         if not Path("/tmp/hallux").exists():
             Path("/tmp/hallux").mkdir()
@@ -48,7 +48,7 @@ def test_hallux_commit(proj_name: str = "test-project1", tmp_proj_dir: str | Non
             len(git_log_output.split("\n")) == 1 + 1
         ), git_log_output  # we have exactly one commit in the repo (+1 empty line)
 
-    test_hallux_fix(proj_name, tmp_proj_dir, command="commit")
+    test_hallux_fix_cpp(proj_name, tmp_proj_dir, command="commit")
 
     with set_directory(Path(tmp_proj_dir)):
         try:
@@ -57,5 +57,52 @@ def test_hallux_commit(proj_name: str = "test-project1", tmp_proj_dir: str | Non
             pytest.fail(e, pytrace=True)  # Cannot call `git log`
 
         assert (
-            len(git_log_output.split("\n")) == 5 + 1
-        ), git_log_output  # we have exactly 5 commits in the repo (+1 empty line)
+            len(git_log_output.split("\n")) == 4 + 1
+        ), git_log_output  # we have exactly 4 commits in the repo (+1 empty line)
+
+
+def test_hallux_commit_python(proj_name: str = "test-python-project", tmp_proj_dir: str | None = None):
+    if tmp_proj_dir is None:
+        if not Path("/tmp/hallux").exists():
+            Path("/tmp/hallux").mkdir()
+        tmp_proj_dir = tempfile.mkdtemp(dir="/tmp/hallux")
+
+    with set_directory(Path(tmp_proj_dir)):
+        try:
+            subprocess.check_output(["git", "init"])
+        except subprocess.CalledProcessError as e:
+            pytest.fail(e, pytrace=True)  # Cannot call `git init`
+
+        proj_dir = Path(__file__).resolve().parent.parent.joinpath(proj_name)
+        shutil.copytree(str(proj_dir), tmp_proj_dir, ignore_dangling_symlinks=False, dirs_exist_ok=True)
+        try:
+            subprocess.check_output(["git", "add", "*"])
+        except subprocess.CalledProcessError as e:
+            pytest.fail(e, pytrace=True)  # Cannot call `git add *`
+
+        try:
+            subprocess.check_output(["git", "commit", "-m", "initial"])
+        except subprocess.CalledProcessError as e:
+            pytest.fail(e, pytrace=True)  # Cannot call `git commit`
+
+        git_log_output: str = ""
+        try:
+            git_log_output = subprocess.check_output(["git", "log", "--pretty=oneline"]).decode("utf8")
+        except subprocess.CalledProcessError as e:
+            pytest.fail(e, pytrace=True)  # Cannot call `git log`
+
+        assert (
+            len(git_log_output.split("\n")) == 1 + 1
+        ), git_log_output  # we have exactly one commit in the repo (+1 empty line)
+
+    test_hallux_fix_python(proj_name, tmp_proj_dir, command="commit")
+
+    with set_directory(Path(tmp_proj_dir)):
+        try:
+            git_log_output = subprocess.check_output(["git", "log", "--pretty=oneline"]).decode("utf8")
+        except subprocess.CalledProcessError as e:
+            pytest.fail(e, pytrace=True)  # Cannot call `git log`
+
+        assert (
+            len(git_log_output.split("\n")) == 2 + 1
+        ), git_log_output  # we have exactly 2 commit in the repo (+1 empty line)
