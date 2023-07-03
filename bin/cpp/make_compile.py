@@ -5,7 +5,7 @@ from __future__ import annotations
 from code_processor import set_directory
 from file_diff import FileDiff
 from query_backend import QueryBackend
-from diff_target import DiffTarget
+from targets.diff_target import DiffTarget
 from issue_solver import IssueSolver
 from issue import IssueDescriptor
 from pathlib import Path
@@ -50,7 +50,7 @@ class CppIssueDescriptor(IssueDescriptor):
             "Fix gcc compilation issue:",
             *self.message_lines,
             "from corresponding c++ code:\n```",
-            *diff.original_lines,
+            *diff.issue_lines,
             "```\nWrite back fixed code ONLY:\n",
         ]
         request = "\n".join(request_lines)

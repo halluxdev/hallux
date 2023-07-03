@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from file_diff import FileDiff
 from query_backend import QueryBackend
-from diff_target import DiffTarget
+from targets.diff_target import DiffTarget
 from issue import IssueDescriptor
 from issue_solver import IssueSolver
 import subprocess
@@ -37,7 +37,7 @@ class RuffIssue(IssueDescriptor):
         request_lines = [
             "Fix python linting issue: " + self.description,
             "from corresponding python code:\n```",
-            *diff.original_lines,
+            *diff.issue_lines,
             "```\nWrite back fixed code ONLY:\n",
         ]
         request = "\n".join(request_lines)

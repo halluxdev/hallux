@@ -5,31 +5,30 @@ import copy
 
 
 # Struct to keep all relevant info about found code fix in one place
-class FileDiff:
-    filename: str
-    issue_line: int
-    start_line: int
-    end_line: int
-    original_lines: list[str]
-    proposed_lines: list[str]
-    filelines: list[str]
-    description: str
-    issue_line_comment: str | None = None
+from typing import Final
 
+
+class FileDiff:
     def __init__(
-        self, filename: str, line: int, radius: int = 4, issue_line_comment: str | None = None, description: str = ""
+        self,
+        filename: str,
+        issue_line: int,
+        radius: int = 4,
+        issue_line_comment: str | None = None,
+        description: str = "",
     ):
         with open(filename, "rt") as file:
-            self.filelines = file.read().split("\n")
-        self.filename = filename
-        self.description = description
-        self.issue_line = line
-        self.start_line = max(0, line - radius)
-        self.end_line = min(len(self.filelines) - 1, line + radius)
-        self.original_lines = copy.copy(self.filelines[self.start_line : self.end_line])
+            self.all_lines: Final[list[str]] = file.read().split("\n")
+        self.filename: Final[str] = filename
+        self.description: Final[str] = description
+        self.issue_line: Final[int] = issue_line
+        self.start_line: Final[int] = max(0, issue_line - radius)
+        self.end_line: Final[int] = min(len(self.all_lines), issue_line + radius)
+        self.issue_lines: Final[list[str]] = copy.copy(self.all_lines[self.start_line - 1 : self.end_line])
+        self.proposed_lines: list[str] = []
+        self.issue_line_comment = issue_line_comment
         if issue_line_comment is not None:
-            self.issue_line_comment = issue_line_comment
-            self.original_lines[line - self.start_line] += issue_line_comment
+            self.issue_lines[issue_line - self.start_line] += issue_line_comment
 
     def propose_lines(self, query_result: str):
         self.proposed_lines = query_result.split("\n")

@@ -16,7 +16,10 @@ import yaml
 from pathlib import Path
 
 from query_backend import QueryBackend, OpenAiChatGPT, DummyBackend
-from diff_target import DiffTarget, FilesystemTarget, GitCommitTarget, GithubProposalTraget
+from targets.diff_target import DiffTarget
+from targets.filesystem_target import FilesystemTarget
+from targets.git_commit_target import GitCommitTarget
+from targets.github_proposal_traget import GithubProposalTraget
 from cpp.cpp import CppProcessor
 from python.python import PythonProcessor
 
