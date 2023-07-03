@@ -3,7 +3,7 @@ name: Python CI
 on: [push, pull_request]
 
 env:
-  PYTHONPATH: ${{ github.workspace }}
+  PYTHONPATH: ${{ github.workspace }}/bin
 
 jobs:
   build:
@@ -29,7 +29,7 @@ jobs:
         ls -la
         export PATH=$(pwd)/bin:$PATH
         echo $PATH
-        PYTHONPATH=. coverage run -m pytest tests/integration/hallux_fix_test.py
+        PYTHONPATH=(pwd)/bin coverage run -m pytest tests/integration/hallux_fix_test.py
 
     - name: Fail if coverage is less than 50%
       run: |
