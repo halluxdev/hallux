@@ -1,28 +1,11 @@
 {
-  "cpp":
-  {
-    "compile": {
-      "cpp/test_cpp_project.cpp": {
-        "return-statement with a value, in function returning ‘void’ [-fpermissive]": [
-          "void print_usage(char* argv[])\n{\n  std::cout << \"Usage: \" << argv[0] << \" filename.cpp\" << std::endl;\n  return;\n}\n\nint main(int argc, char* argv[])\n{"
-        ],
-        "too few arguments to function ‘void print_usage(char**)’": [
-          "  if (argc < 2)\n  {\n    print_usage(argv);\n  }\n\n  missingFunction(argc);\n"
-        ],
-        "expected ‘;’ before ‘}’ token": [
-          "  \n  missingFunction(argc);\n\n  return 0;\n}"
+  "python": {
+    "ruff": {
+      "python/parse_cpp_tree_test.py": {
+        "E722 Do not use bare `except`": [
+          "        try:\n            token1 = next(tokens1)\n            token2 = next(tokens2)\n        except StopIteration:\n            break\n\n\n@pytest.mark.parametrize("
         ]
       }
-    }
-  },
-  "python":
-  {
-    "ruff":
-    {
-      "python/parse_cpp_tree_test.py": {
-        "E722 Do not use bare `except`": ["        try:\n            token1 = next(tokens1)\n            token2 = next(tokens2)\n        except StopIteration:\n            break\n\n\n@pytest.mark.parametrize("]
-      }
-
     }
   }
 }
