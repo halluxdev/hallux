@@ -1,6 +1,8 @@
-name:  Hallux pipeline
+name:  Master Pipeline
 
 on:
+  push:
+    branches: [ master ]
   pull_request:
     branches: [ master ]
 
@@ -18,10 +20,23 @@ jobs:
     - name: Install dependencies
       run: pip install --no-cache-dir -r requirements.txt
 
-    - name: Run Hallux
-      run: python ./worker/main.py
-      env:
-        GITHUB_TOKEN: ${{ secrets.HALLUX_GITHUB_TOKEN }}
-        OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-        OPENAI_MODEL: text-davinci-003
-        PULL_REQUEST_NUMBER: ${{ github.event.pull_request.number }}
+    - name: Unit-Tests
+      run: |        
+        export PATH=$(pwd)/bin:$PATH
+        export PYTHONPATH=$(pwd)/bin:${PYTHONPATH}
+        python -m pytest tests/unit 
+
+    - name: Integration Tests
+      run: |
+        export PATH=$(pwd)/bin:$PATH
+        export PYTHONPATH=$(pwd)/bin:${PYTHONPATH}
+        python -m pytest tests/integration/hallux_fix_test.py 
+        
+
+#    - name: Run Hallux
+#      run: python ./worker/main.py
+#      env:
+#        GITHUB_TOKEN: ${{ secrets.HALLUX_GITHUB_TOKEN }}
+#        OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+#        OPENAI_MODEL: text-davinci-003
+#        PULL_REQUEST_NUMBER: ${{ github.event.pull_request.number }}
