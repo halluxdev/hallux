@@ -47,7 +47,7 @@ class CppIssueDescriptor(IssueDescriptor):
             self.filename, self.issue_line, radius=4, issue_line_comment=line_comment, description=self.description
         )
 
-        request = "Fix gcc compilation issue: " + self.description + "\n"
+        request = "Fix gcc compilation issue:" + "\n"
         for line in self.message_lines:
             request = request + line + "\n"
         request = request + "from corresponding c++ code:\n```\n"
