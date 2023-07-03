@@ -34,7 +34,7 @@ jobs:
       run: |
         export PATH=$(pwd)/bin:$PATH
         export PYTHONPATH=$(pwd)/bin:${PYTHONPATH}
-        python -m pytest tests/integration/hallux_fix_test.py
+        python -m pytest tests/integration/hallux_fix_python_test.py tests/integration/hallux_fix_cpp_test.py
 
 
 #    - name: Run Hallux
