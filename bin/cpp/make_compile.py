@@ -46,14 +46,14 @@ class CppIssueDescriptor(IssueDescriptor):
         diff: FileDiff = FileDiff(
             self.filename, self.issue_line, radius=4, issue_line_comment=line_comment, description=self.description
         )
-
-        request = "Fix gcc compilation issue:" + "\n"
-        for line in self.message_lines:
-            request = request + line + "\n"
-        request = request + "from corresponding c++ code:\n```\n"
-        for line in diff.original_lines:
-            request = request + line + "\n"
-        request = request + "```\nWrite back fixed code ONLY:\n"
+        request_lines = [
+            "Fix gcc compilation issue:",
+            *self.message_lines,
+            "from corresponding c++ code:\n```",
+            *diff.original_lines,
+            "```\nWrite back fixed code ONLY:\n",
+        ]
+        request = "\n".join(request_lines)
         result: list[str] = query_backend.query(request, self)
 
         if len(result) > 0:
