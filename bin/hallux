@@ -91,7 +91,7 @@ if __name__ == "__main__":
         else:
             raise Exception(f"hallux propose is not properly configured")
     else:
-        raise Exception(f"hallux: unknown command: {sys.argv[1]}")
+        raise SystemError(f"hallux: unknown command: {sys.argv[1]}")
 
 
     hallux = Hallux(query_backend=query_backend, config=config, base_path=path, diff_target=target, debug=DEBUG)
