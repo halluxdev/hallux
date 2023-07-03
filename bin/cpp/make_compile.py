@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from code_processor import set_directory
+from file_diff import FileDiff
 from query_backend import QueryBackend
 from diff_target import DiffTarget
 from issue_solver import IssueSolver
@@ -41,27 +42,23 @@ class CppIssueDescriptor(IssueDescriptor):
         )
 
     def try_fixing(self, query_backend: QueryBackend, diff_target: DiffTarget):
-        request = "Fix gcc compilation issue, write resulting code only:\n"
+        line_comment: str = f" // line {str(self.issue_line)}"
+        diff: FileDiff = FileDiff(
+            self.filename, self.issue_line, radius=4, issue_line_comment=line_comment, description=self.description
+        )
+
+        request = "Fix gcc compilation issue: " + self.description + "\n"
         for line in self.message_lines:
             request = request + line + "\n"
-        request = request + "Corresponding c++ code (not full):\n"
-        line_comment: str = f" // line {str(self.issue_line)}"
-        start_line, end_line, requested_codelines, _ = IssueDescriptor.read_lines(
-            self.filename, self.issue_line, 4, line_comment
-        )
-        for line in requested_codelines:
+        request = request + "from corresponding c++ code:\n```\n"
+        for line in diff.original_lines:
             request = request + line + "\n"
+        request = request + "```\nWrite back fixed code ONLY:\n"
         result: list[str] = query_backend.query(request, self)
 
-        if self.debug:
-            print("request")
-            print(request)
-            print("result")
-            print(result)
-
         if len(result) > 0:
-            resulting_lines = IssueDescriptor.prepare_lines(result[0], line_comment)
-            diff_target.apply_diff(self.filename, start_line, end_line, resulting_lines, self.description)
+            diff.propose_lines(result[0])
+            diff_target.apply_diff(diff)
 
     @staticmethod
     def parseMakeIssues(make_output: str, debug: bool = False) -> list[CppIssueDescriptor]:
