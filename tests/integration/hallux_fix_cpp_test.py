@@ -11,7 +11,7 @@ import subprocess
 from code_processor import set_directory
 
 
-def test_hallux_fix(proj_name: str = "test-python-project", tmp_proj_dir: str | None = None, command: str = "fix"):
+def test_hallux_fix(proj_name: str = "test-cpp-project", tmp_proj_dir: str | None = None, command: str = "fix"):
     # Create temporal dir, if not already exists
     if tmp_proj_dir is None:
         if not Path("/tmp/hallux").exists():
