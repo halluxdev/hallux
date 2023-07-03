@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 from abc import abstractmethod
-from diff_target import DiffTarget
+from targets.diff_target import DiffTarget
 from query_backend import QueryBackend
 from contextlib import contextmanager
 from pathlib import Path

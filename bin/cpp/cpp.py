@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from query_backend import QueryBackend
-from diff_target import DiffTarget
+from targets.diff_target import DiffTarget
 from code_processor import CodeProcessor, set_directory
 from cpp.make_compile import MakeCompile_IssueSolver
 import subprocess

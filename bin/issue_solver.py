@@ -3,7 +3,7 @@
 from __future__ import annotations
 from abc import ABC, abstractmethod
 from issue import IssueDescriptor
-from diff_target import DiffTarget
+from targets.diff_target import DiffTarget
 from query_backend import QueryBackend
 
 

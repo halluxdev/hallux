@@ -4,13 +4,13 @@
     "compile": {
       "cpp/test_cpp_project.cpp": {
         "return-statement with a value, in function returning ‘void’ [-fpermissive]": [
-          "void print_usage(char* argv[])\n{\n  std::cout << \"Usage: \" << argv[0] << \" filename.cpp\" << std::endl;\n  return;\n}\n\nint main(int argc, char* argv[])\n{"
+          "\nvoid print_usage(char* argv[])\n{\n  std::cout << \"Usage: \" << argv[0] << \" filename.cpp\" << std::endl;\n  return;\n}\n\nint main(int argc, char* argv[])\n{"
         ],
         "too few arguments to function ‘void print_usage(char**)’": [
-          "  if (argc < 2)\n  {\n    print_usage(argv);\n  }\n\n  missingFunction(argc);\n"
+          "{\n  std::cout << \"This is compilable file (part of CMake project) for testing purposes\" << std::endl ;\n  if (argc < 2)\n  {\n    print_usage(argv);\n  }\n\n  missingFunction(argc);\n"
         ],
         "expected ‘;’ before ‘}’ token": [
-          "  \n  missingFunction(argc);\n\n  return 0;\n}"
+          "  }\n  \n  missingFunction(argc);\n\n  return 0;\n}\n"
         ]
       }
     }

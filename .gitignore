@@ -10,3 +10,4 @@ __pycache__
 repos/
 data/
 .ruff_cache
+.coverage
