@@ -7,18 +7,19 @@
 #    This last one requires some extra configuring to be done
 # All those approaches are hidden after DiffTarget interface
 
-
 from __future__ import annotations
 from abc import ABC, abstractmethod
 import subprocess
 import os
 from pathlib import Path
 from github import Github, Repository, PullRequest
+from file_diff import FileDiff
 
 
+# Interface for DiffTarget implementations
 class DiffTarget(ABC):
     @abstractmethod
-    def apply_diff(self, filename: str, start_line: int, end_line: int, new_lines: list[str], message: str) -> None:
+    def apply_diff(self, diff: FileDiff) -> None:
         pass
 
     @abstractmethod
@@ -37,40 +38,35 @@ class DiffTarget(ABC):
 # Saves diffs directly into local filesystem
 class FilesystemTarget(DiffTarget):
     def __init__(self):
-        self.filename: str | None = None
-        self.filelines: list[str] = []
+        self.existing_diff: FileDiff | None = None
 
-    def apply_diff(self, filename: str, start_line: int, end_line: int, new_lines: list[str], message: str) -> None:
-        if self.filename is not None:
+    def apply_diff(self, diff: FileDiff) -> None:
+        if self.existing_diff is not None:
             raise Exception("FilesystemTarget: Cannot apply new diff, before last one committed or reverted")
 
-        self.filename = filename
-        with open(self.filename, "rt") as file:
-            self.filelines = file.read().split("\n")
+        self.existing_diff = diff  # save new diff in the memory
 
-        with open(filename, "wt") as file:
-            for line in range(0, start_line + 1):
-                file.write(self.filelines[line] + "\n")
+        with open(diff.filename, "wt") as file:
+            for line in range(0, diff.start_line + 1):
+                file.write(diff.filelines[line] + "\n")
 
-            for code_line in new_lines[1:]:
+            for code_line in diff.proposed_lines[1:]:
                 file.write(code_line + "\n")
 
-            for line in range(end_line, len(self.filelines)):
-                file.write(self.filelines[line] + "\n")
+            for line in range(diff.end_line, len(diff.filelines)):
+                file.write(diff.filelines[line] + "\n")
 
             file.close()
 
     def revert_diff(self) -> None:
-        if self.filename is not None:
-            with open(self.filename, "wt") as file:
-                for line in self.filelines:
+        if self.existing_diff is not None:
+            with open(self.existing_diff.filename, "wt") as file:
+                for line in self.existing_diff.filelines:
                     file.write(line + "\n")
-            self.filename = None
-            self.filelines = []
+            self.existing_diff = None
 
     def commit_diff(self) -> bool:
-        self.filename = None
-        self.filelines.clear()
+        self.existing_diff = None
         return False
 
 
@@ -78,22 +74,19 @@ class FilesystemTarget(DiffTarget):
 class GitCommitTarget(FilesystemTarget):
     def __init__(self):
         FilesystemTarget.__init__(self)
-        self.message: str = ""
 
-    def apply_diff(self, filename: str, start_line: int, end_line: int, new_lines: list[str], message: str) -> None:
-        FilesystemTarget.apply_diff(self, filename, start_line, end_line, new_lines, message)
-        self.message = message
+    def apply_diff(self, diff: FileDiff) -> None:
+        FilesystemTarget.apply_diff(self, diff)
 
     def revert_diff(self) -> None:
         FilesystemTarget.revert_diff(self)
-        self.message = ""
 
     def commit_diff(self) -> int:
         curr_dir: str = os.getcwd()
-        git_dir: str = str(Path(self.filename).parent)
+        git_dir: str = str(Path(self.existing_diff.filename).parent)
         os.chdir(git_dir)
-        subprocess.check_output(["git", "add", os.path.relpath(self.filename, start=git_dir)])
-        subprocess.check_output(["git", "commit", "-m", f'"{self.message}"'])
+        subprocess.check_output(["git", "add", os.path.relpath(self.existing_diff.filename, start=git_dir)])
+        subprocess.check_output(["git", "commit", "-m", f'"{self.existing_diff.description}"'])
         FilesystemTarget.commit_diff(self)
         os.chdir(curr_dir)
         return 0
@@ -133,34 +126,20 @@ class GithubProposalTraget(FilesystemTarget):
             )
             exit(6)
 
-        self.filename = None
-        self.start_line = None
-        self.end_line = None
-        self.new_lines = []
-        self.message = ""
-
-    def apply_diff(self, filename: str, start_line: int, end_line: int, new_lines: list[str], message: str) -> None:
-        FilesystemTarget.apply_diff(self, filename, start_line, end_line, new_lines, message)
-        self.filename = filename
-        self.start_line = start_line
-        self.end_line = end_line
-        self.new_lines = new_lines
-        self.message = message
+    def apply_diff(self, diff: FileDiff) -> None:
+        FilesystemTarget.apply_diff(self, diff)
 
     def revert_diff(self) -> None:
         FilesystemTarget.revert_diff(self)
-        self.filename = None
-        self.start_line = None
-        self.end_line = None
-        self.new_lines = []
-        self.message = ""
 
     def commit_diff(self) -> bool:
         commit = self.repo.get_commit(self.pull_request.head.sha)
-        body = self.message + "\n```suggestion\n"
-        for line in self.new_lines:
-            body + body + line + "\n"
+        body = self.existing_diff.description + "\n```suggestion\n"
+        for line in self.existing_diff.proposed_lines:
+            body = body + line + "\n"
         body = body + "\n```"
-        self.pull_request.create_review_comment(body=body, commit=commit, path=self.filename, line=self.start_line + 4)
+        self.pull_request.create_review_comment(
+            body=body, commit=commit, path=self.existing_diff.filename, line=self.existing_diff.issue_line
+        )
         FilesystemTarget.revert_diff(self)
         return True
