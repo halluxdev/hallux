@@ -23,12 +23,15 @@ class OpenAiChatGPT(QueryBackend):
         openai.api_key = os.getenv("OPENAI_API_KEY")
 
     def query(self, request: str, issue: IssueDescriptor | None = None) -> list[str]:
+        print("REQUEST")
+        print(request)
         result = ChatCompletion.create(messages=[{"role": "user", "content": request}], model=self.model)
         answers = []
         if len(result["choices"]) > 0:
-            print(result["choices"])
             for variant in result["choices"]:
                 answers.append(variant["message"]["content"])
+        print("ANSWERS")
+        print(answers)
         return answers
 
 

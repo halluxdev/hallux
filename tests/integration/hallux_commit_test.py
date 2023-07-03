@@ -48,7 +48,7 @@ def test_hallux_commit_cpp(proj_name: str = "test-cpp-project", tmp_proj_dir: st
             len(git_log_output.split("\n")) == 1 + 1
         ), git_log_output  # we have exactly one commit in the repo (+1 empty line)
 
-    test_hallux_fix_cpp(proj_name, tmp_proj_dir, command="commit")
+    test_hallux_fix_cpp(False, proj_name, tmp_proj_dir, command="commit")
 
     with set_directory(Path(tmp_proj_dir)):
         try:
@@ -95,7 +95,7 @@ def test_hallux_commit_python(proj_name: str = "test-python-project", tmp_proj_d
             len(git_log_output.split("\n")) == 1 + 1
         ), git_log_output  # we have exactly one commit in the repo (+1 empty line)
 
-    test_hallux_fix_python(proj_name, tmp_proj_dir, command="commit")
+    test_hallux_fix_python(False, proj_name, tmp_proj_dir, command="commit")
 
     with set_directory(Path(tmp_proj_dir)):
         try:

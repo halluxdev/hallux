@@ -1,0 +1,8 @@
+backend:
+    openai:
+        model: gpt-3.5-turbo
+        max_tokens: 4097
+
+cpp:
+    cmake: .
+    compile: True
