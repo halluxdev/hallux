@@ -5,4 +5,3 @@ black==23.3.0
 openai==0.27.8
 pyyaml==6.0
 PyGithub==1.59
-coverage==7.2.7
