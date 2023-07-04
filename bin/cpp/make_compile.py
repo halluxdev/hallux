@@ -44,7 +44,7 @@ class CppIssueDescriptor(IssueDescriptor):
     def try_fixing(self, query_backend: QueryBackend, diff_target: DiffTarget):
         line_comment: str = f" // line {str(self.issue_line)}"
         diff: FileDiff = FileDiff(
-            self.filename, self.issue_line, radius=4, issue_line_comment=line_comment, description=self.description
+            self.filename, self.issue_line, radius=5, issue_line_comment=line_comment, description=self.description
         )
         request_lines = [
             "Fix gcc compilation issue:",
@@ -84,8 +84,7 @@ class CppIssueDescriptor(IssueDescriptor):
                     issue_line=int(err_line_list[1]),
                     description=str(":".join(err_line_list[4:]).lstrip(" ")),
                 )
-                current_issue.message_lines = [output_lines[line_num - 1]] if line_num > 0 else []
-                current_issue.message_lines.append(output_lines[line_num])
+                current_issue.message_lines = [output_lines[line_num]]
                 current_issue.debug = debug
 
             elif current_issue is not None:

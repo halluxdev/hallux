@@ -63,3 +63,43 @@ def test_file_diff(test_filename="file_diff_test.txt"):
     assert fd1_c.issue_lines == ["3", "4 #", "5"]
     fd1_c.propose_lines("\n".join(fd1_c.issue_lines))
     assert fd1_c.proposed_lines == ["3", "4", "5"]
+
+
+def test_cpp_file_diff_with_real_openai_results(test_filename="../test-cpp-project/cpp/test_cpp_project.cpp"):
+    test_file = Path(__file__).resolve().parent.joinpath(test_filename)
+    fd = FileDiff(str(test_file), issue_line=21, radius=4, issue_line_comment=" // line 21")
+    result = fd.propose_lines(
+        '```cpp\n#include <iostream>\n\nvoid missingFunction(int arg) {\n    std::cout << "Missing function called with argument: " << arg << std::endl;\n}\n\nint main(int argc, char** argv) {\n    missingFunction(argc);\n\n    return 0; // line 21\n}\n```\nThe issue in the code was a missing semicolon at the end of line 21.'
+    )
+    assert result
+    assert fd.proposed_lines == ["  }", "", "  missingFunction(argc);", "", "    return 0;", "}", ""]
+
+    fd2 = FileDiff(str(test_file), issue_line=21, radius=5, issue_line_comment=" // line 21")
+    result = fd2.propose_lines(
+        '```cpp\n#include <iostream>\n\nvoid print_usage(char* argv[]) {\n  std::cout << "Usage: " << argv[0] << " <filename>" << std::endl;\n}\n\nvoid missingFunction(int argc) {\n  std::cout << "Missing function called with " << argc << " argument(s)" << std::endl;\n}\n\nint main(int argc, char* argv[]) {\n  print_usage(argv);\n\n  missingFunction(argc);\n\n  return 0;\n}\n```'
+    )
+    assert result
+    print(fd2.proposed_lines)
+    assert fd.proposed_lines == ["  }", "", "  missingFunction(argc);", "", "    return 0;", "}", ""]
+
+
+def test_python_file_diff_with_real_openai_results(
+    test_filename="../test-python-project/python/parse_cpp_tree_test.py",
+):
+    test_file = Path(__file__).resolve().parent.joinpath(test_filename)
+    fd = FileDiff(str(test_file), issue_line=39, radius=4)
+    assert fd.issue_lines == [
+        "",
+        "        try:",
+        "            token1 = next(tokens1)",
+        "            token2 = next(tokens2)",
+        "        except:",
+        "            break",
+        "",
+        "",
+        "@pytest.mark.parametrize(",
+    ]
+    result = fd.propose_lines(
+        "```python\ntry:\n    token1 = next(tokens1)\n    token2 = next(tokens2)\nexcept StopIteration:\n    break\n\n\n@pytest.mark.parametrize(\n```"
+    )
+    # ToDo: write assert

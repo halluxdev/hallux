@@ -11,7 +11,9 @@ import subprocess
 from code_processor import set_directory
 
 
-def test_hallux_fix_cpp(proj_name: str = "test-cpp-project", tmp_proj_dir: str | None = None, command: str = "fix"):
+def test_hallux_fix_cpp(
+    real_openai_test: bool, proj_name: str = "test-cpp-project", tmp_proj_dir: str | None = None, command: str = "fix"
+):
     # Create temporal dir, if not already exists
     if tmp_proj_dir is None:
         if not Path("/tmp/hallux").exists():
@@ -44,6 +46,15 @@ def test_hallux_fix_cpp(proj_name: str = "test-cpp-project", tmp_proj_dir: str |
     assert not make_succesfull, f"Initial state of {proj_name} Have no issues for cpp/test_cpp_project.o"
     assert returncode == 2
 
+    if real_openai_test:
+        print("REAL OPENAI TEST")
+        dummy_config_file = Path(tmp_proj_dir).joinpath(".hallux")
+        real_config_file = Path(tmp_proj_dir).joinpath(".hallux.real")
+        if real_config_file.exists():
+            if dummy_config_file.exists():
+                dummy_config_file.unlink()
+            real_config_file.rename(dummy_config_file)
+
     # run hallux from the temporal project directory
     with set_directory(Path(tmp_proj_dir)):
         try:
@@ -60,7 +71,10 @@ def test_hallux_fix_cpp(proj_name: str = "test-cpp-project", tmp_proj_dir: str |
 
 
 def test_hallux_fix_python(
-    proj_name: str = "test-python-project", tmp_proj_dir: str | None = None, command: str = "fix"
+    real_openai_test: bool,
+    proj_name: str = "test-python-project",
+    tmp_proj_dir: str | None = None,
+    command: str = "fix",
 ):
     # Create temporal dir, if not already exists
     if tmp_proj_dir is None:
@@ -83,6 +97,15 @@ def test_hallux_fix_python(
             returncode = e.returncode
 
         assert returncode != 0, f"Initial state of {proj_name} contains no ruff warnings"
+
+    if real_openai_test:
+        print("REAL OPENAI TEST")
+        dummy_config_file = Path(tmp_proj_dir).joinpath(".hallux")
+        real_config_file = Path(tmp_proj_dir).joinpath(".hallux.real")
+        if real_config_file.exists():
+            if dummy_config_file.exists():
+                dummy_config_file.unlink()
+            real_config_file.rename(dummy_config_file)
 
     # run hallux from the temporal project directory
     with set_directory(Path(tmp_proj_dir)):
