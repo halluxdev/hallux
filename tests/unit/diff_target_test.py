@@ -4,7 +4,7 @@
 from __future__ import annotations
 
 from typing import Final
-from unittest.mock import MagicMock, patch, mock_open
+from unittest.mock import patch, mock_open
 
 import pytest
 
@@ -28,7 +28,10 @@ def test_filesystem_target():
         assert len(filediff.proposed_lines) == 0
 
         # proposing lines
-        filediff.propose_lines("2A\n3A\n4A\nX")
+        filediff.propose_lines("2A\n3A\n4A\nX", try_merging_lines=True)
+        assert len(filediff.proposed_lines) == 3
+
+        filediff.propose_lines("2A\n3A\n4A\nX", try_merging_lines=False)
         assert len(filediff.proposed_lines) == 4
 
         # helper to check what was written back into file

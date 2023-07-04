@@ -89,7 +89,11 @@ class CppIssueDescriptor(IssueDescriptor):
                 current_issue.debug = debug
 
             elif current_issue is not None:
-                current_issue.message_lines.append(output_lines[line_num])
+                if output_lines[line_num].startswith("make"):
+                    issues.append(current_issue)
+                    current_issue = None
+                else:
+                    current_issue.message_lines.append(output_lines[line_num])
 
         if current_issue is not None:
             issues.append(current_issue)
