@@ -14,9 +14,9 @@ from pathlib import Path
 
 class CppProcessor(CodeProcessor):
     def __init__(
-        self, query_backend: QueryBackend, diff_target: DiffTarget, base_path: Path, config: dict, debug: bool = False
+        self, query_backend: QueryBackend, diff_target: DiffTarget, base_path: Path, config: dict, verbose: bool = False
     ):
-        super().__init__(query_backend, diff_target, config, debug)
+        super().__init__(query_backend, diff_target, config, verbose)
         self.base_path: Path = base_path
 
     def process(self) -> None:
@@ -24,21 +24,13 @@ class CppProcessor(CodeProcessor):
 
         makefile_path: Path
 
-        if "makefile" in self.config.keys():
-            makefile_path = Path(self.config["makefile"])
-        elif "cmake" in self.config.keys():
-            if self.base_path.joinpath("CMakeLists.txt").exists():
-                makefile_path = self.cmake_prepare_makefile(str(self.config["cmake"]))
-            else:
-                print("Cannot find CMakeLists.txt")
-                exit(5)
+        if self.base_path.joinpath("Makefile").exists():
+            makefile_path = self.base_path.joinpath("Makefile")
+        elif self.base_path.joinpath("CMakeLists.txt").exists():
+            makefile_path = self.cmake_prepare_makefile(str(self.base_path))
         else:
-            print("C++ is enabled, but not `makefile` specified nor 'cmake' was found")
-            exit(5)
-
-        if not makefile_path.exists():
-            print(f"{str(makefile_path)} does not exist")
-            exit(5)
+            print("C++ is enabled, but cannot `Makefile` nor 'CMakeLists.txt'")
+            return
 
         if "compile" in self.config.keys():
             with set_directory(self.base_path):
@@ -75,7 +67,7 @@ class CppProcessor(CodeProcessor):
 
         targets: list[str] = self.list_compile_targets(makefile_dir)
 
-        if self.debug:
+        if self.verbose:
             print(f"{len(targets)} targets found")
         target: str
         for target in targets:

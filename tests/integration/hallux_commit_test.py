@@ -13,6 +13,7 @@ from code_processor import set_directory
 
 from integration.hallux_fix_test import test_hallux_fix_python, test_hallux_fix_cpp
 
+
 def test_hallux_commit_cpp(proj_name: str = "test-cpp-project", tmp_proj_dir: str | None = None):
     if tmp_proj_dir is None:
         if not Path("/tmp/hallux").exists():
@@ -47,7 +48,7 @@ def test_hallux_commit_cpp(proj_name: str = "test-cpp-project", tmp_proj_dir: st
             len(git_log_output.split("\n")) == 1 + 1
         ), git_log_output  # we have exactly one commit in the repo (+1 empty line)
 
-    test_hallux_fix_cpp(False, proj_name, tmp_proj_dir, command="commit")
+    test_hallux_fix_cpp(False, proj_name, tmp_proj_dir, target="--git")
 
     with set_directory(Path(tmp_proj_dir)):
         try:
@@ -94,7 +95,7 @@ def test_hallux_commit_python(proj_name: str = "test-python-project", tmp_proj_d
             len(git_log_output.split("\n")) == 1 + 1
         ), git_log_output  # we have exactly one commit in the repo (+1 empty line)
 
-    test_hallux_fix_python(False, proj_name, tmp_proj_dir, command="commit")
+    test_hallux_fix_python(False, proj_name, tmp_proj_dir, target="--git")
 
     with set_directory(Path(tmp_proj_dir)):
         try:

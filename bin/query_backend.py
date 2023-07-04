@@ -17,9 +17,15 @@ class QueryBackend(ABC):
 
 
 class OpenAiChatGPT(QueryBackend):
-    def __init__(self, config: dict):
-        self.model = config["model"]
-        self.max_tokens = config["max_tokens"]
+    def __init__(self, model_name: str = "", max_tokens: int = 4097):
+        if model_name is None or len(model_name) < 2:
+            SystemExit(f"Wrong model name for OpenAI API: {model_name}")
+
+        if os.getenv("OPENAI_API_KEY") is None:
+            SystemExit("Environment variable OPENAI_API_KEY is required for OpenAI API backend")
+
+        self.model = model_name
+        self.max_tokens = max_tokens
         openai.api_key = os.getenv("OPENAI_API_KEY")
 
     def query(self, request: str, issue: IssueDescriptor | None = None) -> list[str]:
@@ -36,9 +42,14 @@ class OpenAiChatGPT(QueryBackend):
 
 
 class DummyBackend(QueryBackend):
-    def __init__(self, filename: str, base_path: Path):
-        self.filename: str = filename
-        self.base_path = base_path
+    def __init__(self, filename: str, root_path: Path):
+        self.base_path = root_path
+        self.filename: str
+        if Path(filename).exists():
+            self.filename = filename
+        else:
+            self.filename = str(self.base_path.joinpath(filename))
+
         with open(self.filename, "rt") as file:
             self.json = json.load(file)
 

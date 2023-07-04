@@ -124,7 +124,8 @@ class FileDiff:
     # NEW FUNCTION
     def _merge_from_issue_line(self, proposed_lines: list[str], found_issue_line_index: int) -> bool:
         """
-        If we can find original issue_line within the proposed_lines, we may use it for better merge between issue_lines and proposed_lines
+        If we can find original issue_line within the proposed_lines,
+        we may use it for better merge between issue_lines and proposed_lines
         :param proposed_lines:
         :param found_issue_line_index:
         :return:

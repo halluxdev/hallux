@@ -56,8 +56,8 @@ def test_file_diff(test_filename="file_diff_test.txt"):
     assert fd3.issue_lines == ["1", "2", "3", "4", "5", "6", "7"]
 
     # If proposed change is dramatic, merge is unsuccessful
-    assert fd1.propose_lines("3\nA\nB\nC") == False
-    assert fd1.propose_lines("A\nB\nC\n5") == False
+    assert fd1.propose_lines("3\nA\nB\nC") is False
+    assert fd1.propose_lines("A\nB\nC\n5") is False
 
     fd1_c = FileDiff(str(test_file), issue_line=4, radius=1, issue_line_comment=" #")
     assert fd1_c.issue_lines == ["3", "4 #", "5"]
@@ -69,14 +69,19 @@ def test_cpp_file_diff_with_real_openai_results(test_filename="../test-cpp-proje
     test_file = Path(__file__).resolve().parent.joinpath(test_filename)
     fd = FileDiff(str(test_file), issue_line=21, radius=4, issue_line_comment=" // line 21")
     result = fd.propose_lines(
-        '```cpp\n#include <iostream>\n\nvoid missingFunction(int arg) {\n    std::cout << "Missing function called with argument: " << arg << std::endl;\n}\n\nint main(int argc, char** argv) {\n    missingFunction(argc);\n\n    return 0; // line 21\n}\n```\nThe issue in the code was a missing semicolon at the end of line 21.'
+        '```cpp\n#include <iostream>\n\nvoid missingFunction(int arg) {\n    std::cout << "Missing function called with'
+        ' argument: " << arg << std::endl;\n}\n\nint main(int argc, char** argv) {\n    missingFunction(argc);\n\n   '
+        " return 0; // line 21\n}\n```\nThe issue in the code was a missing semicolon at the end of line 21."
     )
     assert result
     assert fd.proposed_lines == ["  }", "", "  missingFunction(argc);", "", "    return 0;", "}", ""]
 
     fd2 = FileDiff(str(test_file), issue_line=21, radius=5, issue_line_comment=" // line 21")
     result = fd2.propose_lines(
-        '```cpp\n#include <iostream>\n\nvoid print_usage(char* argv[]) {\n  std::cout << "Usage: " << argv[0] << " <filename>" << std::endl;\n}\n\nvoid missingFunction(int argc) {\n  std::cout << "Missing function called with " << argc << " argument(s)" << std::endl;\n}\n\nint main(int argc, char* argv[]) {\n  print_usage(argv);\n\n  missingFunction(argc);\n\n  return 0;\n}\n```'
+        '```cpp\n#include <iostream>\n\nvoid print_usage(char* argv[]) {\n  std::cout << "Usage: " << argv[0] << "'
+        ' <filename>" << std::endl;\n}\n\nvoid missingFunction(int argc) {\n  std::cout << "Missing function called'
+        ' with " << argc << " argument(s)" << std::endl;\n}\n\nint main(int argc, char* argv[]) {\n '
+        " print_usage(argv);\n\n  missingFunction(argc);\n\n  return 0;\n}\n```"
     )
     assert result
     print(fd2.proposed_lines)
@@ -99,7 +104,8 @@ def test_python_file_diff_with_real_openai_results(
         "",
         "@pytest.mark.parametrize(",
     ]
-    result = fd.propose_lines(
-        "```python\ntry:\n    token1 = next(tokens1)\n    token2 = next(tokens2)\nexcept StopIteration:\n    break\n\n\n@pytest.mark.parametrize(\n```"
+    fd.propose_lines(
+        "```python\ntry:\n    token1 = next(tokens1)\n    token2 = next(tokens2)\nexcept StopIteration:\n   "
+        " break\n\n\n@pytest.mark.parametrize(\n```"
     )
     # ToDo: write assert

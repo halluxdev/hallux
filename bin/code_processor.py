@@ -28,11 +28,11 @@ def set_directory(path: Path):
 
 
 class CodeProcessor:
-    def __init__(self, query_backend: QueryBackend, diff_target: DiffTarget, config: dict, debug: bool = False):
+    def __init__(self, query_backend: QueryBackend, diff_target: DiffTarget, config: dict, verbose: bool = False):
         self.query_backend: QueryBackend = query_backend
         self.diff_target: DiffTarget = diff_target
         self.config = config
-        self.debug: bool = debug
+        self.verbose: bool = verbose
 
     @abstractmethod
     def process(self):

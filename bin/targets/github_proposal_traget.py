@@ -10,27 +10,24 @@ from targets.filesystem_target import FilesystemTarget
 
 # Saves Issue Fixes as Github proposals
 class GithubProposalTraget(FilesystemTarget):
-    def __init__(self, config: dict, PullRequestID):
+    def __init__(self, github: str):
         FilesystemTarget.__init__(self)
-        self.config = config
-        self.PullRequestID = PullRequestID
+
+        elems = github.split("/")
+        guthub_api_url = "https://api.github.com"  # ToDo: We should parse this out from github URL string
+        repo_name = "halluxai/hallux"  # ToDo: We should parse this out from github URL string
+        PR_ID = int(elems[len(elems) - 1])
+
         if "GITHUB_TOKEN" not in os.environ.keys():
             print("GITHUB_TOKEN is not provided properly")
             exit(6)
 
-        base_url = self.config["base_url"] if "base_url" in self.config else "https://api.github.com"
-        self.github = Github(os.environ["GITHUB_TOKEN"], base_url=base_url)
-
-        if "repo_name_or_id" not in self.config:
-            print("repo_name_or_id is not provided properly")
-            exit(6)
-        repo_name_or_id = self.config["repo_name_or_id"]
-        self.repo: Repository = self.github.get_repo(repo_name_or_id)
-        self.pull_request: PullRequest = self.repo.get_pull(self.PullRequestID)
-        print(self.pull_request.title)
+        self.github = Github(os.environ["GITHUB_TOKEN"], base_url=guthub_api_url)
+        self.repo: Repository = self.github.get_repo(repo_name)
+        self.pull_request: PullRequest = self.repo.get_pull(PR_ID)
 
         if self.pull_request.closed_at is not None:  # self.pull_request.is_merged :
-            print(f"Pull Request {self.PullRequestID} is either closed or merged already")
+            print(f"Pull Request {PR_ID} is either closed or merged already")
             exit(6)
         latest_github_sha: str = self.pull_request.head.sha
         git_log = subprocess.check_output(["git", "log", "--pretty=oneline"]).decode("utf8")
