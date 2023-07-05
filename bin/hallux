@@ -20,8 +20,8 @@ from targets.diff_target import DiffTarget
 from targets.filesystem_target import FilesystemTarget
 from targets.git_commit_target import GitCommitTarget
 from targets.github_proposal_traget import GithubProposalTraget
-from cpp.cpp import CppProcessor
-from python.python import PythonProcessor
+from processors.cpp.cpp import CppProcessor
+from processors.python.python import PythonProcessor
 
 DEBUG : Final[bool] = False
 HALLUX_CONFIG_FILE = ".hallux"
