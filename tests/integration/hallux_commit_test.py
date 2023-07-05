@@ -13,9 +13,6 @@ from code_processor import set_directory
 
 from integration.hallux_fix_test import test_hallux_fix_python, test_hallux_fix_cpp
 
-def test_hallux_commit_python():
-    pass
-
 def test_hallux_commit_cpp(proj_name: str = "test-cpp-project", tmp_proj_dir: str | None = None):
     if tmp_proj_dir is None:
         if not Path("/tmp/hallux").exists():
