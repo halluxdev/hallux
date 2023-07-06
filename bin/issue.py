@@ -3,6 +3,7 @@
 from __future__ import annotations
 from abc import ABC, abstractmethod
 from typing import Final
+from file_diff import FileDiff
 
 
 class IssueDescriptor(ABC):
@@ -13,7 +14,7 @@ class IssueDescriptor(ABC):
         self.issue_line: int = issue_line
         self.description: str = description
         self.message_lines: list[str] = []
-        self.debug: bool = False
+        self.file_diff: FileDiff | None = None
 
     @abstractmethod
     def try_fixing(self, query_backend, diff_target):

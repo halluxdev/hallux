@@ -4,7 +4,7 @@ from __future__ import annotations
 from abc import ABC, abstractmethod
 from issue import IssueDescriptor
 from targets.diff_target import DiffTarget
-from query_backend import QueryBackend
+from backend.query_backend import QueryBackend
 
 
 # Base class for "proper" issue solving, i.e. issues solved one-by-one, with double-checking that fix was appropriate

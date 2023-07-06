@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from file_diff import FileDiff
-from query_backend import QueryBackend
+from backend.query_backend import QueryBackend
 from targets.diff_target import DiffTarget
 from issue import IssueDescriptor
 from issue_solver import IssueSolver
@@ -34,21 +34,21 @@ class RuffIssue(IssueDescriptor):
 
     def try_fixing(self, query_backend: QueryBackend, diff_target: DiffTarget):
         line_comment: str = f" # line {str(self.issue_line)}"
-        diff = FileDiff(
+        self.file_diff = FileDiff(
             self.filename, self.issue_line, radius=5, description=self.description, issue_line_comment=line_comment
         )
         request_lines = [
             "Fix python linting issue: " + self.description,
             "from corresponding python code:\n```",
-            *diff.issue_lines,
+            *self.file_diff.issue_lines,
             "```\nWrite back ONLY fixed code, keep formatting:\n",
         ]
         request = "\n".join(request_lines)
         result: list[str] = query_backend.query(request, self)
 
         if len(result) > 0:
-            diff.propose_lines(result[0])
-            diff_target.apply_diff(diff)
+            self.file_diff.propose_lines(result[0])
+            diff_target.apply_diff(self.file_diff)
 
     @staticmethod
     def parseRuffIssues(ruff_output: str) -> list[RuffIssue]:
