@@ -11,6 +11,7 @@ from targets.filesystem_target import FilesystemTarget
 # Saves fixes into local git commits
 class GitCommitTarget(FilesystemTarget):
     def __init__(self):
+        # ToDo: assert we're in GIT repo, crush if not
         FilesystemTarget.__init__(self)
 
     def apply_diff(self, diff: FileDiff) -> None:

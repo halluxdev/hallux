@@ -10,37 +10,52 @@ from targets.filesystem_target import FilesystemTarget
 
 # Saves Issue Fixes as Github proposals
 class GithubProposalTraget(FilesystemTarget):
-    def __init__(self, config: dict, PullRequestID):
+    def __init__(self, PR_URL: str):
         FilesystemTarget.__init__(self)
-        self.config = config
-        self.PullRequestID = PullRequestID
+
+        (base_url, repo_name, PR_ID) = GithubProposalTraget.parse_pr_url(PR_URL)
+
+        if base_url is None:
+            raise SystemError(f"Cannot parse github PR url: {PR_URL}")
+
         if "GITHUB_TOKEN" not in os.environ.keys():
-            print("GITHUB_TOKEN is not provided properly")
-            exit(6)
+            SystemError("GITHUB_TOKEN is not provided")
 
-        base_url = self.config["base_url"] if "base_url" in self.config else "https://api.github.com"
         self.github = Github(os.environ["GITHUB_TOKEN"], base_url=base_url)
-
-        if "repo_name_or_id" not in self.config:
-            print("repo_name_or_id is not provided properly")
-            exit(6)
-        repo_name_or_id = self.config["repo_name_or_id"]
-        self.repo: Repository = self.github.get_repo(repo_name_or_id)
-        self.pull_request: PullRequest = self.repo.get_pull(self.PullRequestID)
-        print(self.pull_request.title)
+        self.repo: Repository = self.github.get_repo(repo_name)
+        self.pull_request: PullRequest = self.repo.get_pull(PR_ID)
 
         if self.pull_request.closed_at is not None:  # self.pull_request.is_merged :
-            print(f"Pull Request {self.PullRequestID} is either closed or merged already")
-            exit(6)
+            SystemError(f"Pull Request {PR_ID} is either closed or merged already")
+
         latest_github_sha: str = self.pull_request.head.sha
         git_log = subprocess.check_output(["git", "log", "--pretty=oneline"]).decode("utf8")
         local_git_sha = git_log.split("\n")[0].split(" ")[0]
 
         if local_git_sha != latest_github_sha:
-            print(
+            SystemError(
                 f"Local git commit `{local_git_sha}` and head from pull-request `{latest_github_sha}` do not coincide!"
             )
-            exit(6)
+
+    @staticmethod
+    def parse_pr_url(pr_url: str) -> tuple[str, str, int] | tuple[None, None, None]:
+        """
+        Tries to parse Pull-Request URL to obtain base_url, repo_name and PR_ID
+        :param pr_url: shall look like this: https://BUSINESS.github.com/YOUR_NAME/REPO_NAME/pull/ID
+        :return: (base_url, base_url = "https://api." + url_items[0], PR_ID) OR None
+        """
+        if pr_url.startswith("https://"):
+            pr_url = pr_url[len("https://") :]
+            url_items = pr_url.split("/")
+            if len(url_items) == 5 and url_items[3] == "pull":
+                if url_items[0] == "github.com":
+                    base_url = "https://api." + url_items[0]
+                else:
+                    base_url = "https://api." + url_items[0] + "/api/v3"
+                repo_name = url_items[1] + "/" + url_items[2]
+                pr_id = int(url_items[4])
+                return base_url, repo_name, pr_id
+        return None, None, None
 
     def apply_diff(self, diff: FileDiff) -> None:
         FilesystemTarget.apply_diff(self, diff)

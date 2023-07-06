@@ -12,7 +12,7 @@ from code_processor import set_directory
 
 
 def test_hallux_fix_cpp(
-    real_openai_test: bool, proj_name: str = "test-cpp-project", tmp_proj_dir: str | None = None, command: str = "fix"
+    real_openai_test: bool, proj_name: str = "test-cpp-project", tmp_proj_dir: str | None = None, target: str = ""
 ):
     # Create temporal dir, if not already exists
     if tmp_proj_dir is None:
@@ -58,7 +58,7 @@ def test_hallux_fix_cpp(
     # run hallux from the temporal project directory
     with set_directory(Path(tmp_proj_dir)):
         try:
-            subprocess.check_output(["hallux", command])
+            subprocess.check_output(["hallux", "fix", target])
         except subprocess.CalledProcessError as e:
             pytest.fail(e, pytrace=True)  # hallux must not fail ?
 
@@ -74,7 +74,7 @@ def test_hallux_fix_python(
     real_openai_test: bool,
     proj_name: str = "test-python-project",
     tmp_proj_dir: str | None = None,
-    command: str = "fix",
+    target: str = "--files",
 ):
     # Create temporal dir, if not already exists
     if tmp_proj_dir is None:
@@ -110,7 +110,7 @@ def test_hallux_fix_python(
     # run hallux from the temporal project directory
     with set_directory(Path(tmp_proj_dir)):
         try:
-            subprocess.check_output(["hallux", command])
+            subprocess.check_output(["hallux", "fix", target])
         except subprocess.CalledProcessError as e:
             pytest.fail(e, pytrace=True)  # hallux must not fail ?
 

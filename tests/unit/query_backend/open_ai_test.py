@@ -1,13 +1,15 @@
 import os
 import pytest
-from unittest.mock import patch, Mock
+from unittest.mock import patch
 from query_backend import OpenAiChatGPT
 from issue import IssueDescriptor
+
 
 class MyIssueDescriptor(IssueDescriptor):
     def try_fixing(self):
         # implement the try_fixing method here
         pass
+
 
 class TestOpenAiChatGPT:
     @pytest.fixture
@@ -16,7 +18,7 @@ class TestOpenAiChatGPT:
         with patch.dict(os.environ, {"OPENAI_API_KEY": "test_key"}):
             return OpenAiChatGPT(config)
 
-    @patch('openai.ChatCompletion.create')
+    @patch("openai.ChatCompletion.create")
     def test_query(self, mock_create, setup_openai_chat_gpt):
         # Mock the response from ChatCompletion.create
         mock_create.return_value = {

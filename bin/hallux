@@ -24,80 +24,181 @@ from processors.cpp.cpp import CppProcessor
 from processors.python.python import PythonProcessor
 
 DEBUG : Final[bool] = False
-HALLUX_CONFIG_FILE = ".hallux"
+CONFIG_FILE : Final[str] = ".hallux"
 
 class Hallux:
-    def __init__(self, query_backend: QueryBackend, config: dict, base_path: Path, diff_target: DiffTarget, debug : bool = False):
+    def __init__(self, query_backend: QueryBackend, config: dict, root_path: Path, diff_target: DiffTarget, command_path: Path | None = None, verbose : bool = False):
         self.query_backend = query_backend
         self.config: Final[dict] = config
-        self.base_path: Final[Path] = base_path
+        self.root_path: Final[Path] = root_path # directory where config file was found
+        self.command_path: Final[Path] = command_path if command_path is not None else root_path # from where hallux was called
         self.diff_target: Final[DiffTarget] = diff_target
-        self.debug: bool = debug
+        self.verbose : bool = verbose
 
     def process(self):
         if "python" in self.config.keys():
-            python = PythonProcessor(self.query_backend, self.diff_target, self.base_path, self.config["python"], self.debug)
+            python = PythonProcessor(self.query_backend, self.diff_target, self.command_path, self.config["python"], self.verbose)
             python.process()
         if "cpp" in self.config.keys():
-            cpp = CppProcessor(self.query_backend, self.diff_target, self.base_path, self.config["cpp"], self.debug)
+            cpp = CppProcessor(self.query_backend, self.diff_target, self.command_path, self.config["cpp"], self.verbose)
             cpp.process()
 
     @staticmethod
-    def find_config() -> tuple[dict | None, Path | None]:
-        curr_path = Path(os.getcwd())
-        while not curr_path.joinpath(HALLUX_CONFIG_FILE).exists() and curr_path.parent != curr_path:
-            curr_path = curr_path.parent
-        if not curr_path.joinpath(HALLUX_CONFIG_FILE).exists():
-            return None, None
-        config_file = str(curr_path.joinpath(HALLUX_CONFIG_FILE))
+    def find_config() -> tuple[dict, Path]:
+        cwd_path : Final[Path] = Path(os.getcwd())
+        config_path = cwd_path
+        while not config_path.joinpath(CONFIG_FILE).exists() and config_path.parent != config_path:
+            config_path = config_path.parent
+        if not config_path.joinpath(CONFIG_FILE).exists():
+            return {}, cwd_path
+        config_file = str(config_path.joinpath(CONFIG_FILE))
         with open(config_file) as file_stream:
             yaml_dict = yaml.load(file_stream, Loader=yaml.CLoader)
-        return yaml_dict, curr_path
+        return yaml_dict, config_path
+
+    @staticmethod
+    def print_usage():
+        print("Hallux v0.1 - Convenient Coding Assistant")
+        print("USAGE: ")
+        print("hallux [COMMAND] [TARGET] [BACKEND] [PLUGINS] [DIR]")
+        print()
+        print("Options for [COMMAND]:")
+        print("fix         (DEFAULT) Tries fixing issues just once and exists")
+        print("agent       Monitors [TARGET] and tries fixing issues in the infinite loop")
+        print()
+        print("Options for [TARGET]:")
+        print("--files     (DEFAULT) Writes fixes directly into local files.")
+        print("--git       Adds separate git commit for every fix,")
+        print("            must be in GIT repository to enable this")
+        print("--github https://BUSINESS.github.com/YOUR_NAME/REPO_NAME/pull/ID")
+        print("            Submits proposals into Github Pull-Request,")
+        print("            must be in GIT repository to enable this,")
+        print("            head SHA in local git and on Github must be same,")
+        print("            env variable GITHUB_TOKEN must be properly set,")
+        print()
+        print("Options for [BACKEND]: ")
+        print("--dummy [DUMMY.JSON]  ")
+        print("            (DEFAULT) reads/writes all queries from/to DUMMY.JSON file")
+        print("            If [DUMMY.JSON] not specified it is defaulted to 'dummy.json'")
+        print("--openai [MODEL-NAME] [MAX-TOKENS]")
+        print("            Uses OpenAI API for queries,")
+        print("            env variable OPENAI_API_KEY must be properly set.")
+        print("            If [MODEL-NAME] not specified it is defaulted to gpt-3.5-turbo")
+        print("            If [MAX-TOKENS] not specified it is defaulted to 4097")
+        print()
+        print("Options for [PLUGINS]:")
+        print("--all       (DEFAULT) try all plugins, or configured ones")
+        print("--python    try fixing only python issues")
+        print("--cpp       try fixing only c++ issues")
+        print("--ruff      try fixing only only ruff issues")
+        print("--gcc-make  try fixing only only gcc-make issues")
+
+
+    @staticmethod
+    def find_arg(argv: list[str], name: str) -> int:
+        """
+        Finds argument index and list of following arguments
+        """
+        for i in range(len(argv)):
+            arg = argv[i]
+            if arg == name or arg.startswith(name):
+                return i
+        return -1
+
+    @staticmethod
+    def init_target(argv: list[str], config : dict | str) -> DiffTarget:
+        # Command-line arguments have highest priority:
+        github_index = Hallux.find_arg(argv, "--github")
+        if github_index > 0:
+            if len(argv) > github_index:
+                return GithubProposalTraget(argv[github_index+1])
+            else:
+                raise SystemError("--github must be followed by proper URL like https://BUSINESS.github.com/YOUR_NAME/REPO_NAME/pull/ID")
+
+        if Hallux.find_arg(argv, "--git") > 0:
+            return GitCommitTarget()
+
+        if Hallux.find_arg(argv, "--files") > 0:
+            return FilesystemTarget()
+
+        # Config settings has medium priority:
+        if "github" in config:
+                return GithubProposalTraget(config["github"])
+        elif config == "git" or "git" in config:
+                return GitCommitTarget()
+        # If no other targets were found - use default
+        return FilesystemTarget()
+
+    @staticmethod
+    def init_backend(argv: list[str], config : dict) -> QueryBackend:
+        # these are default values
+        model : str = "gpt-3.5-turbo"
+        max_tokens : int = 4097
+        dummy_json_file : str = "dummy.json"
+
+        # overwrite default values with ones from config
+        if "openai" in config and config["openai"] is not None:
+            if "model" in config["openai"]:
+                model = config["openai"]["model"]
+            if "max_tokens" in config["openai"]:
+                max_tokens = int(config["openai"]["max_tokens"])
+        if "dummy" in config and config["dummy"] is not None:
+            dummy_json_file = config["dummy"]
+
+        # overwrite values with command-line arguments
+        openai_index = Hallux.find_arg(argv, "--openai")
+        if openai_index > 0 and len(argv) > openai_index:
+            if argv[openai_index+1].startswith("gpt-"):
+                model = argv[openai_index+1]
+                if len(argv) > openai_index + 1:
+                    if int(argv[openai_index+2]) > 1000:
+                        max_tokens = int(argv[openai_index+2])
+
+
+        dummy_index =  Hallux.find_arg(argv, "--dummy")
+        if dummy_index > 0:
+            if len(argv) > dummy_index and argv[dummy_index+1].endswith(".json"):
+                dummy_json_file = argv[dummy_index+1]
+
+        # --dummy still may override "openai" from config
+        if openai_index > 0 or ("openai" in config and dummy_index < 0):
+            return OpenAiChatGPT(model, max_tokens)
+
+        return DummyBackend(dummy_json_file, root_path=config_path)
+
+    def init_plugins(argv: list[str], config : dict) -> dict:
+        # ToDo: not properly implemented yet
+
+        plugins = {"python": {"ruff" : "."},
+                   "cpp": {"compile": True}}
+
+        # plugins: dict = {"all": config["all"] if "all" in config else None,
+        #                  "python": config["python"] if "python" in config else None,
+        #                  "ruff": config["ruff"] if "ruff" in config else None,
+        #                  "cpp": config["cpp"] if "cpp" in config else None,
+        #                  "gcc-make": config["gcc-make"] if "gcc-make" in config else None,
+        #                  }
+        # for arg in argv:
+        #     if arg.lstrip("-") in plugins.keys():
+        #         plugins[arg.lstrip("-")] = True
+
+        return plugins
 
 
 if __name__ == "__main__":
-    if len(sys.argv) < 2 or sys.argv[1] not in ["fix", "propose", "commit"]:
-        print("Hallux v0.1 - Convenient Coding Assistant")
-        print("Usage: hallux fix")
-        print("       hallux commit")
-        print("       hallux propose Github_PullRequest_ID")
-        #print(" [WIP] hallux review Github_PullRequest_ID")
-        #print(" [WIP] hallux tdd cpp-gtest|python-pytest target-name")
-
-        print("hallux fix : fixes issues in the current filesystem")
-        print("hallux commit : when run from GIT repo, fixes issues and submit them as git commits")
-        print("hallux propose : submit fixes as proposals to Github Web Pull Request GUI")
-        #print("hallux review : submit fixes as proposals to Github Web Pull Request GUI")
+    command_path : Final[Path] = Path(os.getcwd())
+    config, config_path = Hallux.find_config()
+    if len(sys.argv) < 2:
+        Hallux.print_usage()
         exit(0)
 
-    config, path = Hallux.find_config()
-    if config is None:
-        print("Error: config file not found")
-        exit(1)
+    query_backend: QueryBackend = Hallux.init_backend(sys.argv, config["backend"] if "backend" in config else {})
 
-    if "backend" not in config:
-        print("Backend is not properly configured")
-        exit(2)
+    target: DiffTarget = Hallux.init_target(sys.argv, config["target"] if "target" in config else {})
 
-    query_backend: QueryBackend = OpenAiChatGPT(config["backend"]["openai"]) if "openai" in config["backend"] else \
-        DummyBackend(config["backend"]["dummy"], base_path=path)
+    plugins : dict = Hallux.init_plugins(sys.argv, config)
 
-    target: DiffTarget
-
-    if sys.argv[1] == "fix":
-        target = FilesystemTarget()
-    elif sys.argv[1] == "commit":
-        target = GitCommitTarget()
-    elif sys.argv[1] == "propose":
-        if "github" in config.keys():
-            target = GithubProposalTraget(config["github"], int(sys.argv[2]))
-        else:
-            raise Exception(f"hallux propose is not properly configured")
-    else:
-        raise SystemError(f"hallux: unknown command: {sys.argv[1]}")
-
-
-    hallux = Hallux(query_backend=query_backend, config=config, base_path=path, diff_target=target, debug=DEBUG)
+    hallux = Hallux(query_backend=query_backend, config=plugins, root_path=config_path, diff_target=target, command_path=command_path)
 
     hallux.process()
 

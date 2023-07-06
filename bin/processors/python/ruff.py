@@ -33,12 +33,15 @@ class RuffIssue(IssueDescriptor):
         )
 
     def try_fixing(self, query_backend: QueryBackend, diff_target: DiffTarget):
-        diff = FileDiff(self.filename, self.issue_line, radius=4, description=self.description)
+        line_comment: str = f" # line {str(self.issue_line)}"
+        diff = FileDiff(
+            self.filename, self.issue_line, radius=5, description=self.description, issue_line_comment=line_comment
+        )
         request_lines = [
             "Fix python linting issue: " + self.description,
             "from corresponding python code:\n```",
             *diff.issue_lines,
-            "```\nWrite back fixed code ONLY:\n",
+            "```\nWrite back ONLY fixed code, keep formatting:\n",
         ]
         request = "\n".join(request_lines)
         result: list[str] = query_backend.query(request, self)
