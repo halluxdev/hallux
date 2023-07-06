@@ -64,7 +64,7 @@ class Hallux:
         print()
         print("Options for [COMMAND]:")
         print("fix         (DEFAULT) Tries fixing issues just once and exists")
-        print("agent       Monitors target and tries fixing issues in the infinite loop")
+        print("agent       Monitors [TARGET] and tries fixing issues in the infinite loop")
         print()
         print("Options for [TARGET]:")
         print("--files     (DEFAULT) Writes fixes directly into local files.")
@@ -79,7 +79,7 @@ class Hallux:
         print("Options for [BACKEND]: ")
         print("--dummy [DUMMY.JSON]  ")
         print("            (DEFAULT) reads/writes all queries from/to DUMMY.JSON file")
-        print("            If [DUMMY.JSON] not specified it is defaulted to '.dummy.json'")
+        print("            If [DUMMY.JSON] not specified it is defaulted to 'dummy.json'")
         print("--openai [MODEL-NAME] [MAX-TOKENS]")
         print("            Uses OpenAI API for queries,")
         print("            env variable OPENAI_API_KEY must be properly set.")
@@ -95,63 +95,80 @@ class Hallux:
 
 
     @staticmethod
-    def init_target(argv: list[str], config : dict) -> DiffTarget:
-        i : int = 0
-        while i < len(argv):
+    def find_arg(argv: list[str], name: str) -> int:
+        """
+        Finds argument index and list of following arguments
+        """
+        for i in range(len(argv)):
             arg = argv[i]
-            if arg == "--github":
-                if len(argv) > i and argv[i+1].startswith("https://"):
-                    return GithubProposalTraget(argv[i+1])
-                else:
-                   raise SystemError("--github should be followed by proper URL like https://BUSINESS.github.com/YOUR_NAME/REPO_NAME/pull/ID")
-            elif arg == "--git":
+            if arg == name or arg.startswith(name):
+                return i
+        return -1
+
+    @staticmethod
+    def init_target(argv: list[str], config : dict | str) -> DiffTarget:
+        # Command-line arguments have highest priority:
+        github_index = Hallux.find_arg(argv, "--github")
+        if github_index > 0:
+            if len(argv) > github_index:
+                return GithubProposalTraget(argv[github_index+1])
+            else:
+                raise SystemError("--github must be followed by proper URL like https://BUSINESS.github.com/YOUR_NAME/REPO_NAME/pull/ID")
+
+        if Hallux.find_arg(argv, "--git") > 0:
+            return GitCommitTarget()
+
+        if Hallux.find_arg(argv, "--files") > 0:
+            return FilesystemTarget()
+
+        # Config settings has medium priority:
+        if "github" in config:
+                return GithubProposalTraget(config["github"])
+        elif config == "git" or "git" in config:
                 return GitCommitTarget()
-            i += 1
-        if "target" in config:
-            if isinstance(config["target"], dict) and "github" in config["target"]:
-                return GithubProposalTraget(config["target"]["github"])
-            elif config["target"] == "git":
-                return GitCommitTarget()
+        # If no other targets were found - use default
         return FilesystemTarget()
 
     @staticmethod
     def init_backend(argv: list[str], config : dict) -> QueryBackend:
-        i : int = 0
-        model = "gpt-3.5-turbo"
-        max_tokens = 4097
-        openai_found : bool = False
-        dummy_json = ".dummy.json"
+        # these are default values
+        model : str = "gpt-3.5-turbo"
+        max_tokens : int = 4097
+        dummy_json_file : str = "dummy.json"
 
-        if "backend" in config and config["backend"] is not None:
-            if "openai" in config["backend"] and config["backend"]["openai"] is not None:
-                openai_found = True
-                if "model" in config["backend"]["openai"]:
-                    model = config["backend"]["openai"]["model"]
-                if "max_tokens" in config["backend"]["openai"]:
-                    max_tokens = config["backend"]["openai"]["max_tokens"]
-            if "dummy" in config["backend"] and config["backend"]["dummy"] is not None:
-                dummy_json = config["backend"]["dummy"]
+        # overwrite default values with ones from config
+        if "openai" in config and config["openai"] is not None:
+            if "model" in config["openai"]:
+                model = config["openai"]["model"]
+            if "max_tokens" in config["openai"]:
+                max_tokens = int(config["openai"]["max_tokens"])
+        if "dummy" in config and config["dummy"] is not None:
+            dummy_json_file = config["dummy"]
 
-        while i < len(argv):
-            arg = argv[i]
-            if arg == "--openai":
-                openai_found = True
-                if len(argv) >= i+1 and argv[i+1].startswith("gpt-"):
-                    model = argv[i+1]
+        # overwrite values with command-line arguments
+        openai_index = Hallux.find_arg(argv, "--openai")
+        if openai_index > 0 and len(argv) > openai_index:
+            if argv[openai_index+1].startswith("gpt-"):
+                model = argv[openai_index+1]
+                if len(argv) > openai_index + 1:
+                    if int(argv[openai_index+2]) > 1000:
+                        max_tokens = int(argv[openai_index+2])
 
-                if len(argv) >= i+2 and int(argv[i+2]) > 1000:
-                    max_tokens = int(argv[i+2])
-            if arg == "--dummy":
-                if len(argv) >= i+1 and str(argv[i+1]).endswith(".json"):
-                    dummy_json = str(argv[i+1])
-            i += 1
 
-        if openai_found:
+        dummy_index =  Hallux.find_arg(argv, "--dummy")
+        if dummy_index > 0:
+            if len(argv) > dummy_index and argv[dummy_index+1].endswith(".json"):
+                dummy_json_file = argv[dummy_index+1]
+
+        # --dummy still may override "openai" from config
+        if openai_index > 0 or ("openai" in config and dummy_index < 0):
             return OpenAiChatGPT(model, max_tokens)
 
-        return DummyBackend(dummy_json, root_path=config_path)
+        return DummyBackend(dummy_json_file, root_path=config_path)
 
     def init_plugins(argv: list[str], config : dict) -> dict:
+        # ToDo: not properly implemented yet
+
         plugins = {"python": {"ruff" : "."},
                    "cpp": {"compile": True}}
 
@@ -175,9 +192,9 @@ if __name__ == "__main__":
         Hallux.print_usage()
         exit(0)
 
-    query_backend: QueryBackend = Hallux.init_backend(sys.argv, config)
+    query_backend: QueryBackend = Hallux.init_backend(sys.argv, config["backend"] if "backend" in config else {})
 
-    target: DiffTarget = Hallux.init_target(sys.argv, config)
+    target: DiffTarget = Hallux.init_target(sys.argv, config["target"] if "target" in config else {})
 
     plugins : dict = Hallux.init_plugins(sys.argv, config)
 
