@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from code_processor import set_directory
 from file_diff import FileDiff
-from query_backend import QueryBackend
+from backend.query_backend import QueryBackend
 from targets.diff_target import DiffTarget
 from issue_solver import IssueSolver
 from issue import IssueDescriptor
@@ -43,22 +43,22 @@ class CppIssueDescriptor(IssueDescriptor):
 
     def try_fixing(self, query_backend: QueryBackend, diff_target: DiffTarget):
         line_comment: str = f" // line {str(self.issue_line)}"
-        diff: FileDiff = FileDiff(
+        self.file_diff = FileDiff(
             self.filename, self.issue_line, radius=5, issue_line_comment=line_comment, description=self.description
         )
         request_lines = [
             "Fix gcc compilation issue:",
             *self.message_lines,
             "from corresponding c++ code:\n```",
-            *diff.issue_lines,
+            *self.file_diff.issue_lines,
             "```\nWrite back fixed code ONLY:\n",
         ]
         request = "\n".join(request_lines)
         result: list[str] = query_backend.query(request, self)
 
         if len(result) > 0:
-            diff.propose_lines(result[0])
-            diff_target.apply_diff(diff)
+            self.file_diff.propose_lines(result[0])
+            diff_target.apply_diff(self.file_diff)
 
     @staticmethod
     def parseMakeIssues(make_output: str, debug: bool = False) -> list[CppIssueDescriptor]:

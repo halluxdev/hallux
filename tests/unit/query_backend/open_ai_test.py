@@ -1,7 +1,7 @@
 import os
 import pytest
 from unittest.mock import patch
-from query_backend import OpenAiChatGPT
+from backend.openai_backend import OpenAiChatGPT
 from issue import IssueDescriptor
 
 
