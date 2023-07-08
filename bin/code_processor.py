@@ -7,7 +7,7 @@ from backend.query_backend import QueryBackend
 from contextlib import contextmanager
 from pathlib import Path
 import os
-
+from utils.logger import logger
 
 @contextmanager
 def set_directory(path: Path):
@@ -19,6 +19,9 @@ def set_directory(path: Path):
     Yields:
         None
     """
+
+    logger.debug(f"code_pocessor.set_directory: {path}")
+
     origin = Path().absolute()
     try:
         os.chdir(path)
