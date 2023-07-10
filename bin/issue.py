@@ -17,5 +17,5 @@ class IssueDescriptor(ABC):
         self.file_diff: FileDiff | None = None
 
     @abstractmethod
-    def try_fixing(self, query_backend, diff_target):
+    def try_fixing(self, query_backend, diff_target) -> bool:
         pass

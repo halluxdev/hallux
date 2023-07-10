@@ -20,7 +20,17 @@ class IssueSolver(ABC):
         target_issues = self.list_issues()
         while issue_index < len(target_issues):
             issue = target_issues[issue_index]
-            issue.try_fixing(diff_target=diff_target, query_backend=query_backend)
+            fixing_successful: bool
+            try:
+                fixing_successful = issue.try_fixing(diff_target=diff_target, query_backend=query_backend)
+            except BaseException as e:
+                diff_target.revert_diff()
+                raise SystemError("Error during try_fixing") from e
+
+            if not fixing_successful:
+                issue_index += 1
+                continue
+
             new_target_issues: list[IssueDescriptor] = self.list_issues()
 
             if len(new_target_issues) < len(target_issues):

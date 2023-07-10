@@ -14,8 +14,8 @@ class GitCommitTarget(FilesystemTarget):
         # ToDo: assert we're in GIT repo, crush if not
         FilesystemTarget.__init__(self)
 
-    def apply_diff(self, diff: FileDiff) -> None:
-        FilesystemTarget.apply_diff(self, diff)
+    def apply_diff(self, diff: FileDiff) -> bool:
+        return FilesystemTarget.apply_diff(self, diff)
 
     def revert_diff(self) -> None:
         FilesystemTarget.revert_diff(self)

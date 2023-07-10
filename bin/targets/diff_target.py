@@ -19,7 +19,7 @@ from file_diff import FileDiff
 # or reverted, if check fails
 class DiffTarget(ABC):
     @abstractmethod
-    def apply_diff(self, diff: FileDiff) -> None:
+    def apply_diff(self, diff: FileDiff) -> bool:
         pass
 
     @abstractmethod
