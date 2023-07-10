@@ -57,8 +57,12 @@ class GithubProposalTraget(FilesystemTarget):
                 return base_url, repo_name, pr_id
         return None, None, None
 
-    def apply_diff(self, diff: FileDiff) -> None:
-        FilesystemTarget.apply_diff(self, diff)
+    def apply_diff(self, diff: FileDiff) -> bool:
+        for file in self.pull_request.get_files():
+            if diff.filename == file.filename:
+                FilesystemTarget.apply_diff(self, diff)
+                return True
+        return False
 
     def revert_diff(self) -> None:
         FilesystemTarget.revert_diff(self)
@@ -69,8 +73,14 @@ class GithubProposalTraget(FilesystemTarget):
         for line in self.existing_diff.proposed_lines:
             body = body + line + "\n"
         body = body + "\n```"
+
         self.pull_request.create_review_comment(
-            body=body, commit=commit, path=self.existing_diff.filename, line=self.existing_diff.issue_line
+            body=body,
+            commit=commit,
+            side="RIGHT",
+            path=str(self.existing_diff.filename),
+            line=self.existing_diff.issue_line,
+            start_line=self.existing_diff.start_line,
         )
-        FilesystemTarget.revert_diff(self)
+        FilesystemTarget.revert_diff(self)  # clean local code
         return True

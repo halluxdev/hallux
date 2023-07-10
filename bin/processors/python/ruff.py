@@ -32,7 +32,7 @@ class RuffIssue(IssueDescriptor):
             language="python", tool="ruff", filename=filename, issue_line=issue_line, description=description
         )
 
-    def try_fixing(self, query_backend: QueryBackend, diff_target: DiffTarget):
+    def try_fixing(self, query_backend: QueryBackend, diff_target: DiffTarget) -> bool:
         line_comment: str = f" # line {str(self.issue_line)}"
         self.file_diff = FileDiff(
             self.filename, self.issue_line, radius=5, description=self.description, issue_line_comment=line_comment
@@ -48,7 +48,9 @@ class RuffIssue(IssueDescriptor):
 
         if len(result) > 0:
             self.file_diff.propose_lines(result[0])
-            diff_target.apply_diff(self.file_diff)
+            return diff_target.apply_diff(self.file_diff)
+
+        return False
 
     @staticmethod
     def parseRuffIssues(ruff_output: str) -> list[RuffIssue]:

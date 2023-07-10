@@ -20,10 +20,10 @@ GITHUB_PULLREQUEST_URL = "https://github.com/halluxai/hallux/pull/26"
 
 
 @pytest.mark.skipif(
-    os.getenv("GITHUB_TOKEN") == None,
+    os.getenv("GITHUB_TOKEN") is None,
     reason="Env variable GITHUB_TOKEN shall be provided in order to run this test",
 )
-def test_hallux_fix_github_ruff(tmp_proj_dir: str | None = None):
+def test_hallux_fix_github(tmp_proj_dir: str | None = None):
     if "GITHUB_TOKEN" not in os.environ.keys():
         SystemError("GITHUB_TOKEN is not provided")
 
@@ -46,21 +46,29 @@ def test_hallux_fix_github_ruff(tmp_proj_dir: str | None = None):
     assert pull_request.closed_at is None, "Testing Pull-Request shall be still open"
     CORRESPONDING_COMMIT_SHA: Final[str] = pull_request.head.sha
 
+    # Try to clean-up all comments
+    for comment in pull_request.get_comments():
+        try:
+            comment.delete()
+        finally:
+            pass
     initial_comments_count: Final[int] = pull_request.get_comments().totalCount
 
     shutil.copytree(str(hallux_git_dir), tmp_proj_dir, ignore_dangling_symlinks=False, dirs_exist_ok=True)
     with set_directory(Path(tmp_proj_dir)):
         try:
+            subprocess.check_output(["git", "reset", "--hard"])
+            subprocess.check_output(["git", "fetch", "origin", CORRESPONDING_COMMIT_SHA])
             subprocess.check_output(["git", "checkout", CORRESPONDING_COMMIT_SHA])
         except subprocess.CalledProcessError as e:
-            pytest.fail(e, pytrace=True)  # Cannot checkout pre-defined commit
+            pytest.fail(e, pytrace=True)  # Cannot checkout PR commit
 
         try:
-            subprocess.check_output(["hallux", "fix", "--ruff", "--github", GITHUB_PULLREQUEST_URL])
+            subprocess.check_output(["hallux", "fix", "--github", GITHUB_PULLREQUEST_URL])
         except subprocess.CalledProcessError as e:
             pytest.fail(
                 e, pytrace=True
-            )  # Fail during running `hallux fix --ruff --github https://github.com/halluxai/hallux/pull/26`
+            )  # Fail during running `hallux fix --github https://github.com/halluxai/hallux/pull/26`
 
     processed_comments_count: Final[int] = pull_request.get_comments().totalCount
 

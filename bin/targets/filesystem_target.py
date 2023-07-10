@@ -10,7 +10,7 @@ class FilesystemTarget(DiffTarget):
     def __init__(self):
         self.existing_diff: FileDiff | None = None
 
-    def apply_diff(self, diff: FileDiff) -> None:
+    def apply_diff(self, diff: FileDiff) -> bool:
         if self.existing_diff is not None:
             raise Exception("FilesystemTarget: Cannot apply new diff, before last one committed or reverted")
 
@@ -29,6 +29,7 @@ class FilesystemTarget(DiffTarget):
                     file.write("\n")
 
             file.close()
+            return True
 
     def revert_diff(self) -> None:
         if self.existing_diff is not None:

@@ -11,6 +11,7 @@ class DummyBackend(QueryBackend):
     def __init__(self, filename: str, root_path: Path):
         self.base_path = root_path
         self.filename: str
+        self.save_on_exit = False
         if Path(filename).is_absolute():
             self.filename = filename
         else:
@@ -19,7 +20,6 @@ class DummyBackend(QueryBackend):
         if Path(self.filename).exists():
             with open(self.filename, "rt") as file:
                 self.json = json.load(file)
-            self.save_on_exit = False
         else:
             self.json = {}
             self.save_on_exit = True
@@ -47,6 +47,7 @@ class DummyBackend(QueryBackend):
             answer_file = self.base_path.joinpath(filename)
             if issue_file.samefile(answer_file):
                 found_issues = file_issues
+                break
 
         if found_issues is None:
             found_issues = tool[issue.filename] = {}
