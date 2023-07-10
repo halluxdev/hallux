@@ -14,7 +14,7 @@ from code_processor import set_directory
 from integration.hallux_fix_test import test_hallux_fix_python, test_hallux_fix_cpp
 
 
-def test_hallux_commit_cpp(proj_name: str = "test-cpp-project", tmp_proj_dir: str | None = None):
+def test_hallux_fix_git_cpp(proj_name: str = "test-cpp-project", tmp_proj_dir: str | None = None):
     if tmp_proj_dir is None:
         if not Path("/tmp/hallux").exists():
             Path("/tmp/hallux").mkdir()
@@ -61,7 +61,7 @@ def test_hallux_commit_cpp(proj_name: str = "test-cpp-project", tmp_proj_dir: st
         ), git_log_output  # we have exactly 4 commits in the repo (+1 empty line)
 
 
-def test_hallux_commit_python(proj_name: str = "test-python-project", tmp_proj_dir: str | None = None):
+def test_hallux_fix_git_python(proj_name: str = "test-python-project", tmp_proj_dir: str | None = None):
     if tmp_proj_dir is None:
         if not Path("/tmp/hallux").exists():
             Path("/tmp/hallux").mkdir()
