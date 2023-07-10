@@ -1,0 +1,5 @@
+backend:
+    dummy: dummy.json
+
+processors:
+    eslint: npm run lint
