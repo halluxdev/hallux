@@ -1,6 +1,4 @@
 from subprocess import Popen, PIPE
-import schedule
-import time
 import yaml
 import os
 import shutil
