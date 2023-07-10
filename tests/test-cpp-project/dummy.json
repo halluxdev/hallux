@@ -11,6 +11,15 @@
         ],
         "expected ‘;’ before ‘}’ token": [
           "  }\n  \n  missingFunction(argc);\n\n  return 0;\n}\n"
+        ],
+        "void function 'print_usage' should not return a value [-Wreturn-type]": [
+          "\nvoid print_usage(char* argv[])\n{\n  std::cout << \"Usage: \" << argv[0] << \" filename.cpp\" << std::endl;\n  return;\n}\n\nint main(int argc, char* argv[])\n{"
+        ],
+        "no matching function for call to 'print_usage'": [
+          "{\n  std::cout << \"This is compilable file (part of CMake project) for testing purposes\" << std::endl ;\n  if (argc < 2)\n  {\n    print_usage(argv);\n  }\n\n  missingFunction(argc);\n"
+        ],
+        "expected ';' after return statement": [
+          "  }\n  \n  missingFunction(argc);\n\n  return 0;\n}\n"
         ]
       }
     }
