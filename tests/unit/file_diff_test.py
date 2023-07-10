@@ -40,8 +40,8 @@ def test_file_diff(test_filename="file_diff_test.txt"):
     try:
         FileDiff(str(test_file), issue_line=100)
         pytest.fail("FileDiff shall raise an Exception")
-    except:
-        pass
+    except Exception:
+        pass  # Exception intercepted!
 
     fd0 = FileDiff(str(test_file), issue_line=4, radius=0)
     assert fd0.issue_lines == ["4"]

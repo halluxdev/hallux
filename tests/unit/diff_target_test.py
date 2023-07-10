@@ -53,7 +53,7 @@ def test_filesystem_target():
             pytest.fail("Second call of apply_diff must cause an Exception")
         except Exception:
             pass  # everything is OK
-        except:
+        except object:
             pytest.fail("Only Exception is allowed here")
 
         # call revert_diff - file shall have original lines
