@@ -21,9 +21,8 @@ For more command-line commands and just type `$ hallux` or `$ hallux --help`
 
 * **bin** main codes for hallux executable
 * **scripts** complimentary scripts for managing the repo
-* **ownai** main codes neural-nets, parsers, etc.
-* **src** c++ codes, also for sake of testing
-* **tests** unit- and other tests for python and c++ parts of the code
+* **ownai** own attempts to implement neural-nets, AST-parsers, etc.
+* **tests** unit- and integration- tests for hallux 
 
 ## Installation
 
