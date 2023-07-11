@@ -12,4 +12,5 @@ data/
 .ruff_cache
 .coverage*
 .run
-
+.scannerwork
+.mypy_cache

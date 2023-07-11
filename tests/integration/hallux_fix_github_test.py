@@ -46,12 +46,16 @@ def test_hallux_fix_github(tmp_proj_dir: str | None = None):
     assert pull_request.closed_at is None, "Testing Pull-Request shall be still open"
     CORRESPONDING_COMMIT_SHA: Final[str] = pull_request.head.sha
 
-    # Try to clean-up all comments
-    for comment in pull_request.get_comments():
-        try:
-            comment.delete()
-        finally:
-            pass
+    # Try to clean-up all existing comments
+    existing_comments = pull_request.get_comments()
+    if existing_comments.totalCount > 0:
+        for comment in existing_comments:
+            try:
+                comment.delete()
+            finally:
+                pass
+
+    # re-calculate comments_count
     initial_comments_count: Final[int] = pull_request.get_comments().totalCount
 
     shutil.copytree(str(hallux_git_dir), tmp_proj_dir, ignore_dangling_symlinks=False, dirs_exist_ok=True)
@@ -73,3 +77,12 @@ def test_hallux_fix_github(tmp_proj_dir: str | None = None):
     processed_comments_count: Final[int] = pull_request.get_comments().totalCount
 
     assert processed_comments_count > initial_comments_count
+
+    # Try to clean-up new comments in order not to pollute test-PR
+    existing_comments = pull_request.get_comments()
+    if existing_comments.totalCount > 0:
+        for comment in existing_comments:
+            try:
+                comment.delete()
+            finally:
+                pass

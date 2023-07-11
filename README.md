@@ -10,21 +10,34 @@ If you want to fix issues in a orderly manner, where every fix has its own `git 
 > hallux fix --git
 
 If you want `hallux` to propose you fixes and corrections directly into your Pull-Request, you may add following line into the CI
-> hallux propose --github https://github.com/ORG_NAME/REPO_NAME/pull/ID 
-`Hallux` will go to Github Web GUI and will send all its findings as comments with code proposals.
+> hallux propose --github https://github.com/ORG_NAME/REPO_NAME/pull/ID
 
-`> hallux agent --github_pr_id=${PULL_REQUEST}`
-`will monitor your open Pull Request and answer to your comments, whenever you mention @hallux user in comment`
+`Hallux` will go to Github Web GUI and will send all its findings as comments with code proposals.
 
 In order for `hallux` to understand your repo you need to provide `.hallux` configuration file, in the repo root folder.  
 For more command-line commands and just type `$ hallux` or `$ hallux --help` 
 
-# Coming features
-In the future, following command will be added
+## Folder structure
 
-If you want `hallux` to permanently monitor your `git branch` and send fixes whenever it finds any, you may start daemon right in your repo 
+* **bin** main codes for hallux executable
+* **scripts** complimentary scripts for managing the repo
+* **ownai** main codes neural-nets, parsers, etc.
+* **src** c++ codes, also for sake of testing
+* **tests** unit- and other tests for python and c++ parts of the code
+
+## Installation
+
+In order to setup Python virtual environment run `./scripts/setup-python.sh`
+
+For activating environment run `cd /path/to/hallux && source activate.sh` 
+
+You might need to add `export PATH="/Path/to/hallux/bin:$PATH"` into your `~/.bashrc` or `~/.zshrc` file.
+
+## Coming features
+
 > hallux agent
-`Hallux` will regularly pull latest changes and will push any appropriate fixes as separate commits.
+
+`Hallux` will regularly pull latest changes and deliver successful fixes.
 
 > hallux review / simplify / refactor / annotate (docstrings)
 
@@ -34,21 +47,4 @@ You may try to use `hallux` as your pair-coding buddy
 > hallux tdd-gtest Name-of-CMake-gtest-target  # FOR C++ Project 
 > hallux tdd-pytest Name-of-pytest # FOR Python project
 ```
-
-## Folder structure
-
-* **python** main codes neural-nets, parsers, etc. 
-* **scripts** complimentary scripts for managing the repo
-* **src** c++ codes, also for sake of testing
-* **tests** unit- and other tests for python and c++ parts of the code
-* **worker** daemon app working as interface to external world 
-
-
-## Installation
-
-Execute
-`./scripts/setup-python.sh`
-
-You might need to add: `export PATH="/Path/to/hallux/bin:$PATH"`
-into your `~/.bashrc` or `~/.zshrc` file
 
