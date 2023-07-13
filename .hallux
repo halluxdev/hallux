@@ -12,4 +12,6 @@ github:
 python:
     ruff: bin
 
+sonar:
+    url: http://localhost:9000
 

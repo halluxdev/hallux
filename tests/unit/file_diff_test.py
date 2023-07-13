@@ -25,7 +25,7 @@ def test_file_diff_parametrized(
     issue_line: int, radius: int, propose_lines, expected_lines, test_filename="file_diff_test.txt"
 ):
     test_file = Path(__file__).resolve().parent.joinpath(test_filename)
-    filediff = FileDiff(str(test_file), issue_line=issue_line, radius=radius)
+    filediff = FileDiff(str(test_file), issue_line=issue_line, radius_or_range=radius)
     assert len(filediff.all_lines) == 10
     assert len(filediff.issue_lines) > 0
     assert len(filediff.issue_lines) <= len(filediff.all_lines)
@@ -43,23 +43,23 @@ def test_file_diff(test_filename="file_diff_test.txt"):
     except Exception:
         pass  # Exception intercepted!
 
-    fd0 = FileDiff(str(test_file), issue_line=4, radius=0)
+    fd0 = FileDiff(str(test_file), issue_line=4, radius_or_range=0)
     assert fd0.issue_lines == ["4"]
 
-    fd1 = FileDiff(str(test_file), issue_line=4, radius=1)
+    fd1 = FileDiff(str(test_file), issue_line=4, radius_or_range=1)
     assert fd1.issue_lines == ["3", "4", "5"]
 
-    fd2 = FileDiff(str(test_file), issue_line=4, radius=2)
+    fd2 = FileDiff(str(test_file), issue_line=4, radius_or_range=2)
     assert fd2.issue_lines == ["2", "3", "4", "5", "6"]
 
-    fd3 = FileDiff(str(test_file), issue_line=4, radius=3)
+    fd3 = FileDiff(str(test_file), issue_line=4, radius_or_range=3)
     assert fd3.issue_lines == ["1", "2", "3", "4", "5", "6", "7"]
 
     # If proposed change is dramatic, merge is unsuccessful
     assert fd1.propose_lines("3\nA\nB\nC") is False
     assert fd1.propose_lines("A\nB\nC\n5") is False
 
-    fd1_c = FileDiff(str(test_file), issue_line=4, radius=1, issue_line_comment=" #")
+    fd1_c = FileDiff(str(test_file), issue_line=4, radius_or_range=1, issue_line_comment=" #")
     assert fd1_c.issue_lines == ["3", "4 #", "5"]
     fd1_c.propose_lines("\n".join(fd1_c.issue_lines))
     assert fd1_c.proposed_lines == ["3", "4", "5"]
@@ -67,7 +67,7 @@ def test_file_diff(test_filename="file_diff_test.txt"):
 
 def test_cpp_file_diff_with_real_openai_results(test_filename="../test-cpp-project/cpp/test_cpp_project.cpp"):
     test_file = Path(__file__).resolve().parent.joinpath(test_filename)
-    fd = FileDiff(str(test_file), issue_line=21, radius=4, issue_line_comment=" // line 21")
+    fd = FileDiff(str(test_file), issue_line=21, radius_or_range=4, issue_line_comment=" // line 21")
     result = fd.propose_lines(
         '```cpp\n#include <iostream>\n\nvoid missingFunction(int arg) {\n    std::cout << "Missing function called with'
         ' argument: " << arg << std::endl;\n}\n\nint main(int argc, char** argv) {\n    missingFunction(argc);\n\n   '
@@ -76,7 +76,7 @@ def test_cpp_file_diff_with_real_openai_results(test_filename="../test-cpp-proje
     assert result
     assert fd.proposed_lines == ["  }", "", "  missingFunction(argc);", "", "    return 0;", "}", ""]
 
-    fd2 = FileDiff(str(test_file), issue_line=21, radius=5, issue_line_comment=" // line 21")
+    fd2 = FileDiff(str(test_file), issue_line=21, radius_or_range=5, issue_line_comment=" // line 21")
     result = fd2.propose_lines(
         '```cpp\n#include <iostream>\n\nvoid print_usage(char* argv[]) {\n  std::cout << "Usage: " << argv[0] << "'
         ' <filename>" << std::endl;\n}\n\nvoid missingFunction(int argc) {\n  std::cout << "Missing function called'
@@ -92,7 +92,7 @@ def test_python_file_diff_with_real_openai_results(
     test_filename="../test-python-project/python/parse_cpp_tree_test.py",
 ):
     test_file = Path(__file__).resolve().parent.joinpath(test_filename)
-    fd = FileDiff(str(test_file), issue_line=39, radius=4)
+    fd = FileDiff(str(test_file), issue_line=39, radius_or_range=4)
     assert fd.issue_lines == [
         "",
         "        try:",

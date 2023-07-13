@@ -12,14 +12,14 @@ class FileDiff:
         self,
         filename: str,
         issue_line: int,
-        radius: int = 4,
+        radius_or_range: int | tuple[int, int] = 4, # radius or tuple with [start_line, end_line]
         issue_line_comment: str | None = None,
         description: str = "",
     ):
         """
         :param filename:
         :param issue_line: line where issue is found (numbering starts from 1)
-        :param radius: "safety buffer" to read around the issue_line
+        :param radius_or_range: "safety buffer" to read around the issue_line
         :param issue_line_comment: add comment into one line from issue_lines,
         :param description: for storing issue description
         """
@@ -27,14 +27,32 @@ class FileDiff:
             self.all_lines: Final[list[str]] = file.read().split("\n")
         self.filename: Final[str] = str(filename)
         self.description: Final[str] = str(description)
-        self.issue_line: Final[int] = abs(int(issue_line))
-        self.safety_radius: Final[int] = abs(int(radius))
+        self.issue_line: Final[int] = min(abs(int(issue_line)), len(self.all_lines))
+
         if self.issue_line < 1 or self.issue_line > len(self.all_lines):
             raise SystemError(
                 f"Wrong issue line {issue_line} for file `{filename}`, containing {len(self.all_lines)} lines"
             )
-        self.start_line: Final[int] = max(1, issue_line - radius)
-        self.end_line: Final[int] = min(len(self.all_lines), issue_line + radius)
+
+        start_line: int
+        end_line: int
+        safety_radius: int
+        if isinstance(radius_or_range, tuple):
+            start_line = max(1, radius_or_range[0])
+            end_line = min(len(self.all_lines), radius_or_range[1])
+            safety_radius = min(self.issue_line-start_line, end_line-self.issue_line)
+        else:
+            start_line = max(1, issue_line - radius_or_range)
+            end_line = min(len(self.all_lines), issue_line + radius_or_range)
+            safety_radius = abs(int(radius_or_range))
+
+        self.start_line: Final[int] = start_line
+        self.end_line: Final[int] = end_line
+        self.safety_radius: Final[int] = safety_radius
+        assert self.start_line <= self.issue_line
+        assert self.end_line >= self.issue_line
+        assert self.safety_radius >= 0
+
         self.issue_lines: Final[list[str]] = copy.copy(self.all_lines[self.start_line - 1 : self.end_line])
         self.proposed_lines: list[str] = []
         self.issue_line_comment = issue_line_comment

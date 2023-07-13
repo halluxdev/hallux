@@ -24,6 +24,7 @@ from targets.git_commit_target import GitCommitTarget
 from targets.github_proposal_traget import GithubProposalTraget
 from processors.cpp.cpp import CppProcessor
 from processors.python.python import PythonProcessor
+from processors.sonar import SonarProcessor
 
 DEBUG : Final[bool] = False
 CONFIG_FILE : Final[str] = ".hallux"
@@ -41,9 +42,14 @@ class Hallux:
         if "python" in self.config.keys():
             python = PythonProcessor(self.query_backend, self.diff_target, self.command_path, self.config["python"], self.verbose)
             python.process()
+
         if "cpp" in self.config.keys():
             cpp = CppProcessor(self.query_backend, self.diff_target, self.command_path, self.config["cpp"], self.verbose)
             cpp.process()
+
+        if "sonar" in self.config.keys():
+            sonar = SonarProcessor(self.query_backend, self.diff_target, self.command_path, self.config["sonar"], self.verbose)
+            sonar.process()
 
     @staticmethod
     def find_config() -> tuple[dict, Path]:
@@ -170,24 +176,17 @@ class Hallux:
 
     def init_plugins(argv: list[str], config : dict) -> dict:
         # ToDo: not properly implemented yet
+        plugins = ["python", "cpp", "sonar"]
+        new_config = {}
+        for plug in plugins:
+            plug_ind = Hallux.find_arg(argv, "--"+plug)
+            if plug_ind > 0:
+                if plug in config:
+                    new_config[plug] = config[plug]
+        # if any plugin mentioned in the arguments, we run it (them), otherwise run those which are in config
+        return new_config if len(new_config) > 0 else config
 
-        plugins = {"python": {"ruff" : "."},
-                   "cpp": {"compile": True}}
-
-        # plugins: dict = {"all": config["all"] if "all" in config else None,
-        #                  "python": config["python"] if "python" in config else None,
-        #                  "ruff": config["ruff"] if "ruff" in config else None,
-        #                  "cpp": config["cpp"] if "cpp" in config else None,
-        #                  "gcc-make": config["gcc-make"] if "gcc-make" in config else None,
-        #                  }
-        # for arg in argv:
-        #     if arg.lstrip("-") in plugins.keys():
-        #         plugins[arg.lstrip("-")] = True
-
-        return plugins
-
-
-if __name__ == "__main__":
+def main():
     command_path : Final[Path] = Path(os.getcwd())
     config, config_path = Hallux.find_config()
     if len(sys.argv) < 2:
@@ -204,3 +203,6 @@ if __name__ == "__main__":
 
     hallux.process()
 
+
+if __name__ == "__main__":
+    main()
