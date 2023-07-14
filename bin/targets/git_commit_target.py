@@ -13,6 +13,9 @@ class GitCommitTarget(FilesystemTarget):
     def __init__(self):
         # ToDo: assert we're in GIT repo, crush if not
         FilesystemTarget.__init__(self)
+        git_status_output = subprocess.check_output(["git", "status", "--porcelain"]).decode("utf8")
+        if len(git_status_output) > 0:
+            raise SystemError("for GIT target you must be in the GIT REPO with no local uncommitted changes!")
 
     def apply_diff(self, diff: FileDiff) -> bool:
         return FilesystemTarget.apply_diff(self, diff)

@@ -175,7 +175,7 @@ class Hallux:
 
         # overwrite values with command-line arguments
         openai_index = Hallux.find_arg(argv, "--openai")
-        if openai_index > 0 and len(argv) > openai_index:
+        if openai_index > 0 and (len(argv) > openai_index + 1):
             if argv[openai_index + 1].startswith("gpt-"):
                 model = argv[openai_index + 1]
                 if len(argv) > openai_index + 1:
@@ -183,9 +183,8 @@ class Hallux:
                         max_tokens = int(argv[openai_index + 2])
 
         dummy_index = Hallux.find_arg(argv, "--dummy")
-        if dummy_index > 0:
-            if len(argv) > dummy_index and argv[dummy_index + 1].endswith(".json"):
-                dummy_json_file = argv[dummy_index + 1]
+        if dummy_index > 0 and (len(argv) > dummy_index + 1) and argv[dummy_index + 1].endswith(".json"):
+            dummy_json_file = argv[dummy_index + 1]
 
         # --dummy still may override "openai" from config
         if openai_index > 0 or ("openai" in config and dummy_index < 0):
@@ -193,6 +192,7 @@ class Hallux:
 
         return DummyBackend(dummy_json_file, root_path=config_path)
 
+    @staticmethod
     def init_plugins(argv: list[str], config: dict) -> dict:
         # ToDo: not properly implemented yet
         plugins = ["python", "cpp", "sonar"]
@@ -220,19 +220,19 @@ def main(argv: list[str], run_path: Path) -> int:
             argv, config["backend"] if "backend" in config else {}, config_path
         )
     except Exception as e:
-        print(f"Error during BACKEND initialization: {e.args}", file=sys.stderr)
+        print(f"Error during BACKEND initialization: {e}", file=sys.stderr)
         return 1
 
     try:
         target: DiffTarget = Hallux.init_target(argv, config["target"] if "target" in config else {})
     except Exception as e:
-        print(f"Error during TARGET initialization: {e.args}", file=sys.stderr)
+        print(f"Error during TARGET initialization: {e}", file=sys.stderr)
         return 2
 
     try:
         plugins: dict = Hallux.init_plugins(argv, config)
     except Exception as e:
-        print(f"Error during PLUGINS initialization: {e.args}", file=sys.stderr)
+        print(f"Error during PLUGINS initialization: {e}", file=sys.stderr)
         return 3
 
     try:
@@ -244,7 +244,7 @@ def main(argv: list[str], run_path: Path) -> int:
             command_path=command_path,
         )
     except Exception as e:
-        print(f"Error during MAIN PROGRAM initialization: {e.args}", file=sys.stderr)
+        print(f"Error during MAIN PROGRAM initialization: {e}", file=sys.stderr)
         return 3
 
     try:

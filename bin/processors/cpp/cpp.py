@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import sys
+
 from backend.query_backend import QueryBackend
 from targets.diff_target import DiffTarget
 from code_processor import CodeProcessor, set_directory
@@ -55,10 +57,8 @@ class CppProcessor(CodeProcessor):
             print("CMake initialized succesfully")
         except subprocess.CalledProcessError as e:
             cmake_output = e.output.decode("utf-8")
-            print("CMake initialization failed:")
-            print(cmake_output)
-            exit(5)
-            return None
+            print(cmake_output, file=sys.stderr)
+            raise SystemError("CMake initialization failed") from e
 
         return Path(makefile_dir).joinpath("Makefile")
 

@@ -30,7 +30,7 @@ class Sonar_IssueSolver(IssueSolver):
             if self.project is not None:
                 request += "&componentKeys=hallux"
             x = requests.get(url=request, headers={"Authorization": "Bearer " + self.token})
-        except BaseException:
+        except Exception:
             return []
 
         if x.status_code == 200:
@@ -49,7 +49,7 @@ class SonarIssue(IssueDescriptor):
         issue_type: str = "warning",
     ):
         super().__init__(
-            language="sonar",
+            language=None,
             tool="sonar",
             filename=filename,
             issue_line=issue_line,
@@ -74,7 +74,7 @@ class SonarIssue(IssueDescriptor):
             "Fix " + self.issue_type + " issue: " + self.description,
             "from corresponding " + self.language + " code:\n```",
             *self.file_diff.issue_lines,
-            "```\nWrite back ONLY fixed code, keep formatting:\n",
+            "```\nWrite back ONLY fixed code, keep formatting:",
         ]
         request = "\n".join(request_lines)
         result: list[str] = query_backend.query(request, self)
