@@ -1,0 +1,19 @@
+#!/usr/bin/env python
+# Copyright: Hallux team, 2023
+
+# MAIN COMMAND-LINE EXECUTABLE
+# - Runs checks in the current folder (linting / unit-tests / docstrings / compilation errors)
+# - Extracts every single message
+# - Makes a prompt for every message
+# - Sends prompt to GPT, receives answer,
+# - Changes code right in the codebase or sends this change as Github Web GUI proposal
+from __future__ import annotations
+import os
+from pathlib import Path
+import sys
+
+from hallux import main
+
+if __name__ == "__main__":
+    main(sys.argv,  Path(os.getcwd()))
+

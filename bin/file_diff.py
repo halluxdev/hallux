@@ -12,7 +12,7 @@ class FileDiff:
         self,
         filename: str,
         issue_line: int,
-        radius_or_range: int | tuple[int, int] = 4, # radius or tuple with [start_line, end_line]
+        radius_or_range: int | tuple[int, int] = 4,  # radius or tuple with [start_line, end_line]
         issue_line_comment: str | None = None,
         description: str = "",
     ):
@@ -40,7 +40,7 @@ class FileDiff:
         if isinstance(radius_or_range, tuple):
             start_line = max(1, radius_or_range[0])
             end_line = min(len(self.all_lines), radius_or_range[1])
-            safety_radius = min(self.issue_line-start_line, end_line-self.issue_line)
+            safety_radius = min(self.issue_line - start_line, end_line - self.issue_line)
         else:
             start_line = max(1, issue_line - radius_or_range)
             end_line = min(len(self.all_lines), issue_line + radius_or_range)

@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from backend.query_backend import QueryBackend
 from targets.diff_target import DiffTarget
-from code_processor import CodeProcessor, set_directory
+from code_processor import CodeProcessor
 import requests
 import os
 from pathlib import Path
@@ -22,7 +22,6 @@ class Sonar_IssueSolver(IssueSolver):
 
     def list_issues(self) -> list[IssueDescriptor]:
         issues: list[IssueDescriptor] = []
-        text: str
         try:
             request: str = (
                 self.url
@@ -41,22 +40,35 @@ class Sonar_IssueSolver(IssueSolver):
 
 
 class SonarIssue(IssueDescriptor):
-    def __init__(self, filename: str, issue_line: int = 0, description: str = "", text_range: dict = dict, issue_type: str = "warning"):
-
-
-
+    def __init__(
+        self,
+        filename: str,
+        issue_line: int = 0,
+        description: str = "",
+        text_range: dict = dict,
+        issue_type: str = "warning",
+    ):
         super().__init__(
-            language="sonar", tool="sonar", filename=filename, issue_line=issue_line, description=description, issue_type=issue_type
+            language="sonar",
+            tool="sonar",
+            filename=filename,
+            issue_line=issue_line,
+            description=description,
+            issue_type=issue_type,
         )
         self.text_range: dict = text_range
 
     def try_fixing(self, query_backend: QueryBackend, diff_target: DiffTarget) -> bool:
         line_comment: str = f" # line {str(self.issue_line)}"
-        start_line : int = self.text_range["startLine"] - self.text_range["startOffset"]
-        end_line : int = self.text_range["endLine"] + self.text_range["endOffset"]
+        start_line: int = self.text_range["startLine"] - self.text_range["startOffset"]
+        end_line: int = self.text_range["endLine"] + self.text_range["endOffset"]
         code_range = (start_line, end_line)
         self.file_diff = FileDiff(
-            self.filename, self.issue_line, radius_or_range=code_range, description=self.description, issue_line_comment=line_comment
+            self.filename,
+            self.issue_line,
+            radius_or_range=code_range,
+            description=self.description,
+            issue_line_comment=line_comment,
         )
         request_lines = [
             "Fix " + self.issue_type + " issue: " + self.description,
@@ -80,6 +92,7 @@ class SonarIssue(IssueDescriptor):
         issues: list[SonarIssue] = []
         for js_issue in js["issues"]:
             comp_arr = js_issue["component"].split(":")
+            # ToDo: do we need any extra-filter here?
             # if comp_arr != self.project:
             #     continue
             filename = ":".join(comp_arr[1:])
@@ -89,7 +102,7 @@ class SonarIssue(IssueDescriptor):
                 issue_line=js_issue["line"],
                 description=js_issue["message"],
                 text_range=js_issue["textRange"],
-                issue_type = str(js_issue['type']).replace("_", " "),
+                issue_type=str(js_issue["type"]).replace("_", " "),
             )
 
             issues.append(issue)

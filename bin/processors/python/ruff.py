@@ -35,7 +35,11 @@ class RuffIssue(IssueDescriptor):
     def try_fixing(self, query_backend: QueryBackend, diff_target: DiffTarget) -> bool:
         line_comment: str = f" # line {str(self.issue_line)}"
         self.file_diff = FileDiff(
-            self.filename, self.issue_line, radius_or_range=5, description=self.description, issue_line_comment=line_comment
+            self.filename,
+            self.issue_line,
+            radius_or_range=5,
+            description=self.description,
+            issue_line_comment=line_comment,
         )
         request_lines = [
             "Fix python linting issue: " + self.description,
