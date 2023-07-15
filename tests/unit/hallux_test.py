@@ -8,6 +8,10 @@ from unittest.mock import patch
 
 from hallux import Hallux, main
 
+import yaml
+from tempfile import TemporaryDirectory
+
+
 
 def test_hallux():
     assert "python" in Hallux.default_plugins
@@ -55,3 +59,31 @@ def test_Hallux_main(mock_print):
     mock_print.mock_calls.clear()
     out_val = main(["hallux", "fix", "--python"], random_path)
     assert out_val == 3
+
+
+
+# This is just a placeholder for the actual name of your CONFIG_FILE
+CONFIG_FILE = 'config.yml'
+
+def test_find_config():
+    with TemporaryDirectory() as tmpdir:
+        # Create a config file
+        config_path = Path(tmpdir)
+        config_file = config_path / CONFIG_FILE
+        config_dict = {"key": "value"}
+        with open(config_file, 'w') as f:
+            yaml.dump(config_dict, f)
+
+        # Run the find_config method and check the output
+        output_dict, output_path = Hallux.find_config(config_path)
+
+        assert output_dict == config_dict
+        assert output_path == config_path
+
+        # Test when config file does not exist
+        empty_dir = Path(tmpdir) / 'empty_dir'
+        empty_dir.mkdir()
+        output_dict, output_path = Hallux.find_config(empty_dir)
+
+        assert output_dict == {}
+        assert output_path == empty_dir
