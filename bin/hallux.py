@@ -83,7 +83,7 @@ class Hallux:
     def print_usage():
         print("Hallux v0.1 - Convenient Coding Assistant")
         print("USAGE: ")
-        print("hallux [COMMAND] [TARGET] [BACKEND] [PLUGINS] [DIR]")
+        print("hallux [COMMAND] [TARGET] [BACKEND] [PLUGINS] [OTHER]")
         print()
         print("Options for [COMMAND]:")
         print("fix         (DEFAULT) Tries fixing issues just once and exists")
@@ -115,6 +115,8 @@ class Hallux:
         print("--cpp       try fixing only c++ issues")
         print("--ruff      try fixing only only ruff issues")
         print("--gcc-make  try fixing only only gcc-make issues")
+        print("Options for [OTHER]:")
+        print("--verbose   Print debug tracebacks on errors")
 
     @staticmethod
     def find_arg(argv: list[str], name: str) -> int:
@@ -205,6 +207,8 @@ class Hallux:
 
 
 def main(argv: list[str], run_path: Path | None = None) -> int:
+    verbose: bool = Hallux.find_arg(argv, "--verbose") > 0 or Hallux.find_arg(argv, "-v") > 0
+
     if run_path is None:
         run_path = Path(os.getcwd())
 
@@ -219,18 +223,24 @@ def main(argv: list[str], run_path: Path | None = None) -> int:
         )
     except Exception as e:
         print(f"Error during BACKEND initialization: {e}", file=sys.stderr)
+        if verbose:
+            raise e
         return 1
 
     try:
         target: DiffTarget = Hallux.init_target(argv, config["target"] if "target" in config else {})
     except Exception as e:
         print(f"Error during TARGET initialization: {e}", file=sys.stderr)
+        if verbose:
+            raise e
         return 2
 
     try:
         plugins: dict = Hallux.init_plugins(argv, config)
     except Exception as e:
         print(f"Error during PLUGINS initialization: {e}", file=sys.stderr)
+        if verbose:
+            raise e
         return 3
 
     try:
@@ -240,15 +250,20 @@ def main(argv: list[str], run_path: Path | None = None) -> int:
             config=plugins,
             run_path=run_path,
             config_path=config_path,
+            verbose=verbose,
         )
     except Exception as e:
         print(f"Error during MAIN PROGRAM initialization: {e}", file=sys.stderr)
+        if verbose:
+            raise e
         return 3
 
     try:
         hallux.process()
     except Exception as e:
-        print(f"Error during MAIN PROCESS initialization: {e.args}", file=sys.stderr)
+        print(f"Error during MAIN process: {e.args}", file=sys.stderr)
+        if verbose:
+            raise e
         return 3
 
     return 0

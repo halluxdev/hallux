@@ -41,4 +41,3 @@ class TestCppProcessor(unittest.TestCase):
         with patch("builtins.print") as mock_print:
             processor.process()
             mock_print.assert_called_with("C++ is enabled, but cannot `Makefile` nor 'CMakeLists.txt'")
-

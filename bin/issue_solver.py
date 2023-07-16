@@ -25,7 +25,7 @@ class IssueSolver(ABC):
                 fixing_successful = issue.try_fixing(diff_target=diff_target, query_backend=query_backend)
             except Exception as e:
                 diff_target.revert_diff()
-                raise SystemError("Error during try_fixing") from e
+                raise e
 
             if not fixing_successful:
                 issue_index += 1
