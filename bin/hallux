@@ -1,19 +1,18 @@
-#!/usr/bin/env python
+#!/usr/bin/env bash
 # Copyright: Hallux team, 2023
 
-# MAIN COMMAND-LINE EXECUTABLE
-# - Runs checks in the current folder (linting / unit-tests / docstrings / compilation errors)
-# - Extracts every single message
-# - Makes a prompt for every message
-# - Sends prompt to GPT, receives answer,
-# - Changes code right in the codebase or sends this change as Github Web GUI proposal
-from __future__ import annotations
-import os
-from pathlib import Path
-import sys
+SCRIPT_DIR=$(dirname "$0")
+HALLUX_ROOT="${SCRIPT_DIR}/.."
 
-from hallux import main
+if [ ! -d "${HALLUX_ROOT}/venv" ]
+then
+  python3 -m venv --prompt="Hallux-0.1" "${HALLUX_ROOT}/venv"
+  source ${HALLUX_ROOT}/venv/bin/activate
+  pip install pip --upgrade
+  pip install wheel
+  pip install -r ${HALLUX_ROOT}/requirements.txt
+fi
 
-if __name__ == "__main__":
-    main(sys.argv,  Path(os.getcwd()))
+source ${HALLUX_ROOT}/activate.sh
 
+python3 ${HALLUX_ROOT}/bin/hallux.py "$@"

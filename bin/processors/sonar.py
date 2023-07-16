@@ -149,6 +149,6 @@ class SonarProcessor(CodeProcessor):
             print("SONAR is not activated")
             return
 
-        print("Process SonarCube issues:")
+        print("Process Sonarqube issues:")
         issue_solver = Sonar_IssueSolver(self.url, self.token)
         issue_solver.solve_issues(self.diff_target, self.query_backend)
