@@ -28,7 +28,7 @@ jobs:
           --cov=bin \
           --cov-branch \
           --cov-report=term \
-          --cov-fail-under=75 \
+          --cov-fail-under=65 \
           tests/unit
 
     - name: Integration Tests

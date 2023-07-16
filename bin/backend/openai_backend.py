@@ -11,10 +11,10 @@ from backend.query_backend import QueryBackend
 class OpenAiChatGPT(QueryBackend):
     def __init__(self, model_name: str = "", max_tokens: int = 4097):
         if model_name is None or len(model_name) < 2:
-            SystemExit(f"Wrong model name for OpenAI API: {model_name}")
+            raise SystemExit(f"Wrong model name for OpenAI API: {model_name}")
 
         if os.getenv("OPENAI_API_KEY") is None:
-            SystemExit("Environment variable OPENAI_API_KEY is required for OpenAI API backend")
+            raise SystemExit("Environment variable OPENAI_API_KEY is required for OpenAI API backend")
 
         self.model = model_name
         self.max_tokens = max_tokens

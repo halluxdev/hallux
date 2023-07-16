@@ -76,7 +76,7 @@ def test_with_no_json_file():
     root_path = Path(tmp_dir)
     dummy_json = "dummy.json"
     assert not root_path.joinpath(dummy_json).exists()
-    dummy_backend = DummyBackend(dummy_json, root_path=root_path)
+    dummy_backend = DummyBackend(dummy_json, base_path=root_path)
     issue = MyIssueDescriptor(language="cpp", tool="newTool", filename="file1.py", description="issue1")
     answ = dummy_backend.query("request", issue)
     del dummy_backend

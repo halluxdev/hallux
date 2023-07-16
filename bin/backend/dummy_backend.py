@@ -8,8 +8,8 @@ from backend.query_backend import QueryBackend
 
 
 class DummyBackend(QueryBackend):
-    def __init__(self, filename: str, root_path: Path):
-        self.base_path = root_path
+    def __init__(self, filename: str, base_path: Path):
+        self.base_path = base_path
         self.filename: str
         self.save_on_exit = False
         if Path(filename).is_absolute():
@@ -55,7 +55,7 @@ class DummyBackend(QueryBackend):
         if issue.description in found_issues:
             return found_issues[issue.description]
         elif issue.file_diff is not None:
-            dummy_answer = found_issues[issue.description] = issue.file_diff.issue_lines
+            dummy_answer = found_issues[issue.description] = ["\n".join(issue.file_diff.issue_lines)]
             return dummy_answer
 
         return []

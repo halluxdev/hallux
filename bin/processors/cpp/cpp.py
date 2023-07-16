@@ -2,6 +2,9 @@
 
 from __future__ import annotations
 
+import sys
+from typing import Final
+
 from backend.query_backend import QueryBackend
 from targets.diff_target import DiffTarget
 from code_processor import CodeProcessor, set_directory
@@ -13,6 +16,9 @@ from pathlib import Path
 
 
 class CppProcessor(CodeProcessor):
+    makefile: Final[str] = "Makefile"
+    cmakelists: Final[str] = "CMakeLists.txt"
+
     def __init__(
         self, query_backend: QueryBackend, diff_target: DiffTarget, base_path: Path, config: dict, verbose: bool = False
     ):
@@ -23,11 +29,15 @@ class CppProcessor(CodeProcessor):
         print("Process C++ issues:")
 
         makefile_path: Path
-
-        if self.base_path.joinpath("Makefile").exists():
-            makefile_path = self.base_path.joinpath("Makefile")
-        elif self.base_path.joinpath("CMakeLists.txt").exists():
-            makefile_path = self.cmake_prepare_makefile(str(self.base_path))
+        # Try some options for searching Makefile / CMakelists.txt
+        if self.base_path.joinpath(self.makefile).exists():
+            makefile_path = self.base_path.joinpath(self.makefile)
+        elif self.base_path.joinpath("build", self.makefile).exists():
+            makefile_path = self.base_path.joinpath("build", self.makefile)
+        elif self.base_path.joinpath(self.cmakelists).exists():
+            makefile_path = self.makefile_from_cmake(str(self.base_path))
+        elif self.base_path.parent.joinpath(self.cmakelists).exists():
+            makefile_path = self.makefile_from_cmake(str(self.base_path.parent))
         else:
             print("C++ is enabled, but cannot `Makefile` nor 'CMakeLists.txt'")
             return
@@ -39,15 +49,8 @@ class CppProcessor(CodeProcessor):
         if "linking" in self.config.keys():
             self.cpp_linking(self.config["linking"])
 
-    def cmake_prepare_makefile(self, cmake_path: str = ".") -> Path | None:
-        if self.base_path.joinpath(cmake_path).joinpath("CMakeLists.txt").exists():
-            cmake_path = self.base_path.joinpath(cmake_path)
-        elif Path(cmake_path).joinpath("CMakeLists.txt").exists():
-            cmake_path = Path(cmake_path)
-        else:
-            print("Cannot find CMakeLists.txt")
-            exit(5)
-
+    def makefile_from_cmake(self, cmake_path: str = ".") -> Path | None:
+        Path("/tmp/hallux").mkdir(exist_ok=True)
         makefile_dir = tempfile.mkdtemp(dir="/tmp/hallux")
         os.chdir(makefile_dir)
         try:
@@ -55,12 +58,10 @@ class CppProcessor(CodeProcessor):
             print("CMake initialized succesfully")
         except subprocess.CalledProcessError as e:
             cmake_output = e.output.decode("utf-8")
-            print("CMake initialization failed:")
-            print(cmake_output)
-            exit(5)
-            return None
+            print(cmake_output, file=sys.stderr)
+            raise SystemError("CMake initialization failed") from e
 
-        return Path(makefile_dir).joinpath("Makefile")
+        return Path(makefile_dir).joinpath(self.makefile)
 
     def solve_make_compile(self, params: dict | str, makefile_path: Path):
         makefile_dir: Path = makefile_path.parent
@@ -76,7 +77,11 @@ class CppProcessor(CodeProcessor):
 
     def list_compile_targets(self, makefile_dir: Path):
         with set_directory(makefile_dir):
-            make_output = subprocess.check_output(["make", "help"])
+            try:
+                make_output = subprocess.check_output(["make", "help"])
+            except subprocess.CalledProcessError as e:
+                raise SystemError(e.output.decode("utf8")) from e
+
             targets: list[str] = str(make_output.decode("utf-8")).split("\n")
             output_targets: list[str] = []
             target: str

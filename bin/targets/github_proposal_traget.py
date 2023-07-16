@@ -10,30 +10,30 @@ from targets.filesystem_target import FilesystemTarget
 
 # Saves Issue Fixes as Github proposals
 class GithubProposalTraget(FilesystemTarget):
-    def __init__(self, PR_URL: str):
+    def __init__(self, pr_url: str):
         FilesystemTarget.__init__(self)
 
-        (base_url, repo_name, PR_ID) = GithubProposalTraget.parse_pr_url(PR_URL)
+        (base_url, repo_name, PR_ID) = GithubProposalTraget.parse_pr_url(pr_url)
 
         if base_url is None:
-            raise SystemError(f"Cannot parse github PR url: {PR_URL}")
+            raise SystemError(f"Cannot parse github PR URL: {pr_url}")
 
         if "GITHUB_TOKEN" not in os.environ.keys():
-            SystemError("GITHUB_TOKEN is not provided")
+            raise SystemError("GITHUB_TOKEN is not provided")
 
         self.github = Github(os.environ["GITHUB_TOKEN"], base_url=base_url)
         self.repo: Repository = self.github.get_repo(repo_name)
         self.pull_request: PullRequest = self.repo.get_pull(PR_ID)
 
         if self.pull_request.closed_at is not None:  # self.pull_request.is_merged :
-            SystemError(f"Pull Request {PR_ID} is either closed or merged already")
+            raise SystemError(f"Pull Request {PR_ID} is either closed or merged already")
 
         latest_github_sha: str = self.pull_request.head.sha
         git_log = subprocess.check_output(["git", "log", "--pretty=oneline"]).decode("utf8")
         local_git_sha = git_log.split("\n")[0].split(" ")[0]
 
         if local_git_sha != latest_github_sha:
-            SystemError(
+            raise SystemError(
                 f"Local git commit `{local_git_sha}` and head from pull-request `{latest_github_sha}` do not coincide!"
             )
 

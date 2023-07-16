@@ -12,7 +12,7 @@ class FilesystemTarget(DiffTarget):
 
     def apply_diff(self, diff: FileDiff) -> bool:
         if self.existing_diff is not None:
-            raise Exception("FilesystemTarget: Cannot apply new diff, before last one committed or reverted")
+            raise SystemError("FilesystemTarget: Cannot apply new diff, before last one committed or reverted")
 
         self.existing_diff = diff  # save new diff in the memory
 
