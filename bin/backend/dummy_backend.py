@@ -8,8 +8,8 @@ from backend.query_backend import QueryBackend
 
 
 class DummyBackend(QueryBackend):
-    def __init__(self, filename: str, root_path: Path):
-        self.base_path = root_path
+    def __init__(self, filename: str, base_path: Path):
+        self.base_path = base_path
         self.filename: str
         self.save_on_exit = False
         if Path(filename).is_absolute():

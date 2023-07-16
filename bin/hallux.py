@@ -37,47 +37,43 @@ class Hallux:
     def __init__(
         self,
         query_backend: QueryBackend,
-        config: dict,
-        root_path: Path,
         diff_target: DiffTarget,
-        command_path: Path | None = None,
+        config: dict,
+        run_path: Path,  # current directory where hallux is executed
+        config_path: Path | None = None,  # directory of the config file, if any
         verbose: bool = False,
     ):
         self.query_backend = query_backend
-        self.config: Final[dict] = config
-        self.root_path: Final[Path] = root_path  # directory where config file was found
-        self.command_path: Final[Path] = (
-            command_path if command_path is not None else root_path
-        )  # from where hallux was called
         self.diff_target: Final[DiffTarget] = diff_target
+        self.config: Final[dict] = config
+        self.run_path: Final[Path] = run_path
+        self.config_path: Final[Path] = config_path if config_path is not None else run_path
         self.verbose: bool = verbose
 
     def process(self):
         if "python" in self.config.keys():
             python = PythonProcessor(
-                self.query_backend, self.diff_target, self.command_path, self.config["python"], self.verbose
+                self.query_backend, self.diff_target, self.config_path, self.config["python"], self.verbose
             )
             python.process()
 
         if "cpp" in self.config.keys():
-            cpp = CppProcessor(
-                self.query_backend, self.diff_target, self.command_path, self.config["cpp"], self.verbose
-            )
+            cpp = CppProcessor(self.query_backend, self.diff_target, self.config_path, self.config["cpp"], self.verbose)
             cpp.process()
 
         if "sonar" in self.config.keys():
             sonar = SonarProcessor(
-                self.query_backend, self.diff_target, self.command_path, self.config["sonar"], self.verbose
+                self.query_backend, self.diff_target, self.config_path, self.config["sonar"], self.verbose
             )
             sonar.process()
 
     @staticmethod
-    def find_config(cwd_path: Path) -> tuple[dict, Path]:
-        config_path = cwd_path
+    def find_config(run_path: Path) -> tuple[dict, Path]:
+        config_path = run_path
         while not config_path.joinpath(CONFIG_FILE).exists() and config_path.parent != config_path:
             config_path = config_path.parent
         if not config_path.joinpath(CONFIG_FILE).exists():
-            return {}, cwd_path
+            return {}, run_path
         config_file = str(config_path.joinpath(CONFIG_FILE))
         with open(config_file) as file_stream:
             yaml_dict = yaml.load(file_stream, Loader=yaml.CLoader)
@@ -190,7 +186,7 @@ class Hallux:
         if openai_index > 0 or ("openai" in config and dummy_index < 0):
             return OpenAiChatGPT(model, max_tokens)
 
-        return DummyBackend(dummy_json_file, root_path=config_path)
+        return DummyBackend(dummy_json_file, base_path=config_path)
 
     @staticmethod
     def init_plugins(argv: list[str], config: dict) -> dict:
@@ -208,9 +204,11 @@ class Hallux:
         return new_config if len(new_config) > 0 else config
 
 
-def main(argv: list[str], run_path: Path) -> int:
-    command_path: Final[Path] = run_path
-    config, config_path = Hallux.find_config(command_path)
+def main(argv: list[str], run_path: Path | None = None) -> int:
+    if run_path is None:
+        run_path = Path(os.getcwd())
+
+    config, config_path = Hallux.find_config(run_path)
     if len(argv) < 2:
         Hallux.print_usage()
         return 0
@@ -238,10 +236,10 @@ def main(argv: list[str], run_path: Path) -> int:
     try:
         hallux = Hallux(
             query_backend=query_backend,
-            config=plugins,
-            root_path=config_path,
             diff_target=target,
-            command_path=command_path,
+            config=plugins,
+            run_path=run_path,
+            config_path=config_path,
         )
     except Exception as e:
         print(f"Error during MAIN PROGRAM initialization: {e}", file=sys.stderr)

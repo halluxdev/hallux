@@ -5,12 +5,9 @@ from __future__ import annotations
 import pytest
 from pathlib import Path
 from unittest.mock import patch
-
-from hallux import Hallux, main
-
+from hallux import Hallux, main, CONFIG_FILE
 import yaml
 from tempfile import TemporaryDirectory
-
 
 
 def test_hallux():
@@ -61,17 +58,13 @@ def test_Hallux_main(mock_print):
     assert out_val == 3
 
 
-
-# This is just a placeholder for the actual name of your CONFIG_FILE
-CONFIG_FILE = 'config.yml'
-
 def test_find_config():
     with TemporaryDirectory() as tmpdir:
         # Create a config file
         config_path = Path(tmpdir)
         config_file = config_path / CONFIG_FILE
         config_dict = {"key": "value"}
-        with open(config_file, 'w') as f:
+        with open(config_file, "w") as f:
             yaml.dump(config_dict, f)
 
         # Run the find_config method and check the output
@@ -80,9 +73,16 @@ def test_find_config():
         assert output_dict == config_dict
         assert output_path == config_path
 
-        # Test when config file does not exist
-        empty_dir = Path(tmpdir) / 'empty_dir'
+        # When run from inner directory => config is still can be found
+        empty_dir = Path(tmpdir) / "empty_dir"
         empty_dir.mkdir()
+        output_dict, output_path = Hallux.find_config(empty_dir)
+
+        assert output_dict == config_dict
+        assert output_path == config_path
+
+        # When config_file is gone => config is not found
+        config_file.unlink()
         output_dict, output_path = Hallux.find_config(empty_dir)
 
         assert output_dict == {}
