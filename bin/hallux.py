@@ -155,34 +155,34 @@ class Hallux:
 
     @staticmethod
     def init_backend(argv: list[str], config: dict, config_path: Path) -> QueryBackend:
-        # these are default values
-        model: str = "gpt-3.5-turbo"
-        max_tokens: int = 4097
-        dummy_json_file: str = "dummy.json"
+        default_model = "gpt-3.5-turbo"
+        default_max_tokens = 4097
+        default_dummy_file = "dummy.json"
 
-        # overwrite default values with ones from config
-        if "openai" in config and config["openai"] is not None:
-            if "model" in config["openai"]:
-                model = config["openai"]["model"]
-            if "max_tokens" in config["openai"]:
-                max_tokens = int(config["openai"]["max_tokens"])
-        if "dummy" in config and config["dummy"] is not None:
-            dummy_json_file = config["dummy"]
+        # Get values from config
+        openai_config = config.get("openai")
+        model = openai_config.get("model") if openai_config else default_model
+        max_tokens = (
+            int(openai_config.get("max_tokens"))
+            if openai_config and "max_tokens" in openai_config
+            else default_max_tokens
+        )
 
-        # overwrite values with command-line arguments
+        dummy_json_file = config.get("dummy", default_dummy_file)
+
+        # Overwrite with command-line arguments
         openai_index = Hallux.find_arg(argv, "--openai")
-        if openai_index > 0 and (len(argv) > openai_index + 1):
+        if openai_index > 0 and len(argv) > openai_index + 1:
             if argv[openai_index + 1].startswith("gpt-"):
                 model = argv[openai_index + 1]
-                if len(argv) > openai_index + 1:
-                    if int(argv[openai_index + 2]) > 1000:
-                        max_tokens = int(argv[openai_index + 2])
+                if len(argv) > openai_index + 1 and int(argv[openai_index + 2]) > 1000:
+                    max_tokens = int(argv[openai_index + 2])
 
         dummy_index = Hallux.find_arg(argv, "--dummy")
-        if dummy_index > 0 and (len(argv) > dummy_index + 1) and argv[dummy_index + 1].endswith(".json"):
+        if dummy_index > 0 and len(argv) > dummy_index + 1 and argv[dummy_index + 1].endswith(".json"):
             dummy_json_file = argv[dummy_index + 1]
 
-        # --dummy still may override "openai" from config
+        # Determine backend based on conditions
         if openai_index > 0 or ("openai" in config and dummy_index < 0):
             return OpenAiChatGPT(model, max_tokens)
 
