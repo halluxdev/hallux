@@ -1,10 +1,12 @@
 #!/bin/bash
 
 # get current script directory cross-platform (macOS/Linux)
-SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
-source ${SCRIPT_DIR}/venv/bin/activate
+PROJECT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 
-export HALLUX_ROOT="${HALLUX_ROOT:-$(SCRIPT_DIR)}"
+# set HALLUX_ROOT if not already defined
+export HALLUX_ROOT="${HALLUX_ROOT:-${PROJECT_DIR}}"
+
+source ${HALLUX_ROOT}/venv/bin/activate
 
 export PYTHONPATH="${HALLUX_ROOT}/bin:${HALLUX_ROOT}/tests:${PYTHONPATH}"
 
