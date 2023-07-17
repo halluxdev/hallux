@@ -1,7 +1,6 @@
 # Copyright: Hallux team, 2023
 
 from __future__ import annotations
-
 from code_processor import set_directory
 from file_diff import FileDiff
 from backend.query_backend import QueryBackend
@@ -13,19 +12,21 @@ import subprocess
 
 
 class MakeCompile_IssueSolver(IssueSolver):
-    def __init__(self, make_target: str, base_path: Path, makefile_dir: Path):
+    def __init__(self, make_target: str, makefile_dir: Path, verbose: bool = False):
         self.make_target = make_target
-        self.base_path = base_path
-        self.makefile_dir = makefile_dir
+        self.base_path = makefile_dir
+        self.verbose = verbose
 
     def solve_issues(self, diff_target: DiffTarget, query_backend: QueryBackend):
+        if self.verbose:
+            print(f"{self.base_path}/Makefile : '{self.make_target}'")
         with set_directory(self.base_path):
             super().solve_issues(diff_target, query_backend)
 
     def list_issues(self) -> list[IssueDescriptor]:
         issues: list[IssueDescriptor] = []
 
-        with set_directory(self.makefile_dir):
+        with set_directory(self.base_path):
             try:
                 subprocess.check_output(["make", self.make_target], stderr=subprocess.STDOUT)
             except subprocess.CalledProcessError as e:
@@ -42,6 +43,7 @@ class CppIssueDescriptor(IssueDescriptor):
         )
 
     def try_fixing(self, query_backend: QueryBackend, diff_target: DiffTarget) -> bool:
+        print(f"{self.filename}:{self.issue_line}: {self.description}")
         line_comment: str = f" // line {str(self.issue_line)}"
         self.file_diff = FileDiff(
             self.filename,

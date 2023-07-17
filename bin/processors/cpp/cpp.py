@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import sys
+from dataclasses import dataclass
 from typing import Final
 
 from backend.query_backend import QueryBackend
@@ -13,6 +14,12 @@ import subprocess
 import os
 import tempfile
 from pathlib import Path
+
+
+@dataclass
+class CompileTarget:
+    target: str
+    makefile_dir: Path
 
 
 class CppProcessor(CodeProcessor):
@@ -42,9 +49,9 @@ class CppProcessor(CodeProcessor):
             print("C++ is enabled, but cannot `Makefile` nor 'CMakeLists.txt'")
             return
 
-        if "compile" in self.config.keys():
-            with set_directory(self.base_path):
-                self.solve_make_compile(self.config["compile"], makefile_path)
+        # if "compile" in self.config.keys():
+        with set_directory(self.base_path):
+            self.solve_make_compile(self.config["compile"], makefile_path)
 
         if "linking" in self.config.keys():
             self.cpp_linking(self.config["linking"])
@@ -66,16 +73,17 @@ class CppProcessor(CodeProcessor):
     def solve_make_compile(self, params: dict | str, makefile_path: Path):
         makefile_dir: Path = makefile_path.parent
 
-        targets: list[str] = self.list_compile_targets(makefile_dir)
+        compile_targets: list[CompileTarget] = []
+        self.list_compile_targets(makefile_dir, compile_targets)
 
         if self.verbose:
-            print(f"{len(targets)} targets found")
-        target: str
-        for target in targets:
-            solver = MakeCompile_IssueSolver(target, self.base_path, makefile_dir)
+            print(f"{len(compile_targets)} targets found")
+        target: CompileTarget
+        for target in compile_targets:
+            solver = MakeCompile_IssueSolver(target.target, target.makefile_dir, self.verbose)
             solver.solve_issues(diff_target=self.diff_target, query_backend=self.query_backend)
 
-    def list_compile_targets(self, makefile_dir: Path):
+    def list_compile_targets(self, makefile_dir: Path, compile_targets: list[CompileTarget]):
         with set_directory(makefile_dir):
             try:
                 make_output = subprocess.check_output(["make", "help"])
@@ -83,14 +91,20 @@ class CppProcessor(CodeProcessor):
                 raise SystemError(e.output.decode("utf8")) from e
 
             targets: list[str] = str(make_output.decode("utf-8")).split("\n")
-            output_targets: list[str] = []
+
             target: str
             for target in targets:
                 if target.endswith(".o"):
                     target = target.lstrip(".")
                     target = target.lstrip(" ")
-                    output_targets.append(target)
-            return output_targets
+                    compile_targets.append(CompileTarget(target=target, makefile_dir=makefile_dir))
+
+            inner_dirs: list = os.listdir(makefile_dir)
+
+            for inner_dir in inner_dirs:
+                inner_makefile = makefile_dir.joinpath(str(inner_dir), "Makefile")
+                if inner_makefile.exists():
+                    self.list_compile_targets(makefile_dir.joinpath(str(inner_dir)), compile_targets)
 
     def cpp_linking(self, params: dict | str):
         pass
