@@ -3,7 +3,7 @@
 from __future__ import annotations
 import json
 from pathlib import Path
-from issue import IssueDescriptor
+from issues.issue import IssueDescriptor
 from backend.query_backend import QueryBackend
 
 

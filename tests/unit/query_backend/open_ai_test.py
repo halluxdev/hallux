@@ -2,7 +2,7 @@ import os
 import pytest
 from unittest.mock import patch
 from backend.openai_backend import OpenAiChatGPT
-from issue import IssueDescriptor
+from issues.issue import IssueDescriptor
 
 
 class MyIssueDescriptor(IssueDescriptor):

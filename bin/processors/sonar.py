@@ -8,9 +8,9 @@ from code_processor import CodeProcessor
 import requests
 import os
 from pathlib import Path
-from file_diff import FileDiff
-from issue import IssueDescriptor
-from issue_solver import IssueSolver
+from proposals.diff_proposal import DiffProposal
+from issues.issue import IssueDescriptor
+from issues.issue_solver import IssueSolver
 import json
 
 
@@ -63,7 +63,7 @@ class SonarIssue(IssueDescriptor):
         start_line: int = self.text_range["startLine"] - self.text_range["startOffset"]
         end_line: int = self.text_range["endLine"] + self.text_range["endOffset"]
         code_range = (start_line, end_line)
-        self.file_diff = FileDiff(
+        self.file_diff = DiffProposal(
             self.filename,
             self.issue_line,
             radius_or_range=code_range,

@@ -2,7 +2,7 @@ from typing import Final
 import requests
 from unittest.mock import Mock, patch
 from pathlib import Path
-from issue import IssueDescriptor
+from issues.issue import IssueDescriptor
 from processors.sonar import Sonar_IssueSolver, SonarIssue
 
 

@@ -4,7 +4,7 @@ from __future__ import annotations
 import subprocess
 import os
 from github import Github, Repository, PullRequest
-from file_diff import FileDiff
+from proposals.diff_proposal import DiffProposal
 from targets.filesystem_target import FilesystemTarget
 
 
@@ -57,20 +57,20 @@ class GithubProposalTraget(FilesystemTarget):
                 return base_url, repo_name, pr_id
         return None, None, None
 
-    def apply_diff(self, diff: FileDiff) -> bool:
+    def apply_diff(self, diff: DiffProposal) -> bool:
         for file in self.pull_request.get_files():
             if diff.filename == file.filename:
                 FilesystemTarget.apply_diff(self, diff)
                 return True
         return False
 
-    def revert_diff(self) -> None:
+    def revert_diff(self):
         FilesystemTarget.revert_diff(self)
 
-    def commit_diff(self) -> bool:
+    def commit_diff(self):
         commit = self.repo.get_commit(self.pull_request.head.sha)
-        body = self.existing_diff.description + "\n```suggestion\n"
-        for line in self.existing_diff.proposed_lines:
+        body = self.existing_proposal.description + "\n```suggestion\n"
+        for line in self.existing_proposal.proposed_lines:
             body = body + line + "\n"
         body = body + "\n```"
 
@@ -78,9 +78,11 @@ class GithubProposalTraget(FilesystemTarget):
             body=body,
             commit=commit,
             side="RIGHT",
-            path=str(self.existing_diff.filename),
-            line=self.existing_diff.issue_line,
-            start_line=self.existing_diff.start_line,
+            path=str(self.existing_proposal.filename),
+            line=self.existing_proposal.issue_line,
+            start_line=self.existing_proposal.start_line,
         )
         FilesystemTarget.revert_diff(self)  # clean local code
-        return True
+
+    def requires_refresh(self) -> bool:
+        return False

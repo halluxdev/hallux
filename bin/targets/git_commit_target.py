@@ -4,7 +4,7 @@ from __future__ import annotations
 import subprocess
 import os
 from pathlib import Path
-from file_diff import FileDiff
+from proposals.diff_proposal import DiffProposal
 from targets.filesystem_target import FilesystemTarget
 
 
@@ -17,18 +17,20 @@ class GitCommitTarget(FilesystemTarget):
         if len(git_status_output) > 0:
             raise SystemError("for GIT target you must be in the GIT REPO with no local uncommitted changes!")
 
-    def apply_diff(self, diff: FileDiff) -> bool:
+    def apply_diff(self, diff: DiffProposal) -> bool:
         return FilesystemTarget.apply_diff(self, diff)
 
     def revert_diff(self) -> None:
         FilesystemTarget.revert_diff(self)
 
-    def commit_diff(self) -> int:
+    def commit_diff(self) -> None:
         curr_dir: str = os.getcwd()
-        git_dir: str = str(Path(self.existing_diff.filename).parent)
+        git_dir: str = str(Path(self.existing_proposal.filename).parent)
         os.chdir(git_dir)
-        subprocess.check_output(["git", "add", os.path.relpath(self.existing_diff.filename, start=git_dir)])
-        subprocess.check_output(["git", "commit", "-m", f'"{self.existing_diff.description}"'])
+        subprocess.check_output(["git", "add", os.path.relpath(self.existing_proposal.filename, start=git_dir)])
+        subprocess.check_output(["git", "commit", "-m", f'"{self.existing_proposal.description}"'])
         FilesystemTarget.commit_diff(self)
         os.chdir(curr_dir)
-        return 0
+
+    def requires_refresh(self) -> bool:
+        return True

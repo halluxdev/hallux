@@ -5,7 +5,7 @@ import pytest
 import json
 from pathlib import Path
 from backend.dummy_backend import DummyBackend
-from issue import IssueDescriptor
+from issues.issue import IssueDescriptor
 import tempfile
 
 

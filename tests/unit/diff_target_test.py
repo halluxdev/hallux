@@ -9,14 +9,15 @@ from unittest.mock import patch, mock_open
 import pytest
 
 from targets.filesystem_target import FilesystemTarget
-from file_diff import FileDiff
+from proposals.simple_proposal import SimpleProposal
 
 
 def test_filesystem_target():
     with patch("builtins.open", mock_open(read_data="1\n2\n3\n4\n5")) as mock_file:
         filename: Final[str] = "/tmp/hallux_mocked_test_file.txt"
         # create FileDiff
-        filediff = FileDiff(filename, issue_line=3, radius_or_range=1)
+
+        filediff = SimpleProposal(filename, issue_line=3, radius_or_range=1)
 
         # check that filediff has all fields correctly set
         assert filediff.filename == filename
