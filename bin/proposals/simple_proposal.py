@@ -24,14 +24,15 @@ class SimpleProposal(DiffProposal):
         :param radius_or_range: "safety buffer" to read around the issue_line
         :param issue_line_comment: add comment into one line from issue_lines,
         """
-        super().__init__(filename=issue.filename, description=issue.description)
+        super().__init__(filename=issue.filename, description=issue.description, issue_line=issue.issue_line)
         self.issue: Final[IssueDescriptor] = issue
         with open(issue.filename, "rt") as file:
             self.all_lines: Final[list[str]] = file.read().split("\n")
 
         if self.issue.issue_line < 1 or self.issue.issue_line > len(self.all_lines):
             raise SystemError(
-                f"Wrong issue line {self.issue.issue_line} for file `{issue.filename}`, containing {len(self.all_lines)} lines"
+                f"Wrong issue line {self.issue.issue_line} for file `{issue.filename}`, containing"
+                f" {len(self.all_lines)} lines"
             )
 
         start_line: int

@@ -36,7 +36,7 @@ def test_list_issues_bad_response():
 
 
 # Tests for SonarIssue
-def test_try_fixing_no_results(filename="file_diff_test.txt"):
+def test_try_fixing_no_results(filename=__file__):
     query_backend = Mock()
     query_backend.query.return_value = []
 
@@ -50,13 +50,18 @@ def test_try_fixing_no_results(filename="file_diff_test.txt"):
         text_range={"startLine": 2, "startOffset": 0, "endLine": 2, "endOffset": 0},
         issue_line=2,
     )
-    result = sonar_issue.try_fixing(query_backend, diff_target)
+    proposals = sonar_issue.list_proposals()
+    proposal = next(proposals)
+    result = proposal.try_fixing(query_backend, diff_target)
 
     assert not result
 
 
 def test_parse_issues():
-    request_output = '{"issues": [{"component": "component:test_file", "line": 1, "message": "message", "textRange": {"startLine": 1, "startOffset": 0, "endLine": 1, "endOffset": 0}, "type": "type"}]}'
+    request_output = (
+        '{"issues": [{"component": "component:test_file", "line": 1, "message": "message", "textRange": {"startLine":'
+        ' 1, "startOffset": 0, "endLine": 1, "endOffset": 0}, "type": "type"}]}'
+    )
 
     issues = SonarIssue.parseIssues(request_output)
 

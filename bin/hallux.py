@@ -138,7 +138,8 @@ class Hallux:
                 return GithubProposalTraget(argv[github_index + 1])
             else:
                 raise SystemError(
-                    "--github must be followed by proper URL like https://BUSINESS.github.com/YOUR_NAME/REPO_NAME/pull/ID"
+                    "--github must be followed by proper URL like"
+                    " https://BUSINESS.github.com/YOUR_NAME/REPO_NAME/pull/ID"
                 )
 
         if Hallux.find_arg(argv, "--git") > 0:

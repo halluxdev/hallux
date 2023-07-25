@@ -2,7 +2,8 @@
 
 from __future__ import annotations
 from abc import ABC, abstractmethod
-from issue import IssueDescriptor
+
+from issues.issue import IssueDescriptor
 from proposals.diff_proposal import DiffProposal
 from targets.diff_target import DiffTarget
 from backend.query_backend import QueryBackend

@@ -54,8 +54,8 @@ class DummyBackend(QueryBackend):
 
         if issue.description in found_issues:
             return found_issues[issue.description]
-        elif issue.file_diff is not None:
-            dummy_answer = found_issues[issue.description] = ["\n".join(issue.file_diff.issue_lines)]
-            return dummy_answer
+        # elif issue.file_diff is not None:
+        #     dummy_answer = found_issues[issue.description] = ["\n".join(issue.file_diff.issue_lines)]
+        #     return dummy_answer
 
         return []

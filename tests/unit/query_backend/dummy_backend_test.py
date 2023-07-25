@@ -5,14 +5,9 @@ import pytest
 import json
 from pathlib import Path
 from backend.dummy_backend import DummyBackend
-from issues.issue import IssueDescriptor
 import tempfile
 
-
-class MyIssueDescriptor(IssueDescriptor):
-    def try_fixing(self):
-        # implement the try_fixing method here
-        pass
+from unit.common.test_issue import TestIssue
 
 
 class TestDummyBackend:
@@ -40,7 +35,7 @@ class TestDummyBackend:
 
     def test_query(self, setup_dummy_backend):
         filename = str(self.base_path.joinpath("dummy_backend_test.txt"))
-        issue = MyIssueDescriptor(language="python", tool="tool1", filename=filename, description="issue1")
+        issue = TestIssue(language="python", tool="tool1", filename=filename, description="issue1")
         result = setup_dummy_backend.query("request", issue)
         assert result == ["issue1 fixed"]
 
@@ -49,20 +44,22 @@ class TestDummyBackend:
         assert result == []
 
     def test_query_no_match(self, setup_dummy_backend):
-        issue = MyIssueDescriptor(
-            language="python", tool="tool1", filename="dummy_backend_test.txt", description="issue3"
+        issue = TestIssue(
+            language="python", tool="tool1", filename="../query_backend/dummy_backend_test.txt", description="issue3"
         )
         result = setup_dummy_backend.query("request", issue)
         assert result == []
 
     def test_query_no_language(self, setup_dummy_backend):
-        issue = MyIssueDescriptor(language="", tool="tool1", filename="dummy_backend_test.txt", description="issue1")
+        issue = TestIssue(
+            language="", tool="tool1", filename="../query_backend/dummy_backend_test.txt", description="issue1"
+        )
         result = setup_dummy_backend.query("request", issue)
         assert result == []
 
     def test_query_no_tool(self, setup_dummy_backend):
-        issue = MyIssueDescriptor(
-            language="cpp", tool="newTool", filename="dummy_backend_test.txt", description="issue1"
+        issue = TestIssue(
+            language="cpp", tool="newTool", filename="../query_backend/dummy_backend_test.txt", description="issue1"
         )
         result = setup_dummy_backend.query("request", issue)
         assert result == []
@@ -77,7 +74,8 @@ def test_with_no_json_file():
     dummy_json = "dummy.json"
     assert not root_path.joinpath(dummy_json).exists()
     dummy_backend = DummyBackend(dummy_json, base_path=root_path)
-    issue = MyIssueDescriptor(language="cpp", tool="newTool", filename="file1.py", description="issue1")
+    base_path = Path(__file__).resolve().parent
+    issue = TestIssue(language="cpp", tool="newTool", filename="file1.py", description="issue1", base_path=base_path)
     answ = dummy_backend.query("request", issue)
     del dummy_backend
     assert answ == []
