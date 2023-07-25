@@ -55,32 +55,6 @@ class CppIssueDescriptor(IssueDescriptor):
             ]
         )
 
-    # def try_fixing(self, diff_target: DiffTarget, proposal: DiffProposal) -> bool:
-    #     print(f"{self.filename}:{self.issue_line}: {self.description}")
-    #     line_comment: str = f" // line {str(self.issue_line)}"
-    #     self.file_diff = DiffProposal(
-    #         self.filename,
-    #         self.issue_line,
-    #         radius_or_range=5,
-    #         issue_line_comment=line_comment,
-    #         description=self.description,
-    #     )
-    #     request_lines = [
-    #         "Fix gcc compilation issue:",
-    #         *self.message_lines,
-    #         "from corresponding c++ code:\n```",
-    #         *self.file_diff.issue_lines,
-    #         "```\nWrite back fixed code ONLY:\n",
-    #     ]
-    #     request = "\n".join(request_lines)
-    #     result: list[str] = query_backend.query(request, self)
-    #
-    #     if len(result) > 0:
-    #         self.file_diff.propose_lines(result[0])
-    #         return diff_target.apply_diff(self.file_diff)
-    #
-    #     return False
-
     @staticmethod
     def parseMakeIssues(make_output: str, debug: bool = False) -> list[CppIssueDescriptor]:
         issues: list[CppIssueDescriptor] = []
