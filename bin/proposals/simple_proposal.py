@@ -73,7 +73,7 @@ class SimpleProposal(DiffProposal):
             "Fix " + self.issue.language + " " + self.issue.issue_type + " issue: " + self.issue.description,
             "from corresponding code:\n```",
             *self.issue_lines,
-            "```\nWrite back ONLY fixed code, keep formatting:\n",
+            "```\nWrite back ONLY fixed code, without explanations. Keep formatting. Don't add new lines.\n",
         ]
         request = "\n".join(request_lines)
         query_results: list[str] = query_backend.query(request, self.issue)

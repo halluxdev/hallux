@@ -49,17 +49,18 @@ class IssueSolver(ABC):
                 if fixing_successful:
                     # ToDo: here we may provide feedback to proposal, in order to collect training data
                     # Also, this is a good place for "multi-step proposal" extension
+                    diff_target.commit_diff()
                     break
 
+                diff_target.revert_diff()
+
             if fixing_successful:
-                diff_target.commit_diff()
                 if diff_target.requires_refresh():
                     target_issues = self.list_issues()
                 else:
                     issue_index += 1
                 print(f"{issue.filename}:{issue.issue_line}: {issue.description} : successfully fixed")
             else:
-                diff_target.revert_diff()
                 issue_index += 1
                 print(f"{issue.filename}:{issue.issue_line}: {issue.description} : unable to fix")
                 continue
