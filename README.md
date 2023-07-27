@@ -46,33 +46,3 @@ You may try to use `hallux` as your pair-coding buddy
 > hallux tdd-gtest Name-of-CMake-gtest-target  # FOR C++ Project 
 > hallux tdd-pytest Name-of-pytest # FOR Python project
 ```
-
-
-## Development
-
-### Debugging
-
-#### Debugging with VSCode
-
-In the .vscode/launch.json file add following configuration:
-```json
-{
-  "version": "0.2.0",
-  "configurations": [
-    {
-      "name": "Debug Hallux",
-      "type": "python",
-      "request": "launch",
-      "console": "integratedTerminal",
-      "program": "${workspaceFolder}/startup.py",
-      "cwd": "/path/to/the/test/project",
-      "env": {
-        "PYTHONPATH": "${workspaceFolder}/bin",
-      },
-      "args" : ["fix", "--cpp"]
-    }
-  ]
-}
-```
-Adjust the `cwd` and `args` to your needs.
-Use "Run and Debug" tab in VSCode to start debugging.
