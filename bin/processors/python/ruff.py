@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 from processors.python.python_proposal import PythonProposal
-from proposals.simple_proposal import SimpleProposal
 from proposals.proposal_engine import ProposalEngine, ProposalList
 from issues.issue import IssueDescriptor
 from issues.issue_solver import IssueSolver
