@@ -12,7 +12,7 @@ from code_processor import set_directory
 
 
 def test_hallux_fix_cpp(
-    real_openai_test: bool,
+    real_openai_test: bool = False,
     proj_name: str = "test-cpp-project",
     tmp_proj_dir: str | None = None,
     target: str = "--files",

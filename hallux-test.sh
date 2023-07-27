@@ -7,6 +7,7 @@ python -m pytest -v \
     --cov-report=term \
     --cov=bin \
     --cov-report=xml \
+    --cov-report=html \
     --junitxml xunit-reports/xunit-result-unit.xml \
     tests/integration \
     tests/unit
