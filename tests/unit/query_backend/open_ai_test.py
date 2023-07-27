@@ -2,13 +2,8 @@ import os
 import pytest
 from unittest.mock import patch
 from backend.openai_backend import OpenAiChatGPT
-from issue import IssueDescriptor
 
-
-class MyIssueDescriptor(IssueDescriptor):
-    def try_fixing(self):
-        # implement the try_fixing method here
-        pass
+from unit.common.test_issue import TestIssue
 
 
 class TestOpenAiChatGPT:
@@ -28,6 +23,6 @@ class TestOpenAiChatGPT:
             ]
         }
 
-        issue = MyIssueDescriptor(language="en", tool="tool1", filename="file1", description="issue1")
+        issue = TestIssue(language="en", tool="tool1", filename="file1", description="issue1")
         result = setup_openai_chat_gpt.query("request", issue)
         assert result == ["answer1", "answer2"]

@@ -3,7 +3,7 @@
 from __future__ import annotations
 from abc import ABC, abstractmethod
 from typing import Final
-from file_diff import FileDiff
+from proposals.proposal_engine import ProposalEngine
 
 
 class IssueDescriptor(ABC):
@@ -21,7 +21,6 @@ class IssueDescriptor(ABC):
         self.issue_line: int = issue_line
         self.description: str = description
         self.message_lines: list[str] = []
-        self.file_diff: FileDiff | None = None
         self.issue_type: str = issue_type
 
         if language is None:
@@ -35,12 +34,15 @@ class IssueDescriptor(ABC):
             ):
                 language = "cpp"
             elif filename.endswith(".js") or filename.endswith(".ts"):
-                language = "js"
+                language = "javascript"
             else:
                 language = "programming"
 
         self.language: Final[str] = language
 
     @abstractmethod
-    def try_fixing(self, query_backend, diff_target) -> bool:
+    def list_proposals(self) -> ProposalEngine:
+        # ToDo: we can provide QueryBackend or even a list[QueryBackend] in here
+        # (or some kind of prioritized container)
+        # This might give ability to try different Backends for different Proposals
         pass

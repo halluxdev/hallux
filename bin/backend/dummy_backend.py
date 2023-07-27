@@ -3,7 +3,7 @@
 from __future__ import annotations
 import json
 from pathlib import Path
-from issue import IssueDescriptor
+from issues.issue import IssueDescriptor
 from backend.query_backend import QueryBackend
 
 
@@ -54,8 +54,8 @@ class DummyBackend(QueryBackend):
 
         if issue.description in found_issues:
             return found_issues[issue.description]
-        elif issue.file_diff is not None:
-            dummy_answer = found_issues[issue.description] = ["\n".join(issue.file_diff.issue_lines)]
-            return dummy_answer
+        # elif issue.file_diff is not None:
+        #     dummy_answer = found_issues[issue.description] = ["\n".join(issue.file_diff.issue_lines)]
+        #     return dummy_answer
 
         return []

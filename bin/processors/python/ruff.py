@@ -2,11 +2,11 @@
 
 from __future__ import annotations
 
-from file_diff import FileDiff
-from backend.query_backend import QueryBackend
-from targets.diff_target import DiffTarget
-from issue import IssueDescriptor
-from issue_solver import IssueSolver
+from processors.python.python_proposal import PythonProposal
+from proposals.simple_proposal import SimpleProposal
+from proposals.proposal_engine import ProposalEngine, ProposalList
+from issues.issue import IssueDescriptor
+from issues.issue_solver import IssueSolver
 import subprocess
 
 
@@ -32,29 +32,16 @@ class RuffIssue(IssueDescriptor):
             language="python", tool="ruff", filename=filename, issue_line=issue_line, description=description
         )
 
-    def try_fixing(self, query_backend: QueryBackend, diff_target: DiffTarget) -> bool:
+    def list_proposals(self) -> ProposalEngine:
         line_comment: str = f" # line {str(self.issue_line)}"
-        self.file_diff = FileDiff(
-            self.filename,
-            self.issue_line,
-            radius_or_range=5,
-            description=self.description,
-            issue_line_comment=line_comment,
+        return ProposalList(
+            [
+                PythonProposal(self, radius_or_range=3, issue_line_comment=line_comment),
+                PythonProposal(self, radius_or_range=4, issue_line_comment=line_comment),
+                PythonProposal(self, radius_or_range=5, issue_line_comment=line_comment),
+                PythonProposal(self, radius_or_range=6, issue_line_comment=line_comment),
+            ]
         )
-        request_lines = [
-            "Fix python linting issue: " + self.description,
-            "from corresponding python code:\n```",
-            *self.file_diff.issue_lines,
-            "```\nWrite back ONLY fixed code, keep formatting:\n",
-        ]
-        request = "\n".join(request_lines)
-        result: list[str] = query_backend.query(request, self)
-
-        if len(result) > 0:
-            self.file_diff.propose_lines(result[0])
-            return diff_target.apply_diff(self.file_diff)
-
-        return False
 
     @staticmethod
     def parseRuffIssues(ruff_output: str) -> list[RuffIssue]:

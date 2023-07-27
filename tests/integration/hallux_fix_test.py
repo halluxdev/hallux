@@ -12,7 +12,10 @@ from code_processor import set_directory
 
 
 def test_hallux_fix_cpp(
-    real_openai_test: bool, proj_name: str = "test-cpp-project", tmp_proj_dir: str | None = None, target: str = ""
+    real_openai_test: bool,
+    proj_name: str = "test-cpp-project",
+    tmp_proj_dir: str | None = None,
+    target: str = "--files",
 ):
     # Create temporal dir, if not already exists
     if tmp_proj_dir is None:

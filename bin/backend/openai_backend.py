@@ -4,7 +4,7 @@ from __future__ import annotations
 import openai
 import os
 from openai.api_resources import ChatCompletion
-from issue import IssueDescriptor
+from issues.issue import IssueDescriptor
 from backend.query_backend import QueryBackend
 
 

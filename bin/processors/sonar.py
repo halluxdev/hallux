@@ -3,14 +3,16 @@
 from __future__ import annotations
 
 from backend.query_backend import QueryBackend
+from proposals.proposal_engine import ProposalEngine, ProposalList
+from proposals.simple_proposal import SimpleProposal
 from targets.diff_target import DiffTarget
 from code_processor import CodeProcessor
 import requests
 import os
 from pathlib import Path
-from file_diff import FileDiff
-from issue import IssueDescriptor
-from issue_solver import IssueSolver
+from proposals.diff_proposal import DiffProposal
+from issues.issue import IssueDescriptor
+from issues.issue_solver import IssueSolver
 import json
 
 
@@ -58,12 +60,20 @@ class SonarIssue(IssueDescriptor):
         )
         self.text_range: dict = text_range
 
+    def list_proposals(self) -> ProposalEngine:
+        line_comment: str = f" # line {str(self.issue_line)}"
+        start_line: int = self.text_range["startLine"] - self.text_range["startOffset"]
+        end_line: int = self.text_range["endLine"] + self.text_range["endOffset"]
+        code_range = (start_line, end_line)
+
+        return ProposalList([SimpleProposal(self, radius_or_range=code_range, issue_line_comment=line_comment)])
+
     def try_fixing(self, query_backend: QueryBackend, diff_target: DiffTarget) -> bool:
         line_comment: str = f" # line {str(self.issue_line)}"
         start_line: int = self.text_range["startLine"] - self.text_range["startOffset"]
         end_line: int = self.text_range["endLine"] + self.text_range["endOffset"]
         code_range = (start_line, end_line)
-        self.file_diff = FileDiff(
+        self.file_diff = DiffProposal(
             self.filename,
             self.issue_line,
             radius_or_range=code_range,

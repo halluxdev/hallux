@@ -9,26 +9,28 @@ from unittest.mock import patch, mock_open
 import pytest
 
 from targets.filesystem_target import FilesystemTarget
-from file_diff import FileDiff
+from proposals.simple_proposal import SimpleProposal
+from unit.common.test_issue import TestIssue
 
 
 def test_filesystem_target():
     with patch("builtins.open", mock_open(read_data="1\n2\n3\n4\n5")) as mock_file:
         filename: Final[str] = "/tmp/hallux_mocked_test_file.txt"
         # create FileDiff
-        filediff = FileDiff(filename, issue_line=3, radius_or_range=1)
+        issue = TestIssue(filename, issue_line=3)
+        filediff = SimpleProposal(issue, radius_or_range=1)
 
         # check that filediff has all fields correctly set
         assert filediff.filename == filename
-        assert filediff.issue_line == 3
+        assert filediff.issue.issue_line == 3
         assert len(filediff.all_lines) == 5
         assert filediff.all_lines == ["1", "2", "3", "4", "5"]
         assert len(filediff.issue_lines) == 3
         assert filediff.issue_lines == ["2", "3", "4"]
-        assert len(filediff.proposed_lines) == 0
+        assert filediff.proposed_lines == ["2", "3", "4"]
 
         # proposing lines
-        filediff.propose_lines("2\n3A\n4\nX", try_merging_lines=True)
+        filediff._merge_lines("2\n3A\n4\nX".split("\n"))
         assert len(filediff.proposed_lines) == len(filediff.issue_lines)
 
         # helper to check what was written back into file

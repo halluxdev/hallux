@@ -2,11 +2,12 @@
 
 from __future__ import annotations
 from code_processor import set_directory
-from file_diff import FileDiff
+from proposals.simple_proposal import SimpleProposal
+from proposals.proposal_engine import ProposalEngine, ProposalList
 from backend.query_backend import QueryBackend
 from targets.diff_target import DiffTarget
-from issue_solver import IssueSolver
-from issue import IssueDescriptor
+from issues.issue_solver import IssueSolver
+from issues.issue import IssueDescriptor
 from pathlib import Path
 import subprocess
 
@@ -41,32 +42,18 @@ class CppIssueDescriptor(IssueDescriptor):
         super().__init__(
             language="cpp", tool="compile", filename=filename, issue_line=issue_line, description=description
         )
+        self.issue_type = "compilation"
 
-    def try_fixing(self, query_backend: QueryBackend, diff_target: DiffTarget) -> bool:
-        print(f"{self.filename}:{self.issue_line}: {self.description}")
+    def list_proposals(self) -> ProposalEngine:
         line_comment: str = f" // line {str(self.issue_line)}"
-        self.file_diff = FileDiff(
-            self.filename,
-            self.issue_line,
-            radius_or_range=5,
-            issue_line_comment=line_comment,
-            description=self.description,
+        return ProposalList(
+            [
+                SimpleProposal(self, radius_or_range=3, issue_line_comment=line_comment),
+                SimpleProposal(self, radius_or_range=4, issue_line_comment=line_comment),
+                SimpleProposal(self, radius_or_range=5, issue_line_comment=line_comment),
+                SimpleProposal(self, radius_or_range=6, issue_line_comment=line_comment),
+            ]
         )
-        request_lines = [
-            "Fix gcc compilation issue:",
-            *self.message_lines,
-            "from corresponding c++ code:\n```",
-            *self.file_diff.issue_lines,
-            "```\nWrite back fixed code ONLY:\n",
-        ]
-        request = "\n".join(request_lines)
-        result: list[str] = query_backend.query(request, self)
-
-        if len(result) > 0:
-            self.file_diff.propose_lines(result[0])
-            return diff_target.apply_diff(self.file_diff)
-
-        return False
 
     @staticmethod
     def parseMakeIssues(make_output: str, debug: bool = False) -> list[CppIssueDescriptor]:
