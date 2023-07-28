@@ -9,7 +9,7 @@ from typing import Final
 from issues.issue import IssueDescriptor
 
 
-class TestIssue(IssueDescriptor):
+class TestingIssue(IssueDescriptor):
     def __init__(
         self,
         filename: str,

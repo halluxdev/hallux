@@ -2,11 +2,13 @@
 
 from __future__ import annotations
 from abc import abstractmethod
-from targets.diff_target import DiffTarget
-from backend.query_backend import QueryBackend
+import subprocess
 from contextlib import contextmanager
 from pathlib import Path
 import os
+
+from targets.diff_target import DiffTarget
+from backend.query_backend import QueryBackend
 
 
 @contextmanager
@@ -33,6 +35,21 @@ class CodeProcessor:
         self.diff_target: DiffTarget = diff_target
         self.config = config
         self.verbose: bool = verbose
+        self.success_test = self.config.get("success_test")
+
+    def is_fix_successful(self) -> bool:
+        if self.success_test is not None:
+            try:
+                if self.verbose:
+                    print(f"RUN success_test: {self.success_test}")
+                subprocess.check_output([self.success_test])
+                if self.verbose:
+                    print("success_test OK")
+                return True
+            except subprocess.CalledProcessError:
+                if self.verbose:
+                    print("success_test FAILED")
+                return False
 
     @abstractmethod
     def process(self):

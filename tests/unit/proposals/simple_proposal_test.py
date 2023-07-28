@@ -7,7 +7,7 @@ import pytest
 from pathlib import Path
 
 from proposals.simple_proposal import SimpleProposal
-from unit.common.test_issue import TestIssue
+from unit.common.testing_issue import TestingIssue
 
 
 @pytest.mark.parametrize(
@@ -24,9 +24,10 @@ from unit.common.test_issue import TestIssue
     ],
 )
 def test_simple_proposal_parametrized(
-    issue_line: int, radius: int, propose_lines, expected_lines, test_filename="../proposals/simple_proposal_test.txt"
+    issue_line: int, radius: int, propose_lines, expected_lines, test_filename="simple_proposal_test.txt"
 ):
-    test_issue = TestIssue(test_filename, issue_line=issue_line)
+    test_file = str(Path(__file__).resolve().parent.joinpath(test_filename))
+    test_issue = TestingIssue(test_file, issue_line=issue_line)
 
     proposal = SimpleProposal(issue=test_issue, radius_or_range=radius)
     assert len(proposal.all_lines) == 10
@@ -38,16 +39,16 @@ def test_simple_proposal_parametrized(
     assert proposal.proposed_lines == expected_lines.split("\n")
 
 
-def test_simple_proposal(test_filename="../proposals/simple_proposal_test.txt"):
-    test_file = Path(__file__).resolve().parent.joinpath(test_filename)
+def test_simple_proposal(test_filename="simple_proposal_test.txt"):
+    test_file = str(Path(__file__).resolve().parent.joinpath(test_filename))
     try:
-        test_issue = TestIssue(test_filename, issue_line=100)
+        test_issue = TestingIssue(test_file, issue_line=100)
         SimpleProposal(test_issue)
         pytest.fail("FileDiff shall raise an Exception")
     except Exception:
         pass  # Exception intercepted!
 
-    test_issue2 = TestIssue(test_filename, issue_line=4)
+    test_issue2 = TestingIssue(test_file, issue_line=4)
     fd0 = SimpleProposal(test_issue2, radius_or_range=0)
     assert fd0.issue_lines == ["4"]
 
@@ -72,7 +73,7 @@ def test_simple_proposal(test_filename="../proposals/simple_proposal_test.txt"):
 
 def test_cpp_file_diff_with_real_openai_results(test_filename="../../test-cpp-project/cpp/test_cpp_project.cpp"):
     test_file = Path(__file__).resolve().parent.joinpath(test_filename)
-    test_issue = TestIssue(str(test_file), issue_line=21)
+    test_issue = TestingIssue(str(test_file), issue_line=21)
     fd = SimpleProposal(test_issue, radius_or_range=4, issue_line_comment=" // line 21")
     real_output = (
         '```cpp\n#include <iostream>\n\nvoid missingFunction(int arg) {\n    std::cout << "Missing function called with'
@@ -100,7 +101,7 @@ def test_python_file_diff_with_real_openai_results(
     test_filename="../../test-python-project/python/parse_cpp_tree_test.py",
 ):
     test_file = Path(__file__).resolve().parent.joinpath(test_filename)
-    test_issue = TestIssue(str(test_file), issue_line=39)
+    test_issue = TestingIssue(str(test_file), issue_line=39)
     fd = SimpleProposal(test_issue, radius_or_range=4)
     assert fd.issue_lines == [
         "",

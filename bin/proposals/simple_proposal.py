@@ -17,7 +17,7 @@ class SimpleProposal(DiffProposal):
     def __init__(
         self,
         issue: IssueDescriptor,
-        radius_or_range: int | tuple[int, int] = 4,  # radius or tuple with [start_line, end_line]
+        radius_or_range: int | tuple[int, int] | None = None,  # radius or tuple with [start_line, end_line]
         issue_line_comment: str | None = None,
     ):
         """
@@ -26,6 +26,7 @@ class SimpleProposal(DiffProposal):
         """
         super().__init__(filename=issue.filename, description=issue.description, issue_line=issue.issue_line)
         self.issue: Final[IssueDescriptor] = issue
+        self.issue_line_comment = issue_line_comment
         with open(issue.filename, "rt") as file:
             self.all_lines: Final[list[str]] = file.read().split("\n")
 
@@ -35,30 +36,28 @@ class SimpleProposal(DiffProposal):
                 f" {len(self.all_lines)} lines"
             )
 
-        start_line: int
-        end_line: int
-        safety_radius: int
         if isinstance(radius_or_range, tuple):
-            start_line = max(1, radius_or_range[0])
-            end_line = min(len(self.all_lines), radius_or_range[1])
-            safety_radius = min(self.issue.issue_line - start_line, end_line - self.issue.issue_line)
-        else:
-            start_line = max(1, self.issue.issue_line - radius_or_range)
-            end_line = min(len(self.all_lines), self.issue.issue_line + radius_or_range)
-            safety_radius = abs(int(radius_or_range))
+            self._set_code_range(radius_or_range)
+        elif radius_or_range is not None:
+            self._set_code_radius(radius_or_range)
 
-        self.start_line: Final[int] = start_line
-        self.end_line: Final[int] = end_line
-        self.safety_radius: Final[int] = safety_radius
-        assert self.start_line <= self.issue.issue_line
-        assert self.end_line >= self.issue.issue_line
-        assert self.safety_radius >= 0
+    def _set_code_range(self, range: tuple[int, int]):
+        self.start_line = max(1, range[0])
+        self.end_line = min(len(self.all_lines), range[1])
+        self.safety_radius = min(self.issue.issue_line - self.start_line, self.end_line - self.issue.issue_line)
+        self._set_issue_lines()
 
-        self.issue_lines: Final[list[str]] = copy.copy(self.all_lines[self.start_line - 1 : self.end_line])
-        self.proposed_lines: list[str] = copy.copy(self.issue_lines)
-        self.issue_line_comment = issue_line_comment
-        if issue_line_comment is not None:
-            self.issue_lines[self.issue.issue_line - self.start_line] += issue_line_comment
+    def _set_code_radius(self, radius: int):
+        self.safety_radius = abs(int(radius))
+        self.start_line = max(1, self.issue.issue_line - self.safety_radius)
+        self.end_line = min(len(self.all_lines), self.issue.issue_line + self.safety_radius)
+        self._set_issue_lines()
+
+    def _set_issue_lines(self):
+        self.issue_lines: list[str] = copy.deepcopy(self.all_lines[self.start_line - 1 : self.end_line])
+        self.proposed_lines: list[str] = copy.deepcopy(self.issue_lines)
+        if self.issue_line_comment is not None:
+            self.issue_lines[self.issue.issue_line - self.start_line] += self.issue_line_comment
 
     def try_fixing(self, query_backend: QueryBackend, diff_target: DiffTarget) -> bool:
         """
@@ -83,7 +82,7 @@ class SimpleProposal(DiffProposal):
         proposed_lines: list[str] = query_results[0].split("\n")
         merge_result = self._merge_lines(proposed_lines)
 
-        if merge_result:
+        if merge_result and self.proposed_lines != self.issue_lines:
             return diff_target.apply_diff(self)
 
         return False

@@ -10,14 +10,14 @@ import pytest
 
 from targets.filesystem_target import FilesystemTarget
 from proposals.simple_proposal import SimpleProposal
-from unit.common.test_issue import TestIssue
+from unit.common.testing_issue import TestingIssue
 
 
 def test_filesystem_target():
     with patch("builtins.open", mock_open(read_data="1\n2\n3\n4\n5")) as mock_file:
         filename: Final[str] = "/tmp/hallux_mocked_test_file.txt"
         # create FileDiff
-        issue = TestIssue(filename, issue_line=3)
+        issue = TestingIssue(filename, issue_line=3)
         filediff = SimpleProposal(issue, radius_or_range=1)
 
         # check that filediff has all fields correctly set

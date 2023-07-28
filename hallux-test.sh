@@ -10,6 +10,6 @@ python -m pytest -v \
     --cov-report=html \
     --junitxml xunit-reports/xunit-result-unit.xml \
     tests/integration \
-    tests/unit
+    tests/unit || exit 1
 
 # coverage xml -o "coverage-reports/coverage-unit.xml"

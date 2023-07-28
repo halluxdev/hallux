@@ -62,23 +62,3 @@ class ProposalEngineRepeat(ProposalEngine):
                 return next(self.proposal_engine_current)
             else:
                 raise StopIteration
-
-
-# class ProposalEngineList(ProposalEngine):
-#     def __init__(self, proposal_engines : list[ProposalEngine]):
-#         self.proposal_engines : Final[ProposalEngine] = proposal_engines
-#         self.index : int = 0
-#
-#
-#     def __next__(self) -> ProposalDiff:
-#         try:
-#             return next(self.proposal_engine_current)
-#         except StopIteration:
-#             if self.index < self.times:
-#                 self.index += 1
-#                 self.proposal_engine_current = copy.deepcopy(self.proposal_engine)
-#                 return next(self.proposal_engine_current)
-#             else:
-#                 raise StopIteration
-#
-#

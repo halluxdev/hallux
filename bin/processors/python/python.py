@@ -3,7 +3,7 @@
 from __future__ import annotations
 from backend.query_backend import QueryBackend
 from targets.diff_target import DiffTarget
-from code_processor import CodeProcessor, set_directory
+from processors.code_processor import CodeProcessor, set_directory
 from pathlib import Path
 from processors.python.ruff import Ruff_IssueSolver
 

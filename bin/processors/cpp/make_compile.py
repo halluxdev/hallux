@@ -1,7 +1,7 @@
 # Copyright: Hallux team, 2023
 
 from __future__ import annotations
-from code_processor import set_directory
+from processors.code_processor import set_directory
 from proposals.simple_proposal import SimpleProposal
 from proposals.proposal_engine import ProposalEngine, ProposalList
 from backend.query_backend import QueryBackend
@@ -14,6 +14,7 @@ import subprocess
 
 class MakeCompile_IssueSolver(IssueSolver):
     def __init__(self, make_target: str, makefile_dir: Path, verbose: bool = False):
+        super().__init__()
         self.make_target = make_target
         self.base_path = makefile_dir
         self.verbose = verbose

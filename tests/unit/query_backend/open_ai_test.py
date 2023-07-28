@@ -3,7 +3,7 @@ import pytest
 from unittest.mock import patch
 from backend.openai_backend import OpenAiChatGPT
 
-from unit.common.test_issue import TestIssue
+from unit.common.testing_issue import TestingIssue
 
 
 class TestOpenAiChatGPT:
@@ -23,6 +23,6 @@ class TestOpenAiChatGPT:
             ]
         }
 
-        issue = TestIssue(language="en", tool="tool1", filename="file1", description="issue1")
+        issue = TestingIssue(language="en", tool="tool1", filename="file1", description="issue1")
         result = setup_openai_chat_gpt.query("request", issue)
         assert result == ["answer1", "answer2"]

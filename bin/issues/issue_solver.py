@@ -13,14 +13,24 @@ from backend.query_backend import QueryBackend
 # If fix wasn't successfull, we ignore it and go to the next issue
 # For every tool such as 'ruff', or 'make compile', inherit separate class out of IssueSolver and define list_issues()
 class IssueSolver(ABC):
+    def __init__(self, success_test=None):
+        self.success_test = success_test
+
     @abstractmethod
     def list_issues(self) -> list[IssueDescriptor]:
         pass
 
     def is_issue_fixed(self, target_issues: list[IssueDescriptor]) -> bool:
-        new_issues = self.list_issues()
-        # Number of issues decreased => FIX SUCCESFULL
-        return len(new_issues) < len(target_issues)
+        if self.success_test is not None:
+            return self.success_test()
+        else:
+            new_issues = self.list_issues()
+            # Number of issues decreased => FIX SUCCESFULL
+            return len(new_issues) < len(target_issues)
+
+    def report_succesfull_fix(self, issue: IssueDescriptor, proposal: DiffProposal):
+        # This is abstract method with empty default implementation
+        pass
 
     def solve_issues(self, diff_target: DiffTarget, query_backend: QueryBackend):
         issue_index: int = 0
@@ -30,9 +40,11 @@ class IssueSolver(ABC):
 
             proposals = issue.list_proposals()
             fixing_successful: bool = False
+            print(f"{issue.filename}:{issue.issue_line}: {issue.description} : ", end="")
 
-            proposal: DiffProposal
+            proposal: DiffProposal | None = None
             for proposal in proposals:
+                print(".", end="")
                 applying_successful: bool
                 try:
                     applying_successful = proposal.try_fixing(diff_target=diff_target, query_backend=query_backend)
@@ -47,7 +59,6 @@ class IssueSolver(ABC):
                     continue
 
                 if fixing_successful:
-                    # ToDo: here we may provide feedback to proposal, in order to collect training data
                     # Also, this is a good place for "multi-step proposal" extension
                     diff_target.commit_diff()
                     break
@@ -55,12 +66,13 @@ class IssueSolver(ABC):
                 diff_target.revert_diff()
 
             if fixing_successful:
+                # provide feedback, in order to collect training data
+                self.report_succesfull_fix(issue, proposal)
                 if diff_target.requires_refresh():
                     target_issues = self.list_issues()
                 else:
                     issue_index += 1
-                print(f"{issue.filename}:{issue.issue_line}: {issue.description} : successfully fixed")
+                print(" \033[92m successfully fixed\033[0m")
             else:
                 issue_index += 1
-                print(f"{issue.filename}:{issue.issue_line}: {issue.description} : unable to fix")
-                continue
+                print(" \033[91m unable to fix\033[0m")
