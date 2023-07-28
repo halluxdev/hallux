@@ -12,4 +12,4 @@ python -m pytest -v \
     tests/integration \
     tests/unit
 
-coverage xml -o "coverage-reports/coverage-unit.xml"
+# coverage xml -o "coverage-reports/coverage-unit.xml"
