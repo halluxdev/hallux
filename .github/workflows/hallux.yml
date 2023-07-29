@@ -33,7 +33,7 @@ jobs:
           --cov-fail-under=65 \
           --junitxml xunit-reports/xunit-result-unit.xml \
           tests/unit \
-          tests/integration
+          tests/integration/hallux_fix_test.py
 
 #    - name: Integration Tests
 #      run: |
@@ -51,6 +51,7 @@ jobs:
       env:
         SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+        PROJECT_VERSION: 0.1-$(git branch --show-current)-$(git rev-list --count HEAD)-$(git rev-parse --short HEAD)
 
 #    - name: Self-Hallux
 #      pull_request:

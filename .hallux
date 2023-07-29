@@ -14,5 +14,5 @@ python:
 sonar:
     url: http://localhost:9000
     success_test: hallux-test.sh
-    project: hallux
+    project: halluxai_hallux_AYmdJxzWKwloFfC93W7m
 
