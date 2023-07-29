@@ -32,7 +32,7 @@ class PythonProposal(SimpleProposal):
                         break
 
             if target_function:
-                func_range = (target_function.lineno - 1, target_function.end_lineno)
+                func_range = (target_function.lineno, target_function.end_lineno)
                 self._set_code_range(func_range)
 
         self.code_offset = 50000
@@ -52,9 +52,11 @@ class PythonProposal(SimpleProposal):
             offset = " " * self.code_offset
 
             for i, line in enumerate(proposed_lines):
-                proposed_lines[i] = offset + line
+                if len(line) > 0:
+                    proposed_lines[i] = offset + line
 
             for i, line in enumerate(self.issue_lines):
-                self.issue_lines[i] = offset + line
+                if len(line) > 0:
+                    self.issue_lines[i] = offset + line
 
         return super()._merge_lines(proposed_lines)

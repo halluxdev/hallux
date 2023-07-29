@@ -49,7 +49,7 @@ class CodeProcessor:
         success_test = self.config.get("success_test")
         if (
             success_test is not None
-            and not Path(success_test).exists()
+            and not Path(success_test).is_absolute()
             and self.base_path.joinpath(success_test).exists()
         ):
             success_test = str(self.base_path.joinpath(success_test))
