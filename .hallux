@@ -13,6 +13,6 @@ python:
 
 sonar:
     url: https://sonarqube.hallux.dev
-    success_test: hallux-test.sh
+    success_test: ./hallux-test.sh -x
     project: halluxai_hallux_AYmdJxzWKwloFfC93W7m
 

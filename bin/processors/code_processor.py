@@ -1,16 +1,17 @@
 # Copyright: Hallux team, 2023
 
 from __future__ import annotations
-from abc import abstractmethod
+from abc import abstractmethod, ABC
 import subprocess
 from pathlib import Path
 from typing import Final
 
+from processors.set_directory import set_directory
 from targets.diff_target import DiffTarget
 from backend.query_backend import QueryBackend
 
 
-class CodeProcessor:
+class CodeProcessor(ABC):
     def __init__(
         self,
         query_backend: QueryBackend,
@@ -27,26 +28,29 @@ class CodeProcessor:
         self.run_path: Final[Path] = run_path
         self.base_path: Final[Path] = base_path
         success_test = self.config.get("success_test")
-        if (
-            success_test is not None
-            and not Path(success_test).is_absolute()
-            and self.base_path.joinpath(success_test).exists()
-        ):
-            success_test = str(self.base_path.joinpath(success_test))
+
+        if success_test is not None:
+            try:
+                with set_directory(self.base_path):
+                    subprocess.check_output(
+                        ["bash"] + success_test.split(" "),
+                    )
+            except subprocess.CalledProcessError as e:
+                raise SystemError(f"Success Test '{success_test}' is failing right from the start") from e
+
         self.success_test: Final[str | None] = success_test
 
     def is_fix_successful(self) -> bool:
         if self.success_test is not None:
             try:
+                with set_directory(self.base_path):
+                    subprocess.check_output(["bash"] + self.success_test.split(" "))
                 if self.verbose:
-                    print(f"RUN success_test: {self.success_test}")
-                subprocess.check_output([self.success_test])
-                if self.verbose:
-                    print("success_test OK")
+                    print("\033[92m success test PASSED\033[0m")
                 return True
             except subprocess.CalledProcessError:
                 if self.verbose:
-                    print("success_test FAILED")
+                    print("\033[91m success test FAILED\033[0m")
                 return False
 
     @abstractmethod
