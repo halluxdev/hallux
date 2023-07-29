@@ -4,4 +4,4 @@ source ./activate.sh
 
 ./hallux-test.sh
 
-sonar-scanner -Dsonar.projectKey=hallux  -Dsonar.sources=bin  -Dsonar.host.url=http://localhost:9000  -Dsonar.token=sqp_fa4f29ff253c20fa7c5cad652763bc6d5a582303 -Dsonar.projectVersion="$(git branch --show-current)-$(git rev-list --count HEAD)-$(git rev-parse --short HEAD)"
+sonar-scanner -Dsonar.projectKey=hallux  -Dsonar.sources=bin  -Dsonar.host.url=https://sonarqube.hallux.dev  -Dsonar.token=${SONAR_TOKEN} -Dsonar.projectVersion="0.1-$(git branch --show-current)-$(git rev-list --count HEAD)-$(git rev-parse --short HEAD)"
