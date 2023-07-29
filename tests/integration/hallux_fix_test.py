@@ -8,7 +8,7 @@ import pytest
 import shutil
 from pathlib import Path
 import subprocess
-from processors.code_processor import set_directory
+from processors.set_directory import set_directory
 
 
 def test_hallux_fix_cpp(

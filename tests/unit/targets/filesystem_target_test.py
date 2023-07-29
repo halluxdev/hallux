@@ -14,7 +14,10 @@ from unit.common.testing_issue import TestingIssue
 
 
 def test_filesystem_target():
-    with patch("builtins.open", mock_open(read_data="1\n2\n3\n4\n5")) as mock_file:
+    with patch("builtins.open", mock_open(read_data="1\n2\n3\n4\n5")) as mock_file, patch(
+        "pathlib.Path.exists"
+    ) as exists:
+        exists.return_value = True
         filename: Final[str] = "/tmp/hallux_mocked_test_file.txt"
         # create FileDiff
         issue = TestingIssue(filename, issue_line=3)

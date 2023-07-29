@@ -3,31 +3,11 @@
 from __future__ import annotations
 from abc import abstractmethod
 import subprocess
-from contextlib import contextmanager
 from pathlib import Path
-import os
 from typing import Final
 
 from targets.diff_target import DiffTarget
 from backend.query_backend import QueryBackend
-
-
-@contextmanager
-def set_directory(path: Path):
-    """Sets the cwd within the context
-
-    Args:
-        path (Path): The path to the cwd
-
-    Yields:
-        None
-    """
-    origin = Path().absolute()
-    try:
-        os.chdir(path)
-        yield
-    finally:
-        os.chdir(origin)
 
 
 class CodeProcessor:

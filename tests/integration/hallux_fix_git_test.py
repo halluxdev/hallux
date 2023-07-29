@@ -9,7 +9,7 @@ import pytest
 import shutil
 from pathlib import Path
 import subprocess
-from processors.code_processor import set_directory
+from processors.set_directory import set_directory
 
 from integration.hallux_fix_test import test_hallux_fix_python, test_hallux_fix_cpp
 
