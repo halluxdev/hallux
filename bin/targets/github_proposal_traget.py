@@ -79,7 +79,7 @@ class GithubProposalTraget(FilesystemTarget):
             commit=commit,
             side="RIGHT",
             path=str(self.existing_proposal.filename),
-            line=self.existing_proposal.issue_line,
+            line=self.existing_proposal.end_line,
             start_line=self.existing_proposal.start_line,
         )
         FilesystemTarget.revert_diff(self)  # clean local code
