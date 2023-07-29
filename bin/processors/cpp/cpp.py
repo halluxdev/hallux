@@ -27,10 +27,15 @@ class CppProcessor(CodeProcessor):
     cmakelists: Final[str] = "CMakeLists.txt"
 
     def __init__(
-        self, query_backend: QueryBackend, diff_target: DiffTarget, base_path: Path, config: dict, verbose: bool = False
+        self,
+        query_backend: QueryBackend,
+        diff_target: DiffTarget,
+        run_path: Path,
+        base_path: Path,
+        config: dict,
+        verbose: bool = False,
     ):
-        super().__init__(query_backend, diff_target, config, verbose)
-        self.base_path: Path = base_path
+        super().__init__(query_backend, diff_target, run_path, base_path, config, verbose)
 
     def process(self) -> None:
         print("Process C++ issues:")

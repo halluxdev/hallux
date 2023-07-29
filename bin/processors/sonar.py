@@ -129,6 +129,7 @@ class SonarProcessor(CodeProcessor):
         self,
         query_backend: QueryBackend,
         diff_target: DiffTarget,
+        run_path: Path,
         base_path: Path,
         config: dict,
         verbose: bool = False,
@@ -136,8 +137,7 @@ class SonarProcessor(CodeProcessor):
         sonarqube_url: str | None = None,
         sonarqube_project: str | None = None,
     ):
-        super().__init__(query_backend, diff_target, config, verbose)
-        self.base_path: Path = base_path
+        super().__init__(query_backend, diff_target, run_path, base_path, config, verbose)
 
         self.token: str | None
         if sonarqube_token is not None:

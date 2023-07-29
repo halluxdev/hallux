@@ -53,17 +53,29 @@ class Hallux:
     def process(self):
         if "python" in self.config.keys():
             python = PythonProcessor(
-                self.query_backend, self.diff_target, self.config_path, self.config["python"], self.verbose
+                self.query_backend,
+                self.diff_target,
+                self.run_path,
+                self.config_path,
+                self.config["python"],
+                self.verbose,
             )
             python.process()
 
         if "cpp" in self.config.keys():
-            cpp = CppProcessor(self.query_backend, self.diff_target, self.config_path, self.config["cpp"], self.verbose)
+            cpp = CppProcessor(
+                self.query_backend, self.diff_target, self.run_path, self.config_path, self.config["cpp"], self.verbose
+            )
             cpp.process()
 
         if "sonar" in self.config.keys():
             sonar = SonarProcessor(
-                self.query_backend, self.diff_target, self.config_path, self.config["sonar"], self.verbose
+                self.query_backend,
+                self.diff_target,
+                self.run_path,
+                self.config_path,
+                self.config["sonar"],
+                self.verbose,
             )
             sonar.process()
 

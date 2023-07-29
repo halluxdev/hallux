@@ -1,19 +1,18 @@
 backend:
     dummy: dummy.json
 
-#    openai:
-#      model: gpt-3.5-turbo
-#      max_tokens: 4097
+    openai:
+      model: gpt-3.5-turbo
+      max_tokens: 4097
 
 github:
     repo_name_or_id: halluxai/hallux
-
 
 python:
     ruff: bin
 
 sonar:
     url: http://localhost:9000
-    success_test: /home/sergey/git/hallux/hallux-test.sh
+    success_test: hallux-test.sh
     project: hallux
 
