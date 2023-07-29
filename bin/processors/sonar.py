@@ -3,24 +3,30 @@
 from __future__ import annotations
 
 from backend.query_backend import QueryBackend
+from proposals.diff_proposal import DiffProposal
 from proposals.proposal_engine import ProposalEngine, ProposalList
+from proposals.python_proposal import PythonProposal
 from proposals.simple_proposal import SimpleProposal
 from targets.diff_target import DiffTarget
-from code_processor import CodeProcessor
+from processors.code_processor import CodeProcessor
 import requests
 import os
 from pathlib import Path
-from proposals.diff_proposal import DiffProposal
 from issues.issue import IssueDescriptor
 from issues.issue_solver import IssueSolver
 import json
 
 
 class Sonar_IssueSolver(IssueSolver):
-    def __init__(self, url: str, token: str, project: str = "hallux"):
+    def __init__(self, url: str, token: str, project: str = "hallux", success_test=None):
+        super().__init__(success_test=success_test)
         self.url: str = url
         self.token: str = token
         self.project: str = project
+        self.already_fixed_files = []
+
+    def report_succesfull_fix(self, issue: IssueDescriptor, proposal: DiffProposal):
+        self.already_fixed_files.append(issue.filename)
 
     def list_issues(self) -> list[IssueDescriptor]:
         issues: list[IssueDescriptor] = []
@@ -30,13 +36,13 @@ class Sonar_IssueSolver(IssueSolver):
                 + "/api/issues/search?resolved=false&severities=MINOR,MAJOR,CRITICAL&statuses=OPEN,CONFIRMED,REOPENED"
             )
             if self.project is not None:
-                request += "&componentKeys=hallux"
+                request += "&componentKeys=" + self.project
             x = requests.get(url=request, headers={"Authorization": "Bearer " + self.token})
         except Exception:
             return []
 
         if x.status_code == 200:
-            issues.extend(SonarIssue.parseIssues(x.text))
+            issues.extend(SonarIssue.parseIssues(x.text, self.already_fixed_files))
 
         return issues
 
@@ -49,6 +55,7 @@ class SonarIssue(IssueDescriptor):
         description: str = "",
         text_range: dict = dict,
         issue_type: str = "warning",
+        already_fixed_files=None,
     ):
         super().__init__(
             language=None,
@@ -58,45 +65,41 @@ class SonarIssue(IssueDescriptor):
             description=description,
             issue_type=issue_type,
         )
+        if already_fixed_files is None:
+            already_fixed_files = list()
         self.text_range: dict = text_range
+        self.already_fixed_files = already_fixed_files
 
     def list_proposals(self) -> ProposalEngine:
-        line_comment: str = f" # line {str(self.issue_line)}"
-        start_line: int = self.text_range["startLine"] - self.text_range["startOffset"]
-        end_line: int = self.text_range["endLine"] + self.text_range["endOffset"]
+        start_line: int = self.text_range["startLine"]
+        end_line: int = self.text_range["endLine"]
         code_range = (start_line, end_line)
 
-        return ProposalList([SimpleProposal(self, radius_or_range=code_range, issue_line_comment=line_comment)])
+        # we may only fix 1 issue per file for SonarQube
+        if self.filename in self.already_fixed_files:
+            return ProposalList([])
 
-    def try_fixing(self, query_backend: QueryBackend, diff_target: DiffTarget) -> bool:
-        line_comment: str = f" # line {str(self.issue_line)}"
-        start_line: int = self.text_range["startLine"] - self.text_range["startOffset"]
-        end_line: int = self.text_range["endLine"] + self.text_range["endOffset"]
-        code_range = (start_line, end_line)
-        self.file_diff = DiffProposal(
-            self.filename,
-            self.issue_line,
-            radius_or_range=code_range,
-            description=self.description,
-            issue_line_comment=line_comment,
-        )
-        request_lines = [
-            "Fix " + self.issue_type + " issue: " + self.description,
-            "from corresponding " + self.language + " code:\n```",
-            *self.file_diff.issue_lines,
-            "```\nWrite back ONLY fixed code, keep formatting:",
-        ]
-        request = "\n".join(request_lines)
-        result: list[str] = query_backend.query(request, self)
+        if self.language == "python":
+            line_comment: str = f" # line {str(self.issue_line)}"
+            proposal_list = [
+                PythonProposal(self, extract_function=True, issue_line_comment=line_comment),
+                PythonProposal(self, radius_or_range=4, issue_line_comment=line_comment),
+            ]
+            if end_line - start_line > 4:
+                proposal_list.append(PythonProposal(self, radius_or_range=code_range, issue_line_comment=line_comment))
 
-        if len(result) > 0:
-            self.file_diff.propose_lines(result[0])
-            return diff_target.apply_diff(self.file_diff)
+        else:
+            proposal_list = [
+                SimpleProposal(self, radius_or_range=4),
+                SimpleProposal(self, radius_or_range=6),
+            ]
+            if end_line - start_line > 4:
+                proposal_list.append(SimpleProposal(self, radius_or_range=code_range))
 
-        return False
+        return ProposalList(proposal_list)
 
     @staticmethod
-    def parseIssues(request_output: str) -> list[SonarIssue]:
+    def parseIssues(request_output: str, already_fixed_files: list[str] | None = None) -> list[SonarIssue]:
         js = json.loads(request_output)
 
         issues: list[SonarIssue] = []
@@ -113,6 +116,7 @@ class SonarIssue(IssueDescriptor):
                 description=js_issue["message"],
                 text_range=js_issue["textRange"],
                 issue_type=str(js_issue["type"]).replace("_", " "),
+                already_fixed_files=already_fixed_files,
             )
 
             issues.append(issue)
@@ -125,14 +129,15 @@ class SonarProcessor(CodeProcessor):
         self,
         query_backend: QueryBackend,
         diff_target: DiffTarget,
+        run_path: Path,
         base_path: Path,
         config: dict,
         verbose: bool = False,
         sonarqube_token: str | None = None,
         sonarqube_url: str | None = None,
+        sonarqube_project: str | None = None,
     ):
-        super().__init__(query_backend, diff_target, config, verbose)
-        self.base_path: Path = base_path
+        super().__init__(query_backend, diff_target, run_path, base_path, config, verbose)
 
         self.token: str | None
         if sonarqube_token is not None:
@@ -154,11 +159,21 @@ class SonarProcessor(CodeProcessor):
             print("Cannot find SONAR URL")
             self.url = None
 
+        self.sonarqube_project: str | None
+        if sonarqube_project is not None:
+            self.project = sonarqube_project
+        elif "project" in config:
+            self.project = config["project"]
+        else:
+            print("Cannot find SONAR PROJECT")
+            self.project = None
+
     def process(self) -> None:
         if self.token is None or self.url is None:
             print("SONAR is not activated")
             return
 
         print("Process Sonarqube issues:")
-        issue_solver = Sonar_IssueSolver(self.url, self.token)
+        is_fix_succesful = self.is_fix_successful if self.success_test is not None else None
+        issue_solver = Sonar_IssueSolver(self.url, self.token, self.project, success_test=is_fix_succesful)
         issue_solver.solve_issues(self.diff_target, self.query_backend)

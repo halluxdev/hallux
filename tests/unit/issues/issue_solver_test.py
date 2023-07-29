@@ -1,19 +1,17 @@
 import pytest
-from unittest.mock import Mock, call
+from unittest.mock import Mock
 from issues.issue_solver import IssueSolver
-from issues.issue import IssueDescriptor
 from proposals.diff_proposal import DiffProposal
-from proposals.proposal_engine import ProposalEngine, ProposalList
 from targets.diff_target import DiffTarget
 from backend.query_backend import QueryBackend
 
-from unit.common.test_issue import TestIssue
+from unit.common.testing_issue import TestingIssue
 
 
 # Create a concrete subclass of IssueSolver for testing
 class ExampleIssueSolver(IssueSolver):
     def list_issues(self):
-        # This method could return a list of mock issues, or a list of real IssueDescriptor objects with known characteristics.
+        # This method returns a list of issues, or a list of real IssueDescriptor objects with known characteristics.
         return []
 
 
@@ -38,7 +36,7 @@ def query_backend():
 # Define a fixture for the issue_descriptor mock
 @pytest.fixture
 def issue_descriptor():
-    mock_issue = Mock(spec=TestIssue)
+    mock_issue = Mock(spec=TestingIssue)
     mock_issue.filename = "filename"
     mock_issue.issue_line = 1
     mock_issue.description = "description"

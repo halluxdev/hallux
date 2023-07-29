@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from processors.python.python_proposal import PythonProposal
+from proposals.python_proposal import PythonProposal
 from proposals.proposal_engine import ProposalEngine, ProposalList
 from issues.issue import IssueDescriptor
 from issues.issue_solver import IssueSolver
@@ -11,6 +11,7 @@ import subprocess
 
 class Ruff_IssueSolver(IssueSolver):
     def __init__(self, ruff_dir: str | None = None):
+        super().__init__()
         self.ruff_dir: str = ruff_dir if ruff_dir is not None else "."
 
     def list_issues(self) -> list[IssueDescriptor]:
@@ -35,9 +36,8 @@ class RuffIssue(IssueDescriptor):
         line_comment: str = f" # line {str(self.issue_line)}"
         return ProposalList(
             [
-                PythonProposal(self, radius_or_range=3, issue_line_comment=line_comment),
+                PythonProposal(self, extract_function=True, issue_line_comment=line_comment),
                 PythonProposal(self, radius_or_range=4, issue_line_comment=line_comment),
-                PythonProposal(self, radius_or_range=5, issue_line_comment=line_comment),
                 PythonProposal(self, radius_or_range=6, issue_line_comment=line_comment),
             ]
         )

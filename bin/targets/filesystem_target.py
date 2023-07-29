@@ -42,8 +42,9 @@ class FilesystemTarget(DiffTarget):
 
             self.existing_proposal = None
 
-    def commit_diff(self):
+    def commit_diff(self) -> bool:
         self.existing_proposal = None
+        return True
 
     def requires_refresh(self) -> bool:
         return True

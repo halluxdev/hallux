@@ -53,17 +53,29 @@ class Hallux:
     def process(self):
         if "python" in self.config.keys():
             python = PythonProcessor(
-                self.query_backend, self.diff_target, self.config_path, self.config["python"], self.verbose
+                self.query_backend,
+                self.diff_target,
+                self.run_path,
+                self.config_path,
+                self.config["python"],
+                self.verbose,
             )
             python.process()
 
         if "cpp" in self.config.keys():
-            cpp = CppProcessor(self.query_backend, self.diff_target, self.config_path, self.config["cpp"], self.verbose)
+            cpp = CppProcessor(
+                self.query_backend, self.diff_target, self.run_path, self.config_path, self.config["cpp"], self.verbose
+            )
             cpp.process()
 
         if "sonar" in self.config.keys():
             sonar = SonarProcessor(
-                self.query_backend, self.diff_target, self.config_path, self.config["sonar"], self.verbose
+                self.query_backend,
+                self.diff_target,
+                self.run_path,
+                self.config_path,
+                self.config["sonar"],
+                self.verbose,
             )
             sonar.process()
 
@@ -130,7 +142,7 @@ class Hallux:
         return -1
 
     @staticmethod
-    def init_target(argv: list[str], config: dict | str) -> DiffTarget:
+    def init_target(argv: list[str], config: dict | str, verbose: bool = False) -> DiffTarget:
         # Command-line arguments have highest priority:
         github_index = Hallux.find_arg(argv, "--github")
         if github_index > 0:
@@ -143,7 +155,7 @@ class Hallux:
                 )
 
         if Hallux.find_arg(argv, "--git") > 0:
-            return GitCommitTarget()
+            return GitCommitTarget(verbose=verbose)
 
         if Hallux.find_arg(argv, "--files") > 0:
             return FilesystemTarget()
@@ -193,7 +205,7 @@ class Hallux:
 
     @staticmethod
     def init_plugins(argv: list[str], config: dict) -> dict:
-        # ToDo: not properly implemented yet
+        # not properly implemented yet
         plugins = ["python", "cpp", "sonar"]
         new_config = {}
         for plug in plugins:
@@ -229,7 +241,7 @@ def main(argv: list[str], run_path: Path | None = None) -> int:
         return 1
 
     try:
-        target: DiffTarget = Hallux.init_target(argv, config["target"] if "target" in config else {})
+        target: DiffTarget = Hallux.init_target(argv, config["target"] if "target" in config else {}, verbose)
     except Exception as e:
         print(f"Error during TARGET initialization: {e}", file=sys.stderr)
         if verbose:

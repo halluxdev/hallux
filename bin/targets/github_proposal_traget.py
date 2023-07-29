@@ -3,7 +3,7 @@
 from __future__ import annotations
 import subprocess
 import os
-from github import Github, Repository, PullRequest
+from github import Github, Repository, PullRequest, GithubException
 from proposals.diff_proposal import DiffProposal
 from targets.filesystem_target import FilesystemTarget
 
@@ -67,22 +67,29 @@ class GithubProposalTraget(FilesystemTarget):
     def revert_diff(self):
         FilesystemTarget.revert_diff(self)
 
-    def commit_diff(self):
+    def commit_diff(self) -> bool:
         commit = self.repo.get_commit(self.pull_request.head.sha)
         body = self.existing_proposal.description + "\n```suggestion\n"
         for line in self.existing_proposal.proposed_lines:
             body = body + line + "\n"
         body = body + "\n```"
 
-        self.pull_request.create_review_comment(
-            body=body,
-            commit=commit,
-            side="RIGHT",
-            path=str(self.existing_proposal.filename),
-            line=self.existing_proposal.issue_line,
-            start_line=self.existing_proposal.start_line,
-        )
-        FilesystemTarget.revert_diff(self)  # clean local code
+        success: bool = True
+        try:
+            self.pull_request.create_review_comment(
+                body=body,
+                commit=commit,
+                side="RIGHT",
+                path=str(self.existing_proposal.filename),
+                line=self.existing_proposal.end_line,
+                start_line=self.existing_proposal.start_line,
+            )
+        except GithubException:
+            success = False
+
+        # clean local code
+        FilesystemTarget.revert_diff(self)
+        return success
 
     def requires_refresh(self) -> bool:
         return False
