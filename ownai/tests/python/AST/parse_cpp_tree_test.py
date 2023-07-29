@@ -4,8 +4,6 @@ import pytest
 import uuid
 from pathlib import Path
 from clang.cindex import Index, Token, TranslationUnit
-
-
 from AST.ast_parser import parse_cpp_tree, parse_cpp_list
 
 
@@ -33,11 +31,11 @@ def assert_cpp_files_similar(cpp_file1: str, cpp_file2: str):
         assert token1.kind == token2.kind
         assert token1.spelling == token2.spelling
 
-        try:
-            token1 = next(tokens1)
-            token2 = next(tokens2)
-        except:
-            break
+        try:  #
+            token1 = next(tokens1)  #
+            token2 = next(tokens2)  #
+        except:  #
+            break  #
 
 
 @pytest.mark.parametrize(
