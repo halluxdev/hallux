@@ -59,9 +59,11 @@ class IssueSolver(ABC):
                     continue
 
                 if fixing_successful:
-                    # Also, this is a good place for "multi-step proposal" extension
-                    diff_target.commit_diff()
-                    break
+                    # this is a good place for "multi-step proposal" extension
+                    fixing_successful = diff_target.commit_diff()
+                    # commit_diff() might not be OK
+                    if fixing_successful:
+                        break
 
                 diff_target.revert_diff()
 

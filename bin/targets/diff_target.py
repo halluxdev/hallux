@@ -28,7 +28,7 @@ class DiffTarget(ABC):
         pass
 
     @abstractmethod
-    def commit_diff(self) -> None:
+    def commit_diff(self) -> bool:
         pass
 
     @abstractmethod

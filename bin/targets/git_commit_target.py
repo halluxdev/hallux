@@ -29,11 +29,11 @@ class GitCommitTarget(FilesystemTarget):
     def revert_diff(self) -> None:
         FilesystemTarget.revert_diff(self)
 
-    def commit_diff(self) -> None:
+    def commit_diff(self) -> bool:
         curr_dir: str = os.getcwd()
         git_dir: str = str(Path(self.existing_proposal.filename).parent)
         os.chdir(git_dir)
-
+        success: bool = True
         try:
             if self.verbose:
                 print(f"git add {os.path.relpath(self.existing_proposal.filename, start=git_dir)}")
@@ -54,11 +54,12 @@ class GitCommitTarget(FilesystemTarget):
             if self.verbose:
                 print("ERROR:")
                 print(e.output.decode("utf8"))
-            os.chdir(curr_dir)
             FilesystemTarget.revert_diff(self)
-            raise e
+            success = False
         finally:
             os.chdir(curr_dir)
+
+        return success
 
     def requires_refresh(self) -> bool:
         return True
