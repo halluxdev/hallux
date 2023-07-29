@@ -113,4 +113,8 @@ class CppProcessor(CodeProcessor):
                     self.list_compile_targets(makefile_dir.joinpath(str(inner_dir)), compile_targets)
 
     def cpp_linking(self, params: dict | str):
+        """
+        Add a nested comment explaining why this method is empty
+        """
         pass
+
