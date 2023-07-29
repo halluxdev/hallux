@@ -12,7 +12,7 @@ python:
     ruff: bin
 
 sonar:
-    url: http://localhost:9000
+    url: https://sonarqube.hallux.dev
     success_test: hallux-test.sh
     project: halluxai_hallux_AYmdJxzWKwloFfC93W7m
 
