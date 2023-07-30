@@ -1,7 +1,7 @@
 # Copyright: Hallux team, 2023
 
 from __future__ import annotations
-from processors.code_processor import set_directory
+from processors.set_directory import set_directory
 from proposals.simple_proposal import SimpleProposal
 from proposals.proposal_engine import ProposalEngine, ProposalList
 from backend.query_backend import QueryBackend

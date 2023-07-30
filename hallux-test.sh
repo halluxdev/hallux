@@ -2,7 +2,7 @@
 
 source ./activate.sh
 
-python -m pytest -v \
+python -m pytest -v $1 \
     --cov-branch \
     --cov-report=term \
     --cov=bin \

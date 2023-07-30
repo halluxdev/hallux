@@ -8,7 +8,8 @@ from typing import Final
 
 from backend.query_backend import QueryBackend
 from targets.diff_target import DiffTarget
-from processors.code_processor import CodeProcessor, set_directory
+from processors.code_processor import CodeProcessor
+from processors.set_directory import set_directory
 from processors.cpp.make_compile import MakeCompile_IssueSolver
 import subprocess
 import os
@@ -112,4 +113,8 @@ class CppProcessor(CodeProcessor):
                     self.list_compile_targets(makefile_dir.joinpath(str(inner_dir)), compile_targets)
 
     def cpp_linking(self, params: dict | str):
+        """
+        Add a nested comment explaining why this method is empty
+        """
         pass
+

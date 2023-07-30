@@ -18,43 +18,48 @@ class PythonProposal(SimpleProposal):
     ):
         super().__init__(issue, radius_or_range, issue_line_comment)
         if extract_function:
-            with open(self.issue.filename, "rt") as f:
-                python_source = f.read()
-            # Parse the code into an AST
-            parsed_ast = ast.parse(python_source, filename=self.issue.filename)
-
-            # Find the target function
-            target_function = None
-            for node in ast.walk(parsed_ast):
-                if isinstance(node, ast.FunctionDef) or isinstance(node, ast.AsyncFunctionDef):
-                    if node.lineno <= self.issue.issue_line <= node.end_lineno:
-                        target_function = node
-                        break
-
-            if target_function:
-                func_range = (target_function.lineno - 1, target_function.end_lineno)
-                self._set_code_range(func_range)
-
+            self.extract_function(issue)
         self.code_offset = 50000
-        # count code offset
+        self.count_code_offset()
+        if self.code_offset > 0:
+            self.remove_code_offset()
+
+    def extract_function(self, issue):
+        with open(issue.filename, "rt") as f:
+            python_source = f.read()
+        parsed_ast = ast.parse(python_source, filename=issue.filename)
+        target_function = self.find_target_function(parsed_ast, issue.issue_line)
+        if target_function:
+            func_range = (target_function.lineno, target_function.end_lineno)
+            self._set_code_range(func_range)
+
+    def find_target_function(self, parsed_ast, issue_line):
+        for node in ast.walk(parsed_ast):
+            if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
+                if node.lineno <= issue_line <= node.end_lineno:
+                    return node
+
+    def count_code_offset(self):
         for line in self.issue_lines:
             lsline = line.lstrip(" ")
-            if len(lsline) > 0:  #
+            if len(lsline) > 0:
                 self.code_offset = min(self.code_offset, len(line) - len(lsline))
 
-        if self.code_offset > 0:
-            for i, line in enumerate(self.issue_lines):
-                self.issue_lines[i] = line[self.code_offset :]
-            self.proposed_lines = copy.deepcopy(self.issue_lines)
+    def remove_code_offset(self):
+        for i, line in enumerate(self.issue_lines):
+            self.issue_lines[i] = line[self.code_offset :]
+        self.proposed_lines = copy.deepcopy(self.issue_lines)
 
     def _merge_lines(self, proposed_lines: list[str]) -> bool:
         if self.code_offset > 0:
             offset = " " * self.code_offset
 
             for i, line in enumerate(proposed_lines):
-                proposed_lines[i] = offset + line
+                if len(line) > 0:
+                    proposed_lines[i] = offset + line
 
             for i, line in enumerate(self.issue_lines):
-                self.issue_lines[i] = offset + line
+                if len(line) > 0:
+                    self.issue_lines[i] = offset + line
 
         return super()._merge_lines(proposed_lines)
