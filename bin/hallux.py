@@ -219,9 +219,9 @@ class Hallux:
         return new_config if len(new_config) > 0 else config
 
 
-def main(argv: list[str], run_path: Path | None = None) -> int:
+def main(argv: list[str], run_path: Path | None = None) -> int: 
     verbose: bool = Hallux.find_arg(argv, "--verbose") > 0 or Hallux.find_arg(argv, "-v") > 0
-
+    
     if run_path is None:
         run_path = Path(os.getcwd())
 
