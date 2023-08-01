@@ -16,7 +16,7 @@ class GitCommitTarget(FilesystemTarget):
     """
 
     def __init__(self, verbose: bool = False):
-        # ToDo: assert we're in GIT repo, crush if not
+        # ToDo: assert we're in GIT repo, crash if not
         FilesystemTarget.__init__(self)
         git_status_output = subprocess.check_output(["git", "status", "--porcelain"]).decode("utf8")
         if len(git_status_output) > 0:
