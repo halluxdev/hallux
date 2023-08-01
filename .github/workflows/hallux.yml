@@ -52,7 +52,8 @@ jobs:
       env:
         SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
-        PROJECT_VERSION: 0.1-$(git branch --show-current)-$(git rev-list --count HEAD)-$(git rev-parse --short HEAD)
+        SONAR_PROJECT_VERSION: ${{ github.run_number }}
+        # PROJECT_VERSION: 0.1-$(git branch --show-current)-$(git rev-list --count HEAD)-$(git rev-parse --short HEAD)
 
 #    - name: Self-Hallux
 #      pull_request:
