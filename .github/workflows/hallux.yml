@@ -26,14 +26,15 @@ jobs:
         export PATH=$(pwd)/bin:$PATH
         export PYTHONPATH=$(pwd)/bin:${PYTHONPATH}
         python -m pytest \
-          --cov=bin \
           --cov-branch \
-          --cov-report=xml \
           --cov-report=term \
+          --cov=bin \
+          --cov-report=xml \
           --cov-fail-under=65 \
           --junitxml xunit-reports/xunit-result-unit.xml \
           tests/unit \
           tests/integration/hallux_fix_test.py
+        ls -la
 
 #    - name: Integration Tests
 #      run: |
