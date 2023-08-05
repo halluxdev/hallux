@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from backend.query_backend import QueryBackend
+from backends.query_backend import QueryBackend
 from proposals.diff_proposal import DiffProposal
 from proposals.proposal_engine import ProposalEngine, ProposalList
 from proposals.python_proposal import PythonProposal

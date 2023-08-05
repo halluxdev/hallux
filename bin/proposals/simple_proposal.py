@@ -6,7 +6,7 @@ import copy
 import difflib
 from typing import Final
 
-from backend.query_backend import QueryBackend
+from backends.query_backend import QueryBackend
 from issues.issue import IssueDescriptor
 from targets.diff_target import DiffTarget
 from proposals.diff_proposal import DiffProposal
@@ -75,7 +75,7 @@ class SimpleProposal(DiffProposal):
             "```\nWrite ONLY fixed code, without explanations. Keep formatting.",
         ]
         request = "\n".join(request_lines)
-        query_results: list[str] = query_backend.query(request, self.issue)
+        query_results: list[str] = query_backend.query(request, self.issue, issue_lines=self.issue_lines)
         if len(query_results) == 0:
             return False
 

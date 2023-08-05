@@ -1,7 +1,7 @@
 #!/bin/env python
 # Copyright: Hallux team, 2023
 
-# HALLUX FIX TEST : checks that `hallux fix` command indeed capable of fixing all issues in the test-project(s)
+# HALLUX TEST : checks that `hallux .` command indeed capable of fixing all issues in the test-project(s)
 from __future__ import annotations
 import tempfile
 import pytest
@@ -11,12 +11,13 @@ import subprocess
 from processors.set_directory import set_directory
 
 
-def test_hallux_fix_cpp(
+def test_hallux_cpp(
     real_openai_test: bool = False,
     proj_name: str = "test-cpp-project",
     tmp_proj_dir: str | None = None,
     target: str = "--files",
 ):
+    backend = "--gpt3" if real_openai_test else "--cache"
     # Create temporal dir, if not already exists
     if tmp_proj_dir is None:
         if not Path("/tmp/hallux").exists():
@@ -53,6 +54,7 @@ def test_hallux_fix_cpp(
         print("REAL OPENAI TEST")
         dummy_config_file = Path(tmp_proj_dir).joinpath(".hallux")
         real_config_file = Path(tmp_proj_dir).joinpath(".hallux.real")
+        Path(tmp_proj_dir).joinpath("dummy.json").unlink()
         if real_config_file.exists():
             if dummy_config_file.exists():
                 dummy_config_file.unlink()
@@ -61,7 +63,7 @@ def test_hallux_fix_cpp(
     # run hallux from the temporal project directory
     with set_directory(Path(tmp_proj_dir)):
         try:
-            subprocess.check_output(["hallux", "fix", target])
+            subprocess.check_output(["hallux", target, backend, "."])
         except subprocess.CalledProcessError as e:
             pytest.fail(e, pytrace=True)  # hallux must not fail ?
 
@@ -73,12 +75,13 @@ def test_hallux_fix_cpp(
             pytest.fail(e, pytrace=True)  # make must not find any issues
 
 
-def test_hallux_fix_python(
-    real_openai_test: bool,
+def test_hallux_python(
+    real_openai_test: bool = False,
     proj_name: str = "test-python-project",
     tmp_proj_dir: str | None = None,
     target: str = "--files",
 ):
+    backend = "--gpt3" if real_openai_test else "--cache"
     # Create temporal dir, if not already exists
     if tmp_proj_dir is None:
         if not Path("/tmp/hallux").exists():
@@ -105,6 +108,7 @@ def test_hallux_fix_python(
         print("REAL OPENAI TEST")
         dummy_config_file = Path(tmp_proj_dir).joinpath(".hallux")
         real_config_file = Path(tmp_proj_dir).joinpath(".hallux.real")
+        Path(tmp_proj_dir).joinpath("dummy.json").unlink()
         if real_config_file.exists():
             if dummy_config_file.exists():
                 dummy_config_file.unlink()
@@ -113,7 +117,7 @@ def test_hallux_fix_python(
     # run hallux from the temporal project directory
     with set_directory(Path(tmp_proj_dir)):
         try:
-            subprocess.check_output(["hallux", "fix", target])
+            subprocess.check_output(["hallux", target, backend, "."])
         except subprocess.CalledProcessError as e:
             pytest.fail(e, pytrace=True)  # hallux must not fail ?
 

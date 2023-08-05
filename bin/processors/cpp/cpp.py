@@ -6,7 +6,7 @@ import sys
 from dataclasses import dataclass
 from typing import Final
 
-from backend.query_backend import QueryBackend
+from backends.query_backend import QueryBackend
 from targets.diff_target import DiffTarget
 from processors.code_processor import CodeProcessor
 from processors.set_directory import set_directory
@@ -117,4 +117,3 @@ class CppProcessor(CodeProcessor):
         Add a nested comment explaining why this method is empty
         """
         pass
-

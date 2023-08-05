@@ -11,10 +11,10 @@ from pathlib import Path
 import subprocess
 from processors.set_directory import set_directory
 
-from integration.hallux_fix_test import test_hallux_fix_python, test_hallux_fix_cpp
+from integration.hallux_fix_test import test_hallux_python, test_hallux_cpp
 
 
-def test_hallux_fix_git_cpp(proj_name: str = "test-cpp-project", tmp_proj_dir: str | None = None):
+def test_hallux_git_cpp(proj_name: str = "test-cpp-project", tmp_proj_dir: str | None = None):
     if tmp_proj_dir is None:
         if not Path("/tmp/hallux").exists():
             Path("/tmp/hallux").mkdir()
@@ -48,7 +48,7 @@ def test_hallux_fix_git_cpp(proj_name: str = "test-cpp-project", tmp_proj_dir: s
             len(git_log_output.split("\n")) == 1 + 1
         ), git_log_output  # we have exactly one commit in the repo (+1 empty line)
 
-    test_hallux_fix_cpp(False, proj_name, tmp_proj_dir, target="--git")
+    test_hallux_cpp(False, proj_name, tmp_proj_dir, target="--git")
 
     with set_directory(Path(tmp_proj_dir)):
         try:
@@ -61,7 +61,7 @@ def test_hallux_fix_git_cpp(proj_name: str = "test-cpp-project", tmp_proj_dir: s
         ), git_log_output  # we have exactly 4 commits in the repo (+1 empty line)
 
 
-def test_hallux_fix_git_python(proj_name: str = "test-python-project", tmp_proj_dir: str | None = None):
+def test_hallux_git_python(proj_name: str = "test-python-project", tmp_proj_dir: str | None = None):
     if tmp_proj_dir is None:
         if not Path("/tmp/hallux").exists():
             Path("/tmp/hallux").mkdir()
@@ -95,7 +95,7 @@ def test_hallux_fix_git_python(proj_name: str = "test-python-project", tmp_proj_
             len(git_log_output.split("\n")) == 1 + 1
         ), git_log_output  # we have exactly one commit in the repo (+1 empty line)
 
-    test_hallux_fix_python(False, proj_name, tmp_proj_dir, target="--git")
+    test_hallux_python(False, proj_name, tmp_proj_dir, target="--git")
 
     with set_directory(Path(tmp_proj_dir)):
         try:

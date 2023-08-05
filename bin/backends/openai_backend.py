@@ -7,23 +7,32 @@ import os
 from openai.api_resources import ChatCompletion
 
 from issues.issue import IssueDescriptor
-from backend.query_backend import QueryBackend
+from backends.query_backend import QueryBackend
 
 
 class OpenAiChatGPT(QueryBackend):
-    def __init__(self, model_name: str = "", max_tokens: int = 4097, verbose: bool = True):
-        if model_name is None or len(model_name) < 2:
-            raise SystemExit(f"Wrong model name for OpenAI API: {model_name}")
+    def __init__(
+        self,
+        model: str = "",
+        max_tokens: int = 4097,
+        type="openai",
+        verbose: bool = True,
+        previous_backend: QueryBackend | None = None,
+    ):
+        assert type == "openai"
+        super().__init__(previous_backend)
+        if model is None or len(model) < 2:
+            raise SystemExit(f"Wrong model name for OpenAI API: {model}")
 
         if os.getenv("OPENAI_API_KEY") is None:
             raise SystemExit("Environment variable OPENAI_API_KEY is required for OpenAI API backend")
 
-        self.model = model_name
-        self.max_tokens = max_tokens
+        self.model = model
+        self.tokens = max_tokens
         openai.api_key = os.getenv("OPENAI_API_KEY")
         self.verbose: Final[bool] = verbose
 
-    def query(self, request: str, issue: IssueDescriptor | None = None) -> list[str]:
+    def query(self, request: str, issue: IssueDescriptor | None = None, issue_lines: list[str] = list) -> list[str]:
         if self.verbose:
             print("REQUEST")
             print(request)

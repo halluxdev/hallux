@@ -1,5 +1,7 @@
-backend:
-    dummy: dummy.json
+backends:
+    - cache:
+        type: dummy
+        filename: dummy.json
 
 cpp:
     cmake: .

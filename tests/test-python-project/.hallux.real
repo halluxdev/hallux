@@ -1,7 +1,8 @@
-backend:
-    openai:
+backends:
+    - gpt3:
+        type: openai
         model: gpt-3.5-turbo
-        max_tokens: 4097
+        tokens: 4097
 
 python:
     ruff: python
