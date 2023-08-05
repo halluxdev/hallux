@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
+from typing import Any
 
 
 class DiffProposal(ABC):
@@ -16,8 +17,17 @@ class DiffProposal(ABC):
         self.start_line: int = start_line
         self.end_line: int = end_line
         self.all_lines: list[str] = []
+        self.issue_lines: list[str] = []
         self.proposed_lines: list[str] = []
 
     @abstractmethod
     def try_fixing(self, query_backend, diff_target) -> bool:
         pass
+
+    def try_fixing_with_priority(self, query_backend, diff_target, used_backend) -> tuple[bool, Any]:
+        previous_backend = query_backend.previous_backend()
+
+        if previous_backend is not None and previous_backend != used_backend:
+            return self.try_fixing_with_priority(previous_backend, diff_target, used_backend)
+        else:
+            return self.try_fixing(query_backend, diff_target), query_backend

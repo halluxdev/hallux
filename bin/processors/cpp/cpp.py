@@ -117,4 +117,3 @@ class CppProcessor(CodeProcessor):
         Add a nested comment explaining why this method is empty
         """
         pass
-

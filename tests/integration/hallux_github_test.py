@@ -23,7 +23,7 @@ GITHUB_PULLREQUEST_URL = "https://github.com/halluxai/hallux/pull/26"
     os.getenv("GITHUB_TOKEN") is None,
     reason="Env variable GITHUB_TOKEN shall be provided in order to run this test",
 )
-def test_hallux_fix_github(tmp_proj_dir: str | None = None):
+def test_hallux_github(tmp_proj_dir: str | None = None):
     if "GITHUB_TOKEN" not in os.environ.keys():
         SystemError("GITHUB_TOKEN is not provided")
 

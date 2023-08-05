@@ -3,13 +3,13 @@
   {
     "compile": {
       "cpp/test_cpp_project.cpp": {
-        "return-statement with a value, in function returning ‘void’ [-fpermissive]": [
+        "172b018e28070e0019d34d49392f50ee": [
           "\nvoid print_usage(char* argv[])\n{\n  std::cout << \"Usage: \" << argv[0] << \" filename.cpp\" << std::endl;\n  return;\n}\n\nint main(int argc, char* argv[])\n{"
         ],
-        "too few arguments to function ‘void print_usage(char**)’": [
+        "f271280977d51efe07a72bc62b647da7": [
           "{\n  std::cout << \"This is compilable file (part of CMake project) for testing purposes\" << std::endl ;\n  if (argc < 2)\n  {\n    print_usage(argv);\n  }\n\n  missingFunction(argc);\n"
         ],
-        "expected ‘;’ before ‘}’ token": [
+        "7d1b1e5b9b882efff1190ea535ddec24": [
           "  }\n  \n  missingFunction(argc);\n\n  return 0;\n}\n"
         ],
         "void function 'print_usage' should not return a value [-Wreturn-type]": [

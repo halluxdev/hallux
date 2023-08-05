@@ -14,7 +14,9 @@ data/
 coverage-*/
 coverage.xml
 xunit-*/
+htmlcov/
 .run
 .scannerwork
 .mypy_cache
 .DS_Store
+dummy.json
