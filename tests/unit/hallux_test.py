@@ -48,13 +48,13 @@ def test_Hallux_main(mock_print):
 
     # ask for fix ., but nothing configured => quit
     mock_print.mock_calls.clear()
-    out_val = main(["hallux", "."], random_path)
+    out_val = main(["hallux", "--cache", "."], random_path)
     assert out_val == 0
     assert len(mock_print.mock_calls) == 0
 
     # asked to fix python, but no path
     mock_print.mock_calls.clear()
-    out_val = main(["hallux", "--python"], random_path)
+    out_val = main(["hallux", "--cache", "--python"], random_path)
     assert 10 > out_val > 0  #
 
 
