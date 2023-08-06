@@ -1,10 +1,12 @@
+# left for compatibility with old code
 backend:
     dummy: dummy.json
 
-
-github:
-    repo_name_or_id: halluxai/hallux
-
+# this is new "Backends" format
+backends:
+    - cache:
+        type: dummy
+        filename: dummy.json
 
 python:
     ruff: .
