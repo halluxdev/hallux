@@ -170,8 +170,8 @@ class Hallux:
         default_list = [
             {"cache": {"type": "dummy", "filename": "dummy.json"}},
             {"free": {"type": "hallux", "url": "https://free-trial.hallux.dev/api/v1"}},
-            # {"gpt3": {"type": "openai", "model": "gpt-3.5-turbo", "tokens": 4096}},
-            # {"gpt4": {"type": "openai", "model": "gpt-4", "tokens": 8192}},
+            {"gpt3": {"type": "openai", "model": "gpt-3.5-turbo", "max_tokens": 4096}},
+            # Gonna be enabled soon {"gpt4": {"type": "openai", "model": "gpt-4", "max_tokens": 8192}},
         ]
 
         backends_list: list[dict] = backends_list if backends_list is not None else default_list
