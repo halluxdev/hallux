@@ -83,7 +83,7 @@ def test_solve_issues(issue_solver, diff_target, query_backend, issue_descriptor
     diff_target.commit_diff.assert_called()
     diff_target.revert_diff.assert_not_called()
 
-    assert proposal.try_fixing_with_priority_called == True
+    assert proposal.try_fixing_with_priority_called is True
 
 
 def test_solve_issues_try_fixing_raises_exception(issue_solver, diff_target, query_backend, issue_descriptor, proposal):
@@ -129,7 +129,7 @@ def test_solve_issues_try_fixing_fails(issue_solver, diff_target, query_backend,
     issue_solver.list_issues.assert_called()
 
     # Check that the try_fixing method was called with the correct arguments
-    assert proposal.try_fixing_with_priority_called == True
+    assert proposal.try_fixing_with_priority_called is True
 
     # Check that the commit_diff method was not called
     diff_target.commit_diff.assert_not_called()
