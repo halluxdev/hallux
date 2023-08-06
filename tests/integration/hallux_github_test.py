@@ -12,7 +12,7 @@ import shutil
 import os
 from pathlib import Path
 import subprocess
-from processors.set_directory import set_directory
+from auxilary import set_directory
 from targets.github_proposal_traget import GithubProposalTraget
 from github import Github, Repository, PullRequest
 

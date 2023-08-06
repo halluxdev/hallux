@@ -9,9 +9,8 @@ import pytest
 import shutil
 from pathlib import Path
 import subprocess
-from processors.set_directory import set_directory
 
-from integration.hallux_fix_test import test_hallux_python, test_hallux_cpp
+from integration.hallux_fix_test import test_hallux_python, test_hallux_cpp, set_directory
 
 
 def test_hallux_git_cpp(proj_name: str = "test-cpp-project", tmp_proj_dir: str | None = None):

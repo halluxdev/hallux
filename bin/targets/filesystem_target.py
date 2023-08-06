@@ -6,7 +6,7 @@ from pathlib import Path
 
 from proposals.diff_proposal import DiffProposal
 from targets.diff_target import DiffTarget
-from processors.set_directory import set_directory
+from auxilary import set_directory
 
 
 # Saves diff-proposals directly into local filesystem
