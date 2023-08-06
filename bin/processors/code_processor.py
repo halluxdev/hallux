@@ -31,6 +31,8 @@ class CodeProcessor(ABC):
 
         if success_test is not None:
             try:
+                if self.verbose:
+                    print(f"Try running success test: {success_test} ...")
                 with set_directory(self.base_path):
                     subprocess.check_output(
                         ["bash"] + success_test.split(" "),
