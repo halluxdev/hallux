@@ -6,7 +6,7 @@ from abc import ABC, abstractmethod
 from issues.issue import IssueDescriptor
 from proposals.diff_proposal import DiffProposal
 from targets.diff_target import DiffTarget
-from backend.query_backend import QueryBackend
+from backends.query_backend import QueryBackend
 
 
 # Base class for "proper" issue solving, i.e. issues solved one-by-one, with double-checking that fix was appropriate

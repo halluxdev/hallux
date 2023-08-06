@@ -15,9 +15,9 @@ from typing import Final
 import yaml
 from pathlib import Path
 
-from backend.query_backend import QueryBackend
-from backend.openai_backend import OpenAiChatGPT
-from backend.dummy_backend import DummyBackend
+from backends.query_backend import QueryBackend
+from backends.openai_backend import OpenAiChatGPT
+from backends.dummy_backend import DummyBackend
 from targets.diff_target import DiffTarget
 from targets.filesystem_target import FilesystemTarget
 from targets.git_commit_target import GitCommitTarget

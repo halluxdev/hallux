@@ -7,7 +7,7 @@ import os
 from openai.api_resources import ChatCompletion
 
 from issues.issue import IssueDescriptor
-from backend.query_backend import QueryBackend
+from backends.query_backend import QueryBackend
 
 
 class OpenAiChatGPT(QueryBackend):

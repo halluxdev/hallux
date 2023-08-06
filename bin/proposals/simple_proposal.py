@@ -6,7 +6,7 @@ import copy
 import difflib
 from typing import Final
 
-from backend.query_backend import QueryBackend
+from backends.query_backend import QueryBackend
 from issues.issue import IssueDescriptor
 from targets.diff_target import DiffTarget
 from proposals.diff_proposal import DiffProposal

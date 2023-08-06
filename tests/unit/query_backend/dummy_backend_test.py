@@ -4,7 +4,7 @@
 import pytest
 import json
 from pathlib import Path
-from backend.dummy_backend import DummyBackend
+from backends.dummy_backend import DummyBackend
 import tempfile
 
 from unit.common.testing_issue import TestingIssue

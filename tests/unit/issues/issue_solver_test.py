@@ -3,7 +3,7 @@ from unittest.mock import Mock
 from issues.issue_solver import IssueSolver
 from proposals.diff_proposal import DiffProposal
 from targets.diff_target import DiffTarget
-from backend.query_backend import QueryBackend
+from backends.query_backend import QueryBackend
 
 from unit.common.testing_issue import TestingIssue
 
