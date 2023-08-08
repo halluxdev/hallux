@@ -1,7 +1,7 @@
 # Copyright: Hallux team, 2023
 
 from __future__ import annotations
-from backend.query_backend import QueryBackend
+from backends.query_backend import QueryBackend
 from targets.diff_target import DiffTarget
 from processors.code_processor import CodeProcessor
 from processors.set_directory import set_directory

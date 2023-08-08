@@ -3,7 +3,7 @@ from unittest.mock import Mock
 from issues.issue_solver import IssueSolver
 from proposals.diff_proposal import DiffProposal
 from targets.diff_target import DiffTarget
-from backend.query_backend import QueryBackend
+from backends.query_backend import QueryBackend
 
 from unit.common.testing_issue import TestingIssue
 
@@ -30,7 +30,9 @@ def diff_target():
 # Define a fixture for the query_backend mock
 @pytest.fixture
 def query_backend():
-    return Mock(spec=QueryBackend)
+    backend = Mock(spec=QueryBackend)
+    backend.previous_backend.return_value = None
+    return backend
 
 
 # Define a fixture for the issue_descriptor mock
@@ -48,29 +50,40 @@ def issue_descriptor():
 @pytest.fixture
 def proposal():
     proposal = Mock(spec=DiffProposal)
-    proposal.try_fixing.return_value = True
+    proposal.try_fixing_with_priority_called = False
+    proposal.try_fixing_with_priority_return_value = False
+
+    def mock_impl(diff_target, query_backend, used_backend):
+        proposal.try_fixing_with_priority_called = True
+        return proposal.try_fixing_with_priority_return_value, query_backend
+
+    proposal.try_fixing_with_priority = mock_impl
     return proposal
 
 
 def test_solve_issues(issue_solver, diff_target, query_backend, issue_descriptor, proposal):
     issue_descriptor.list_proposals.return_value = [proposal]
 
-    # Mock the list_issues method to return a list containing our mock issue
+    # Mock the issue_solver methods
     issue_solver.list_issues = Mock(return_value=[issue_descriptor])
+    issue_solver.is_issue_fixed = Mock(return_value=True)
 
-    # Mock the try_fixing method to return True
-    proposal.try_fixing = Mock(return_value=True)
+    # Mock the try_fixing_with_priority method to return True
+    proposal.try_fixing_with_priority_return_value = True
 
     # Mock the commit_diff method to return True
     diff_target.commit_diff = Mock(return_value=True)
+    diff_target.requires_refresh = Mock(return_value=False)
 
     issue_solver.solve_issues(diff_target, query_backend)
 
     # Check that the list_issues method was called once
     issue_solver.list_issues.assert_called()
+    issue_solver.is_issue_fixed.assert_called()
+    diff_target.commit_diff.assert_called()
+    diff_target.revert_diff.assert_not_called()
 
-    # Check that the try_fixing method was called with the correct arguments
-    proposal.try_fixing.assert_called_once_with(diff_target=diff_target, query_backend=query_backend)
+    assert proposal.try_fixing_with_priority_called is True
 
 
 def test_solve_issues_try_fixing_raises_exception(issue_solver, diff_target, query_backend, issue_descriptor, proposal):
@@ -80,7 +93,7 @@ def test_solve_issues_try_fixing_raises_exception(issue_solver, diff_target, que
     issue_descriptor.list_proposals.return_value = [proposal]
 
     # Mock the try_fixing method to raise an exception
-    proposal.try_fixing = Mock(side_effect=Exception)
+    proposal.try_fixing_with_priority = Mock(side_effect=Exception)
     # Mock the commit_diff method to return True
     diff_target.commit_diff = Mock(return_value=True)
 
@@ -91,22 +104,24 @@ def test_solve_issues_try_fixing_raises_exception(issue_solver, diff_target, que
     issue_solver.list_issues.assert_called()
 
     # Check that the try_fixing method was called with the correct arguments
-    proposal.try_fixing.assert_called_once_with(diff_target=diff_target, query_backend=query_backend)
+    proposal.try_fixing_with_priority.assert_called_once_with(
+        diff_target=diff_target, query_backend=query_backend, used_backend=None
+    )
 
     # Check that the commit_diff method was not called
     diff_target.commit_diff.assert_not_called()
+    diff_target.revert_diff.assert_called()
 
 
-def test_solve_issues_try_fixing_fails(issue_solver, diff_target, query_backend, issue_descriptor):
+def test_solve_issues_try_fixing_fails(issue_solver, diff_target, query_backend, issue_descriptor, proposal):
     # Mock the list_issues method to return a list containing our mock issue
     issue_solver.list_issues = Mock(return_value=[issue_descriptor])
 
     issue_descriptor.list_proposals.return_value = [proposal]
 
-    # Mock the try_fixing method to return False
-    proposal.try_fixing = Mock(return_value=False)
     # Mock the commit_diff method to return True
     diff_target.commit_diff = Mock(return_value=True)
+    diff_target.revert_diff = Mock(return_value=None)
 
     issue_solver.solve_issues(diff_target, query_backend)
 
@@ -114,29 +129,8 @@ def test_solve_issues_try_fixing_fails(issue_solver, diff_target, query_backend,
     issue_solver.list_issues.assert_called()
 
     # Check that the try_fixing method was called with the correct arguments
-    proposal.try_fixing.assert_called_once_with(diff_target=diff_target, query_backend=query_backend)
+    assert proposal.try_fixing_with_priority_called is True
 
     # Check that the commit_diff method was not called
     diff_target.commit_diff.assert_not_called()
-
-
-def test_solve_issues_try_fixing_succeeds(issue_solver, diff_target, query_backend, issue_descriptor):
-    # Mock the list_issues method to return a list containing our mock issue the first time,
-    # and an empty list the second time
-    issue_solver.list_issues = Mock(side_effect=[[issue_descriptor], [], []])
-    issue_descriptor.list_proposals.return_value = [proposal]
-    # Mock the try_fixing method to return True
-    proposal.try_fixing = Mock(return_value=True)
-    # Mock the commit_diff method to return True
-    diff_target.commit_diff = Mock(return_value=True)
-
-    issue_solver.solve_issues(diff_target, query_backend)
-
-    # Check that the list_issues method was called once
-    issue_solver.list_issues.assert_called()
-
-    # Check that the try_fixing method was called with the correct arguments
-    proposal.try_fixing.assert_called_once_with(diff_target=diff_target, query_backend=query_backend)
-
-    # Check that the commit_diff method was called once
-    diff_target.commit_diff.assert_called_once()
+    diff_target.revert_diff.assert_called()

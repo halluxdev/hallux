@@ -1,12 +1,14 @@
 #!/bin/env python
 # Copyright: Hallux team, 2023
+from unittest.mock import Mock
 
 import pytest
 import json
 from pathlib import Path
-from backend.dummy_backend import DummyBackend
+from backends.dummy_backend import DummyBackend
 import tempfile
 
+from proposals.diff_proposal import DiffProposal
 from unit.common.testing_issue import TestingIssue
 
 
@@ -36,8 +38,8 @@ class TestDummyBackend:
 
     def test_query(self, setup_dummy_backend):
         issue = TestingIssue(language="python", tool="tool1", filename=self.test_filename, description="issue1")
-        result = setup_dummy_backend.query("request", issue)
-        assert result == ["issue1 fixed"]
+        result = setup_dummy_backend.query("request", issue, ["something"])
+        assert result == []
 
     def test_query_no_issue(self, setup_dummy_backend):
         result = setup_dummy_backend.query("request")
@@ -59,7 +61,7 @@ class TestDummyBackend:
         assert result == []
 
 
-def test_with_no_json_file():
+def test_report_succesfull_fix():
     if not Path("/tmp/hallux").exists():
         Path("/tmp/hallux").mkdir()
 
@@ -70,12 +72,16 @@ def test_with_no_json_file():
     dummy_backend = DummyBackend(dummy_json, base_path=root_path)
     base_path = Path(__file__).resolve().parent
     issue = TestingIssue(language="cpp", tool="newTool", filename="file1.py", description="issue1", base_path=base_path)
-    answ = dummy_backend.query("request", issue)
+    proposal = Mock(spec=DiffProposal)
+    proposal.issue_lines = ["aaa"]
+    proposal.proposed_lines = ["bbb"]
+    dummy_backend.report_succesfull_fix(issue, proposal)
+    # answ = dummy_backend.query("request", issue)
     del dummy_backend
-    assert answ == []
+    # assert answ == []
     assert root_path.joinpath(dummy_json).exists()
 
     with open(str(root_path.joinpath(dummy_json)), "rt") as file:
         json_file = json.load(file)
 
-    assert json_file == {"cpp": {"newTool": {"file1.py": {}}}}
+    assert json_file == {"cpp": {"newTool": {"file1.py": {"f9bb7fe87bb576c1b6f9efad6bd01485": "bbb"}}}}

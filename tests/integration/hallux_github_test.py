@@ -23,7 +23,7 @@ GITHUB_PULLREQUEST_URL = "https://github.com/halluxai/hallux/pull/26"
     os.getenv("GITHUB_TOKEN") is None,
     reason="Env variable GITHUB_TOKEN shall be provided in order to run this test",
 )
-def test_hallux_fix_github(tmp_proj_dir: str | None = None):
+def test_hallux_github(tmp_proj_dir: str | None = None):
     if "GITHUB_TOKEN" not in os.environ.keys():
         SystemError("GITHUB_TOKEN is not provided")
 
@@ -68,11 +68,11 @@ def test_hallux_fix_github(tmp_proj_dir: str | None = None):
             pytest.fail(e, pytrace=True)  # Cannot checkout PR commit
 
         try:
-            subprocess.check_output(["hallux", "fix", "--github", GITHUB_PULLREQUEST_URL])
+            subprocess.check_output(["hallux", "--python", "--github", GITHUB_PULLREQUEST_URL, "."])
         except subprocess.CalledProcessError as e:
             pytest.fail(
                 e, pytrace=True
-            )  # Fail during running `hallux fix --github https://github.com/halluxai/hallux/pull/26`
+            )  # Fail during running `hallux --python --github https://github.com/halluxai/hallux/pull/26 .`
 
     processed_comments_count: Final[int] = pull_request.get_comments().totalCount
 

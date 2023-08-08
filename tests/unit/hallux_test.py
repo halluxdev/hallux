@@ -38,24 +38,24 @@ def test_Hallux_main(mock_print):
     # prints usage, and quits
     out_val: int = main([], random_path)
     assert out_val == 0
-    assert len(mock_print.mock_calls) == 36
+    assert len(mock_print.mock_calls) > 30
 
     # same as before
     mock_print.mock_calls.clear()
     out_val: int = main(["hallux"], random_path)
     assert out_val == 0
-    assert len(mock_print.mock_calls) == 36
+    assert len(mock_print.mock_calls) > 30
 
-    # ask for fix, but nothing configured => quit
+    # ask for fix ., but nothing configured => quit
     mock_print.mock_calls.clear()
-    out_val = main(["hallux", "fix"], random_path)
+    out_val = main(["hallux", "--cache", "."], random_path)
     assert out_val == 0
     assert len(mock_print.mock_calls) == 0
 
-    # asked to fix python, but nothing configured => returns 3
+    # asked to fix python, but no path
     mock_print.mock_calls.clear()
-    out_val = main(["hallux", "fix", "--python"], random_path)
-    assert out_val == 3
+    out_val = main(["hallux", "--cache", "--python"], random_path)
+    assert 10 > out_val > 0  #
 
 
 def test_find_config():

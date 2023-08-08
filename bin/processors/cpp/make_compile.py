@@ -4,7 +4,7 @@ from __future__ import annotations
 from processors.set_directory import set_directory
 from proposals.simple_proposal import SimpleProposal
 from proposals.proposal_engine import ProposalEngine, ProposalList
-from backend.query_backend import QueryBackend
+from backends.query_backend import QueryBackend
 from targets.diff_target import DiffTarget
 from issues.issue_solver import IssueSolver
 from issues.issue import IssueDescriptor

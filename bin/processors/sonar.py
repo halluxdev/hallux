@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from backend.query_backend import QueryBackend
+from backends.query_backend import QueryBackend
 from proposals.diff_proposal import DiffProposal
 from proposals.proposal_engine import ProposalEngine, ProposalList
 from proposals.python_proposal import PythonProposal
@@ -25,8 +25,9 @@ class Sonar_IssueSolver(IssueSolver):
         self.project: str = project
         self.already_fixed_files = []
 
-    def report_succesfull_fix(self, issue: IssueDescriptor, proposal: DiffProposal):
+    def report_succesfull_fix(self, issue: IssueDescriptor, proposal: DiffProposal, query_backend: QueryBackend):
         self.already_fixed_files.append(issue.filename)
+        super().report_succesfull_fix(issue, proposal, query_backend)
 
     def list_issues(self) -> list[IssueDescriptor]:
         issues: list[IssueDescriptor] = []
