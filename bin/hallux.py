@@ -14,9 +14,8 @@ from typing import Final
 import yaml
 from pathlib import Path
 
-from backends.openai_backend import OpenAiChatGPT, QueryBackend
-from backends.dummy_backend import DummyBackend
-from backends.hallux_backend import HalluxBackend
+from auxilary import find_arg
+from backends.factory import BackendFactory, QueryBackend
 from targets.diff_target import DiffTarget
 from targets.filesystem_target import FilesystemTarget
 from targets.git_commit_target import GitCommitTarget
@@ -128,20 +127,9 @@ class Hallux:
         print("--verbose   Print debug tracebacks on errors")
 
     @staticmethod
-    def find_arg(argv: list[str], name: str) -> int:
-        """
-        Finds argument index and list of following arguments
-        """
-        for i in range(len(argv)):
-            arg = argv[i]
-            if arg == name or arg.startswith(name):
-                return i
-        return -1
-
-    @staticmethod
     def init_target(argv: list[str], config: dict | str, verbose: bool = False) -> DiffTarget:
         # Command-line arguments have highest priority:
-        github_index = Hallux.find_arg(argv, "--github")
+        github_index = find_arg(argv, "--github")
         if github_index > 0:
             if len(argv) > github_index:
                 return GithubProposalTraget(argv[github_index + 1])
@@ -151,10 +139,10 @@ class Hallux:
                     " https://BUSINESS.github.com/YOUR_NAME/REPO_NAME/pull/ID"
                 )
 
-        if Hallux.find_arg(argv, "--git") > 0:
+        if find_arg(argv, "--git") > 0:
             return GitCommitTarget(verbose=verbose)
 
-        if Hallux.find_arg(argv, "--files") > 0:
+        if find_arg(argv, "--files") > 0:
             return FilesystemTarget()
 
         # Config settings has medium priority:
@@ -166,50 +154,12 @@ class Hallux:
         return FilesystemTarget()
 
     @staticmethod
-    def init_backend(argv: list[str], backends_list: list[dict] | None, config_path: Path) -> QueryBackend:
-        default_list = [
-            {"cache": {"type": "dummy", "filename": "dummy.json"}},
-            {"free": {"type": "hallux", "url": "https://free-trial.hallux.dev/api/v1"}},
-            {"gpt3": {"type": "openai", "model": "gpt-3.5-turbo", "max_tokens": 4096}},
-            # Gonna be enabled soon {"gpt4": {"type": "openai", "model": "gpt-4", "max_tokens": 8192}},
-        ]
-
-        backends_list: list[dict] = backends_list if backends_list is not None else default_list
-        backend = None
-        if not isinstance(backends_list, list) or len(backends_list) == 0:
-            raise SystemError(f"BACKENDS config setting must contain non-empty list. Error in: {backends_list}")
-
-        for name_dict in backends_list:
-            if not isinstance(name_dict, dict) or len(name_dict.items()) != 1:
-                raise SystemError(f"Each BACKEND must have just one name-settings pair. Error in: {name_dict}")
-
-            short_name = list(name_dict)[0]
-            settings_dict = name_dict[short_name]
-
-            if not isinstance(settings_dict, dict) or "type" not in settings_dict.keys():
-                raise SystemError(f"Each BACKEND setting must have at least 'type' setting. Error in: {settings_dict}")
-
-            if settings_dict["type"] == "dummy":
-                backend = DummyBackend(**settings_dict, base_path=config_path, previous_backend=backend)
-            elif settings_dict["type"] == "openai":
-                backend = OpenAiChatGPT(**settings_dict, previous_backend=backend)
-            elif settings_dict["type"] == "hallux":
-                backend = HalluxBackend(**settings_dict, previous_backend=backend)
-            else:
-                raise SystemError(f"Unknown type {settings_dict['type']} for BACKEND setting: {name_dict}")
-
-            if Hallux.find_arg(argv, "--" + short_name) > 0:
-                return backend
-
-        return backend
-
-    @staticmethod
     def init_plugins(argv: list[str], config: dict) -> dict:
         # not properly implemented yet
         plugins = ["python", "cpp", "sonar"]
         new_config = {}
         for plug in plugins:
-            plug_ind = Hallux.find_arg(argv, "--" + plug)
+            plug_ind = find_arg(argv, "--" + plug)
             if plug_ind > 0:
                 if plug in config:
                     new_config[plug] = config[plug]
@@ -220,7 +170,7 @@ class Hallux:
 
 
 def main(argv: list[str], run_path: Path | None = None) -> int:
-    verbose: bool = Hallux.find_arg(argv, "--verbose") > 0 or Hallux.find_arg(argv, "-v") > 0
+    verbose: bool = find_arg(argv, "--verbose") > 0 or find_arg(argv, "-v") > 0
 
     if len(argv) < 2:
         Hallux.print_usage()
@@ -236,7 +186,7 @@ def main(argv: list[str], run_path: Path | None = None) -> int:
     config, config_path = Hallux.find_config(run_path)
 
     try:
-        query_backend: QueryBackend = Hallux.init_backend(argv, config.get("backends", None), config_path)
+        query_backend: QueryBackend = BackendFactory.init_backend(argv, config.get("backends", None), config_path)
     except Exception as e:
         print(f"Error during BACKEND initialization: {e}", file=sys.stderr)
         if verbose:

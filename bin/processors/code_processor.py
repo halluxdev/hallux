@@ -6,7 +6,7 @@ import subprocess
 from pathlib import Path
 from typing import Final
 
-from processors.set_directory import set_directory
+from auxilary import set_directory
 from targets.diff_target import DiffTarget
 from backends.query_backend import QueryBackend
 
