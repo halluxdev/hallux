@@ -10,9 +10,10 @@ from issues.issue import IssueDescriptor
 
 
 class QueryBackend(ABC):
-    def __init__(self, base_path: Path = Path(), previous_backend: QueryBackend | None = None):
+    def __init__(self, base_path: Path = Path(), previous_backend: QueryBackend | None = None, verbose: bool = False):
         self.previous = previous_backend
         self.base_path: Final[Path] = base_path
+        self.verbose: Final[bool] = verbose
         self.was_modified = False
 
     def previous_backend(self) -> QueryBackend | None:

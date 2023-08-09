@@ -16,12 +16,12 @@ class HalluxBackend(QueryBackend):
         type="hallux",
         base_path: Path = Path(),
         previous_backend: QueryBackend | None = None,
+        verbose: bool = False,
     ):
-        super().__init__(base_path, previous_backend)
+        super().__init__(base_path, previous_backend, verbose=verbose)
         assert type == "hallux"
         self.url = url
         self.token = token
-        self.base_path: Final[Path] = base_path
 
     def query(self, request: str, issue: IssueDescriptor | None = None, issue_lines: list[str] = list) -> list[str]:
         return []
