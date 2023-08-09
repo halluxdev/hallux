@@ -1,14 +1,15 @@
 # Copyright: Hallux team, 2023
 
 from __future__ import annotations
-from abc import abstractmethod, ABC
+
 import subprocess
+from abc import ABC, abstractmethod
 from pathlib import Path
 from typing import Final
 
 from auxilary import set_directory
-from targets.diff_target import DiffTarget
 from backends.query_backend import QueryBackend
+from targets.diff_target import DiffTarget
 
 
 class CodeProcessor(ABC):

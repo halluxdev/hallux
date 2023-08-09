@@ -1,13 +1,15 @@
 # Copyright: Hallux team, 2023
 
 from __future__ import annotations
-from backends.query_backend import QueryBackend
-from targets.diff_target import DiffTarget
-from processors.code_processor import CodeProcessor
-from auxilary import set_directory
+
 from pathlib import Path
-from processors.python.ruff import Ruff_IssueSolver
+
+from auxilary import set_directory
+from backends.query_backend import QueryBackend
+from processors.code_processor import CodeProcessor
 from processors.python.mypy import Mypy_IssueSolver
+from processors.python.ruff import Ruff_IssueSolver
+from targets.diff_target import DiffTarget
 
 
 class PythonProcessor(CodeProcessor):

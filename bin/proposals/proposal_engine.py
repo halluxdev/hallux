@@ -1,11 +1,10 @@
 from __future__ import annotations
 
 import copy
+from abc import ABC, abstractmethod
 from typing import Final
 
 from proposals.diff_proposal import DiffProposal
-
-from abc import ABC, abstractmethod
 
 
 class ProposalEngine(ABC):

@@ -2,19 +2,20 @@
 
 from __future__ import annotations
 
+import json
+import os
+from pathlib import Path
+
+import requests
 from backends.query_backend import QueryBackend
+from issues.issue import IssueDescriptor
+from issues.issue_solver import IssueSolver
+from processors.code_processor import CodeProcessor
 from proposals.diff_proposal import DiffProposal
 from proposals.proposal_engine import ProposalEngine, ProposalList
 from proposals.python_proposal import PythonProposal
 from proposals.simple_proposal import SimpleProposal
 from targets.diff_target import DiffTarget
-from processors.code_processor import CodeProcessor
-import requests
-import os
-from pathlib import Path
-from issues.issue import IssueDescriptor
-from issues.issue_solver import IssueSolver
-import json
 
 
 class Sonar_IssueSolver(IssueSolver):

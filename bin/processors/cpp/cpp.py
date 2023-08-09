@@ -2,19 +2,19 @@
 
 from __future__ import annotations
 
+import os
+import subprocess
 import sys
+import tempfile
 from dataclasses import dataclass
+from pathlib import Path
 from typing import Final
 
-from backends.query_backend import QueryBackend
-from targets.diff_target import DiffTarget
-from processors.code_processor import CodeProcessor
 from auxilary import set_directory
+from backends.query_backend import QueryBackend
+from processors.code_processor import CodeProcessor
 from processors.cpp.make_compile import MakeCompile_IssueSolver
-import subprocess
-import os
-import tempfile
-from pathlib import Path
+from targets.diff_target import DiffTarget
 
 
 @dataclass

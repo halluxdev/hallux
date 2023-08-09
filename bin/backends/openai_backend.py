@@ -2,14 +2,14 @@
 
 from __future__ import annotations
 
+import os
 from pathlib import Path
 from typing import Final
-import openai
-import os
-from openai.api_resources import ChatCompletion
 
-from issues.issue import IssueDescriptor
+import openai
 from backends.query_backend import QueryBackend
+from issues.issue import IssueDescriptor
+from openai.api_resources import ChatCompletion
 
 
 class OpenAiChatGPT(QueryBackend):

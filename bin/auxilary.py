@@ -1,9 +1,10 @@
 # Copyright: Hallux team, 2023
 
 from __future__ import annotations
+
+import os
 from contextlib import contextmanager
 from pathlib import Path
-import os
 
 
 @contextmanager

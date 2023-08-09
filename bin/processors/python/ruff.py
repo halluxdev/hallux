@@ -1,6 +1,7 @@
 # Copyright: Hallux team, 2023
 
 from __future__ import annotations
+
 import subprocess
 
 from issues.issue import IssueDescriptor
