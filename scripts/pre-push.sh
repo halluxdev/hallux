@@ -2,19 +2,16 @@
 
 set -e
 
-#echo "RUN CLANG-FORMAT"
-#./scripts/pre-push-format.sh
-
 cd "${0%/*}/../.."
 
-./ci-python-tests.sh
+echo "CHECK FORMATTING"
+black bin --check || exit 1
+
+echo "CHECK IMPORTS ORDER"
+isort bin --check || exit 1
+
+./hallux-test.sh -x
 if [ $? -ne 0 ]; then
- echo "!!!!!PYTHON TESTS MUST PASS BEFORE GIT PUSH!!!!!"
+ echo "TESTS MUST PASS BEFORE PUSH!!"
  exit 1
 fi
-
-#../ci-cpp-tests.sh
-#if [ $? -ne 0 ]; then
-# echo "!!!!!C++ TESTS MUST PASS BEFORE GIT PUSH!!!!!"
-# exit 1
-#fi
