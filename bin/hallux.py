@@ -15,6 +15,7 @@ from pathlib import Path
 from typing import Final
 
 import yaml
+from __version__ import version
 from auxilary import find_arg
 from backends.factory import BackendFactory, QueryBackend
 from processors.cpp.cpp import CppProcessor
@@ -92,7 +93,7 @@ class Hallux:
 
     @staticmethod
     def print_usage():
-        print("Hallux v0.1 - Convenient Coding Assistant")
+        print(f"Hallux v{version} - Convenient Coding Assistant")
         print("USAGE: ")
         print("hallux [TARGET] [BACKEND] [PLUGINS] [OTHER] DIR")
         print()

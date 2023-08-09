@@ -18,12 +18,12 @@ class OpenAiChatGPT(QueryBackend):
         model: str = "",
         max_tokens: int = 4097,
         type="openai",
-        verbose: bool = True,
+        verbose: bool = False,
         base_path: Path = Path(),
         previous_backend: QueryBackend | None = None,
     ):
         assert type == "openai"
-        super().__init__(base_path, previous_backend)
+        super().__init__(base_path, previous_backend, verbose=verbose)
         if model is None or len(model) < 2:
             raise SystemExit(f"Wrong model name for OpenAI API: {model}")
 
@@ -32,7 +32,6 @@ class OpenAiChatGPT(QueryBackend):
 
         self.model: Final[str] = model
         self.max_tokens: Final[int] = max_tokens
-        self.verbose: Final[bool] = verbose
 
         openai.api_key = os.getenv("OPENAI_API_KEY")
 

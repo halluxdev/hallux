@@ -12,9 +12,16 @@ from proposals.diff_proposal import DiffProposal
 
 
 class DummyBackend(QueryBackend):
-    def __init__(self, filename: str, base_path: Path, type="dummy", previous_backend: QueryBackend | None = None):
+    def __init__(
+        self,
+        filename: str,
+        base_path: Path,
+        type="dummy",
+        previous_backend: QueryBackend | None = None,
+        verbose: bool = False,
+    ):
         assert type == "dummy"
-        super().__init__(base_path, previous_backend)
+        super().__init__(base_path, previous_backend, verbose=verbose)
 
         self.filename: str
         self.was_modified: bool = False

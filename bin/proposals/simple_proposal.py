@@ -135,7 +135,7 @@ class SimpleProposal(DiffProposal):
             return False
 
         # merge ending code
-        line_diff: list[str] = list(difflib.ndiff(self.issue_lines, proposed_lines))
+        line_diff = list(difflib.ndiff(self.issue_lines, proposed_lines))
         issue_index = 0
         prop_index = 0
 

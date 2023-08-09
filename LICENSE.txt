@@ -1,0 +1,3 @@
+        PRIVATE LICENSE
+
+Copyright (C) 2023 Hallux.dev Team
