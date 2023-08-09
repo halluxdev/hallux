@@ -1,11 +1,13 @@
 # Copyright: Hallux team, 2023
 
 from __future__ import annotations
+
+import hashlib
 import json
 from pathlib import Path
-import hashlib
-from issues.issue import IssueDescriptor
+
 from backends.query_backend import QueryBackend
+from issues.issue import IssueDescriptor
 from proposals.diff_proposal import DiffProposal
 
 

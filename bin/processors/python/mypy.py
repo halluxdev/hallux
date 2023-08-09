@@ -1,11 +1,12 @@
 # Copyright: Hallux team, 2023
 
 from __future__ import annotations
+
 import subprocess
 
-from issues.python_issue import PythonIssue
 from issues.issue import IssueDescriptor
 from issues.issue_solver import IssueSolver
+from issues.python_issue import PythonIssue
 
 
 class Mypy_IssueSolver(IssueSolver):

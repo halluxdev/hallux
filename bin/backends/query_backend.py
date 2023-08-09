@@ -1,6 +1,7 @@
 # Copyright: Hallux team, 2023
 
 from __future__ import annotations
+
 from abc import ABC, abstractmethod
 from pathlib import Path
 from typing import Final

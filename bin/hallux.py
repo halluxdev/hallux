@@ -9,20 +9,21 @@
 # - Changes code right in the codebase or sends this change as Github Web GUI proposal
 
 from __future__ import annotations
-import sys
-from typing import Final
-import yaml
-from pathlib import Path
 
+import sys
+from pathlib import Path
+from typing import Final
+
+import yaml
 from auxilary import find_arg
 from backends.factory import BackendFactory, QueryBackend
+from processors.cpp.cpp import CppProcessor
+from processors.python.python import PythonProcessor
+from processors.sonar import SonarProcessor
 from targets.diff_target import DiffTarget
 from targets.filesystem_target import FilesystemTarget
 from targets.git_commit_target import GitCommitTarget
 from targets.github_proposal_traget import GithubProposalTraget
-from processors.cpp.cpp import CppProcessor
-from processors.python.python import PythonProcessor
-from processors.sonar import SonarProcessor
 
 DEBUG: Final[bool] = False
 CONFIG_FILE: Final[str] = ".hallux"

@@ -8,7 +8,9 @@
 # All those approaches are hidden after DiffTarget interface written in this file
 
 from __future__ import annotations
+
 from abc import ABC, abstractmethod
+
 from proposals.diff_proposal import DiffProposal
 
 

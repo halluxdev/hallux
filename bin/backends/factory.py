@@ -1,11 +1,13 @@
 # Copyright: Hallux team, 2023
 
 from __future__ import annotations
+
 from pathlib import Path
-from backends.openai_backend import OpenAiChatGPT, QueryBackend
+
+from auxilary import find_arg
 from backends.dummy_backend import DummyBackend
 from backends.hallux_backend import HalluxBackend
-from auxilary import find_arg
+from backends.openai_backend import OpenAiChatGPT, QueryBackend
 
 
 class BackendFactory:

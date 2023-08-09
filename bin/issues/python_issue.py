@@ -2,9 +2,9 @@
 
 from __future__ import annotations
 
-from proposals.python_proposal import PythonProposal
-from proposals.proposal_engine import ProposalEngine, ProposalList
 from issues.issue import IssueDescriptor
+from proposals.proposal_engine import ProposalEngine, ProposalList
+from proposals.python_proposal import PythonProposal
 
 
 class PythonIssue(IssueDescriptor):

@@ -4,9 +4,9 @@ from __future__ import annotations
 
 from pathlib import Path
 
+from auxilary import set_directory
 from proposals.diff_proposal import DiffProposal
 from targets.diff_target import DiffTarget
-from auxilary import set_directory
 
 
 # Saves diff-proposals directly into local filesystem

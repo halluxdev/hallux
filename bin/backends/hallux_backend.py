@@ -4,8 +4,8 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from issues.issue import IssueDescriptor
 from backends.query_backend import QueryBackend
+from issues.issue import IssueDescriptor
 
 
 class HalluxBackend(QueryBackend):

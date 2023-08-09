@@ -1,9 +1,11 @@
 # Copyright: Hallux team, 2023
 
 from __future__ import annotations
-import subprocess
+
 import os
-from github import Github, Repository, PullRequest, GithubException
+import subprocess
+
+from github import Github, GithubException, PullRequest, Repository
 from proposals.diff_proposal import DiffProposal
 from targets.filesystem_target import FilesystemTarget
 
