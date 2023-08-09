@@ -12,8 +12,8 @@ from proposals.diff_proposal import DiffProposal
 class DummyBackend(QueryBackend):
     def __init__(self, filename: str, base_path: Path, type="dummy", previous_backend: QueryBackend | None = None):
         assert type == "dummy"
-        super().__init__(previous_backend)
-        self.base_path = base_path
+        super().__init__(base_path, previous_backend)
+
         self.filename: str
         self.was_modified: bool = False
         if Path(filename).is_absolute():

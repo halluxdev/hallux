@@ -1,6 +1,8 @@
 # Copyright: Hallux team, 2023
 
 from __future__ import annotations
+
+from pathlib import Path
 from typing import Final
 import openai
 import os
@@ -17,20 +19,22 @@ class OpenAiChatGPT(QueryBackend):
         max_tokens: int = 4097,
         type="openai",
         verbose: bool = True,
+        base_path: Path = Path(),
         previous_backend: QueryBackend | None = None,
     ):
         assert type == "openai"
-        super().__init__(previous_backend)
+        super().__init__(base_path, previous_backend)
         if model is None or len(model) < 2:
             raise SystemExit(f"Wrong model name for OpenAI API: {model}")
 
         if os.getenv("OPENAI_API_KEY") is None:
             raise SystemExit("Environment variable OPENAI_API_KEY is required for OpenAI API backend")
 
-        self.model = model
-        self.max_tokens = max_tokens
-        openai.api_key = os.getenv("OPENAI_API_KEY")
+        self.model: Final[str] = model
+        self.max_tokens: Final[int] = max_tokens
         self.verbose: Final[bool] = verbose
+
+        openai.api_key = os.getenv("OPENAI_API_KEY")
 
     def query(self, request: str, issue: IssueDescriptor | None = None, issue_lines: list[str] = list) -> list[str]:
         if self.verbose:
