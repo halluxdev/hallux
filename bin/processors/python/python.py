@@ -7,6 +7,7 @@ from processors.code_processor import CodeProcessor
 from auxilary import set_directory
 from pathlib import Path
 from processors.python.ruff import Ruff_IssueSolver
+from processors.python.mypy import Mypy_IssueSolver
 
 
 class PythonProcessor(CodeProcessor):
@@ -30,4 +31,9 @@ class PythonProcessor(CodeProcessor):
     def python_ruff(self, config):
         with set_directory(self.run_path):
             solver = Ruff_IssueSolver(config)
+            solver.solve_issues(diff_target=self.diff_target, query_backend=self.query_backend)
+
+    def python_mypy(self, config):
+        with set_directory(self.run_path):
+            solver = Mypy_IssueSolver(config)
             solver.solve_issues(diff_target=self.diff_target, query_backend=self.query_backend)

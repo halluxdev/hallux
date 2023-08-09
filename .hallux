@@ -29,7 +29,8 @@ backends:
         max_tokens: 32768
 
 python:
-    ruff: bin
+    ruff: . # command-line arguments for ruff
+    mypy: --ignore-missing-imports . # command-line arguments for mypy
 
 sonar:
     url: https://sonarqube.hallux.dev

@@ -2,12 +2,16 @@
 
 from __future__ import annotations
 from abc import ABC, abstractmethod
+from pathlib import Path
+from typing import Final
+
 from issues.issue import IssueDescriptor
 
 
 class QueryBackend(ABC):
-    def __init__(self, previous_backend: QueryBackend | None = None):
+    def __init__(self, base_path: Path = Path(), previous_backend: QueryBackend | None = None):
         self.previous = previous_backend
+        self.base_path: Final[Path] = base_path
         self.was_modified = False
 
     def previous_backend(self) -> QueryBackend | None:

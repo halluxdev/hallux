@@ -24,30 +24,29 @@ class BackendFactory:
             raise SystemError(f"BACKENDS config setting must contain non-empty list. Error in: {backends_list}")
 
         for name_dict in backends_list:
-            BackendFactory._validate_settings(name_dict)
-            short_name = list(name_dict)[0]
-            settings_dict = name_dict[short_name]
-            backend = BackendFactory._create_backend(settings_dict, config_path, backend)
-            if find_arg(argv, "--" + short_name) > 0:
+            name, settings = BackendFactory._validate_settings(name_dict)
+            backend = BackendFactory._create_backend(settings, config_path, backend)
+            if find_arg(argv, "--" + name) > 0:
                 return backend  # stop early if required by CLI
         return backend
 
     @staticmethod
-    def _validate_settings(name_dict: dict) -> None:
+    def _validate_settings(name_dict: dict) -> tuple[str, dict[str, str]]:
         if not isinstance(name_dict, dict) or len(name_dict.items()) != 1:
-            raise SystemError(f"Each BACKEND must have just one name-settings pair. Error in: {name_dict}")
+            raise SystemError(f"Each BACKEND must be just one name-settings pair. Error in: {name_dict}")
 
-        short_name = list(name_dict)[0]
-        settings_dict = name_dict[short_name]
+        name = str(list(name_dict)[0])
+        settings = name_dict[name]
 
-        if not isinstance(settings_dict, dict) or "type" not in settings_dict.keys():
-            raise SystemError(f"Each BACKEND setting must have at least 'type' setting. Error in: {settings_dict}")
+        if not isinstance(settings, dict) or "type" not in settings.keys():
+            raise SystemError(f"Each BACKEND setting must have at least 'type' setting. Error in: {settings}")
+        return name, settings
 
     @staticmethod
-    def _create_backend(settings_dict: dict, config_path: Path, previous_backend: QueryBackend) -> QueryBackend:
+    def _create_backend(settings: dict, config_path: Path, previous_backend: QueryBackend) -> QueryBackend:
         type_to_class = {"dummy": DummyBackend, "openai": OpenAiChatGPT, "hallux": HalluxBackend}
-        backend_type = settings_dict["type"]
+        backend_type = settings["type"]
         backend_class = type_to_class.get(backend_type)
         if backend_class is None:
             raise SystemError(f"Unknown BACKEND type: {backend_type}")
-        return backend_class(**settings_dict, base_path=config_path, previous_backend=previous_backend)
+        return backend_class(**settings, base_path=config_path, previous_backend=previous_backend)
