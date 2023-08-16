@@ -6,7 +6,7 @@ from pathlib import Path
 
 from auxilary import find_arg
 from backends.dummy_backend import DummyBackend
-from backends.hallux_backend import HalluxBackend
+from backends.rest_backend import RestBackend
 from backends.openai_backend import OpenAiChatGPT, QueryBackend
 
 
@@ -50,7 +50,11 @@ class BackendFactory:
     def _create_backend(
         settings: dict, config_path: Path, previous_backend: QueryBackend, verbose: bool
     ) -> QueryBackend:
-        type_to_class = {"dummy": DummyBackend, "openai": OpenAiChatGPT, "hallux": HalluxBackend}
+        type_to_class = {
+            "dummy": DummyBackend,
+            "openai": OpenAiChatGPT,
+            "rest": RestBackend
+        }
         backend_type = settings["type"]
         backend_class = type_to_class.get(backend_type)
         if backend_class is None:
