@@ -21,6 +21,7 @@ from backends.factory import BackendFactory, QueryBackend
 from processors.cpp.cpp import CppProcessor
 from processors.python.python import PythonProcessor
 from processors.sonar import SonarProcessor
+from processors.eslint.eslint_processor import EslintProcessor
 from targets.diff_target import DiffTarget
 from targets.filesystem_target import FilesystemTarget
 from targets.git_commit_target import GitCommitTarget
@@ -78,6 +79,23 @@ class Hallux:
                 self.verbose,
             )
             sonar.process()
+
+        if "processors" in self.config.keys():
+            for processor in self.config["processors"]:
+                processor_type = list(processor.keys())[0]  # Get the processor type (e.g., "eslint" or "custom")
+                processor_config = processor[processor_type]  # Get the processor configuration dictionary
+
+                if processor_config["type"] == "eslint":
+                    eslint = EslintProcessor(
+                        self.query_backend,
+                        self.diff_target,
+                        self.run_path,
+                        self.config_path,
+                        processor_config,
+                        self.verbose,
+                    )
+                    eslint.process()
+
 
     @staticmethod
     def find_config(run_path: Path) -> tuple[dict, Path]:
