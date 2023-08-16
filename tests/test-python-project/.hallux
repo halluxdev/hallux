@@ -1,7 +1,18 @@
 backends:
-    - cache:
-        type: dummy
-        filename: dummy.json
+    # - cache:
+    #     type: dummy
+    #     filename: dummy.json
+
+    - gpt3:
+        type: openai
+        model: gpt-3.5-turbo
+        max_tokens: 4096
+
+    - rest:
+        type: rest
+        url: http://localhost:8000/generate
+        request_body: { message: Think in step by step manner. $PROMPT } # Defaults to: $PROMPT
+        response_body: $RESPONSE.answer.0.value # Defaults to $RESPONSE
 
 python:
     ruff: .
