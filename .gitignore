@@ -20,3 +20,4 @@ htmlcov/
 .mypy_cache
 .DS_Store
 dummy.json
+bin/__version__.py # this file is auto-generated
