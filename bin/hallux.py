@@ -15,7 +15,6 @@ from pathlib import Path
 from typing import Final
 
 import yaml
-from __version__ import version
 from auxilary import find_arg
 from backends.factory import BackendFactory, QueryBackend
 from processors.cpp.cpp import CppProcessor
@@ -25,6 +24,12 @@ from targets.diff_target import DiffTarget
 from targets.filesystem_target import FilesystemTarget
 from targets.git_commit_target import GitCommitTarget
 from targets.github_proposal_traget import GithubProposalTraget
+
+try:
+    from __version__ import version
+except:
+    version = ".DEVELOP"
+
 
 DEBUG: Final[bool] = False
 CONFIG_FILE: Final[str] = ".hallux"

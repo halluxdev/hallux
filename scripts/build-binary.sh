@@ -1,8 +1,10 @@
 #!/usr/bin/env bash
 
+cd "${0%/*}/.."
+
 source ./activate.sh
 
-MAJOR=$(cat version.txt)
+MAJOR=$(cat ./version.txt)
 VERSION=${MAJOR}.$(git rev-list --count HEAD)
 
 echo "# Copyright: Hallux team, 2023" > bin/__version__.py
