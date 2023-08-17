@@ -1,17 +1,27 @@
+from __future__ import annotations
+
 import pathlib
-from setuptools import setup, find_packages
+import os
+from setuptools import setup
 
 here = pathlib.Path(__file__).parent.resolve()
 
+def get_version() -> str:
+    # check auto-genertated file for latest version
+    version_py = here / "bin/__version__.py"
+    if version_py.exists():
+        with open(version_py) as fp:
+            for line in fp.read().splitlines():
+                if line.startswith("version"):
+                    delim = '"' if '"' in line else "'"
+                    return line.split(delim)[1]
 
-def get_version(rel_path: str) -> str:
-    with open(here / rel_path) as fp:
-        for line in fp.read().splitlines():
-            if line.startswith("__version__"):
-                # __version__ = "0.9"
-                delim = '"' if '"' in line else "'"
-                return line.split(delim)[1]
-    raise RuntimeError("Unable to find version string.")
+    # check env variable
+    version_env : str | None = os.environ.get("HALLUX_VERSION", None)
+    if version_env is not None:
+        return version_env
+
+    return "DEVELOP"
 
 
 # Get the long description from the README file
@@ -19,7 +29,7 @@ long_description = (here / "README.md").read_text(encoding="utf-8")
 
 setup(
     name="hallux",
-    version=get_version("src/__version__.py"),
+    version=get_version(),
     description="Convenient Coding Assistant.",
     long_description=long_description,
     long_description_content_type="text/markdown",
@@ -47,10 +57,6 @@ setup(
         "Programming Language :: Python :: 3.12",
     ],
     package_dir={"": "bin"},
-    # packages=find_packages(
-    #     where="src",
-    #     exclude=["contrib", "docs", "tests*", "tasks"],
-    # ),
     install_requires=["ruff", "mypy", "openai", "pyyaml", "PyGithub"],
     entry_points={
         "console_scripts": [

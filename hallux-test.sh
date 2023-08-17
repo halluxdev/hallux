@@ -11,5 +11,3 @@ python -m pytest -v $1 \
     --junitxml xunit-reports/xunit-result-unit.xml \
     tests/integration \
     tests/unit || exit 1
-
-# coverage xml -o "coverage-reports/coverage-unit.xml"
