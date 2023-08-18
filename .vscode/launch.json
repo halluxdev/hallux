@@ -11,7 +11,7 @@
       "env": {
         "PYTHONPATH": "${workspaceFolder}/bin",
       },
-      "args" : ["--rest", "./tests/test-nodejs-project"]
+      "args" : ["--rest", "./tests/test-python-project"]
     },
     {
       "name": "Python: Current File",

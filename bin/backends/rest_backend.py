@@ -41,22 +41,24 @@ class RestBackend(QueryBackend):
             return True
         return False
 
-    def _make_request(self):
+    def _make_request(self, request: str):
         try:
-            response = requests.get(self.url)
-            # Check the status code to determine if the host is reachable
+            response = requests.post(self.url, json={"message": request})
+
+            # Successful response
             if response.status_code == 200:
-                print(f"Host {self.url} is reachable.")
+                return response.json()
+
             else:
-                print(f"Host {self.url} is reachable, but returned a non-200 status code: {response.status_code}")
+                print(f"Error status code: {response.status_code}")
+
         except requests.ConnectionError:
             print(f"Host {self.url} is not reachable.")
 
+        return None
 
 
     def query(self, request: str, issue: IssueDescriptor | None = None, issue_lines: list[str] = list) -> list[str]:
-
-
         if(self._is_object(self.request_body)):
             json_data = json.dumps(self.request_body)
             parsed_request = json_data.replace("$PROMPT", request)
@@ -70,21 +72,18 @@ class RestBackend(QueryBackend):
             print("Invalid request body")
             return []
 
+        if self.verbose:
+            print("REQUEST")
+            print(parsed_request)
 
-        return []
-
-
-        # response = requests.post(self.url, json={"message": request})
-
-        # Check the response status code
-        if response.status_code == 200:
-            data = response.text
-            print("\n\n\n\n =========== Response ========= \n\n")
-            print(data)
-            # Do something with the data
-        else:
-            print('An error occurred:', response.status_code)
+        response = self._make_request(parsed_request)
+        if(response is None):
             return []
 
+        if self.verbose:
+            print("ANSWERS")
+            print(response)
 
-        return []
+        answers = [response]
+        return answers
+
