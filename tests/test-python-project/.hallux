@@ -3,10 +3,10 @@ backends:
     #     type: dummy
     #     filename: dummy.json
 
-    - gpt3:
-        type: openai
-        model: gpt-3.5-turbo
-        max_tokens: 4096
+    # - gpt3:
+    #     type: openai
+    #     model: gpt-3.5-turbo
+    #     max_tokens: 4096
 
     - rest:
         type: rest

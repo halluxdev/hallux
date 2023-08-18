@@ -13,7 +13,7 @@ class RestBackend(QueryBackend):
         self,
         url: str,
         request_body: Any = "$PROMPT",
-        response_body: str = "",
+        response_body: str = "$RESPONSE",
         token: str | None = None,
         type="rest",
         base_path: Path = Path(),
@@ -58,6 +58,43 @@ class RestBackend(QueryBackend):
         return None
 
 
+    """
+    Takes the response object and response_body configuration in the following format:
+    "$RESPONSE.answer.0.value" and returns the value of the response object at that path.
+    """
+    def _parse_response(self, response: str | None | dict) -> list[str]:
+        if(response is None):
+            return []
+
+        if(self.response_body == "$RESPONSE" and self._is_string(response)):
+            return [response]
+
+        elif(self.response_body.startswith("$RESPONSE.")):
+            keys = self.response_body.split('.')[1:]
+
+            current = response
+
+            try:
+                for key in keys:
+                    if isinstance(current, dict):
+                        current = current[key]
+                    elif isinstance(current, list):
+                        if key.isdigit():
+                            key = int(key)
+                            current = current[key]
+                        else:
+                            return []
+                    else:
+                        return []
+            except (KeyError, IndexError, ValueError):
+                return []
+
+            return [current]
+
+        else:
+            return []
+
+
     def query(self, request: str, issue: IssueDescriptor | None = None, issue_lines: list[str] = list) -> list[str]:
         if(self._is_object(self.request_body)):
             json_data = json.dumps(self.request_body)
@@ -77,13 +114,10 @@ class RestBackend(QueryBackend):
             print(parsed_request)
 
         response = self._make_request(parsed_request)
-        if(response is None):
-            return []
+        parsed_response = self._parse_response(response)
 
         if self.verbose:
             print("ANSWERS")
-            print(response)
+            print(parsed_response)
 
-        answers = [response]
-        return answers
-
+        return parsed_response
