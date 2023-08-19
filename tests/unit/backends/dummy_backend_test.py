@@ -84,4 +84,4 @@ def test_report_succesfull_fix():
     with open(str(root_path.joinpath(dummy_json)), "rt") as file:
         json_file = json.load(file)
 
-    assert json_file == {"cpp": {"newTool": {"file1.py": {"f9bb7fe87bb576c1b6f9efad6bd01485": "bbb"}}}}
+    assert json_file == {"f9bb7fe87bb576c1b6f9efad6bd01485": "bbb"}
