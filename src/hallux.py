@@ -22,9 +22,7 @@ from targets.diff_target import DiffTarget
 from targets.filesystem_target import FilesystemTarget
 from targets.git_commit_target import GitCommitTarget
 from targets.github_proposal_traget import GithubProposalTraget
-from tools.cpp.cpp import CppProcessor
-from tools.python.python import PythonProcessor
-from tools.sonarqube.solver import SonarProcessor
+from tools.factory import IssueSolver, ProcessorFactory
 
 try:
     from __version__ import version
@@ -42,48 +40,19 @@ class Hallux:
 
     def __init__(
         self,
-        query_backend: QueryBackend,
-        diff_target: DiffTarget,
-        config: dict,
-        run_path: Path,  # current directory where hallux is executed
-        config_path: Path | None = None,  # directory of the config file, if any
+        solvers: list[IssueSolver],
+        run_path: Path,  # directory, specified in command-line
+        config_path: Path,  # directory of the config file, if exists, or current one
         verbose: bool = False,
     ):
-        self.query_backend = query_backend
-        self.diff_target: Final[DiffTarget] = diff_target
-        self.config: Final[dict] = config
+        self.solvers: Final[list[IssueSolver]] = solvers
         self.run_path: Final[Path] = run_path
         self.config_path: Final[Path] = config_path if config_path is not None else run_path
         self.verbose: bool = verbose
 
-    def process(self, command_dir: str):
-        if "python" in self.config.keys():
-            python = PythonProcessor(
-                self.query_backend,
-                self.diff_target,
-                self.run_path,
-                self.config_path,
-                self.config["python"],
-                self.verbose,
-            )
-            python.process()
-
-        if "cpp" in self.config.keys():
-            cpp = CppProcessor(
-                self.query_backend, self.diff_target, self.run_path, self.config_path, self.config["cpp"], self.verbose
-            )
-            cpp.process()
-
-        if "sonar" in self.config.keys():
-            sonar = SonarProcessor(
-                self.query_backend,
-                self.diff_target,
-                self.run_path,
-                self.config_path,
-                self.config["sonar"],
-                self.verbose,
-            )
-            sonar.process()
+    def process(self, diff_target: DiffTarget, query_backend: QueryBackend):
+        for solver in self.solvers:
+            solver.solve_issues(diff_target, query_backend)
 
     @staticmethod
     def find_config(run_path: Path) -> tuple[dict, Path]:
@@ -165,21 +134,6 @@ class Hallux:
         # If no other targets were found - use default
         return FilesystemTarget()
 
-    @staticmethod
-    def init_plugins(argv: list[str], config: dict) -> dict:
-        # not properly implemented yet
-        plugins = ["python", "cpp", "sonar"]
-        new_config = {}
-        for plug in plugins:
-            plug_ind = find_arg(argv, "--" + plug)
-            if plug_ind > 0:
-                if plug in config:
-                    new_config[plug] = config[plug]
-                else:
-                    new_config[plug] = Hallux.default_plugins[plug]
-        # if any plugin mentioned in the arguments, we run it (them), otherwise run those which are in config
-        return new_config if len(new_config) > 0 else config
-
 
 def main(argv: list[str], run_path: Path | None = None) -> int:
     """
@@ -227,18 +181,24 @@ def main(argv: list[str], run_path: Path | None = None) -> int:
         return 3
 
     try:
-        plugins: dict = Hallux.init_plugins(argv, config)
+        solvers: list[IssueSolver] = ProcessorFactory.init_solvers(
+            argv,
+            config.get("solvers"),
+            config.get("groups"),
+            config_path=config_path,
+            run_path=run_path,
+            command_dir=command_dir,
+            verbose=verbose,
+        )
     except Exception as e:
-        print(f"Error during PLUGINS initialization: {e}", file=sys.stderr)
+        print(f"Error during SOLVERS initialization: {e}", file=sys.stderr)
         if verbose:
             raise e
         return 4
 
     try:
         hallux = Hallux(
-            query_backend=query_backend,
-            diff_target=target,
-            config=plugins,
+            solvers=solvers,
             run_path=run_path,
             config_path=config_path,
             verbose=verbose,
@@ -250,7 +210,7 @@ def main(argv: list[str], run_path: Path | None = None) -> int:
         return 5
 
     try:
-        hallux.process(command_dir)
+        hallux.process(query_backend=query_backend, diff_target=target)
     except Exception as e:
         print(f"Error during process: {e.args}", file=sys.stderr)
         if verbose:
@@ -261,5 +221,5 @@ def main(argv: list[str], run_path: Path | None = None) -> int:
 
 
 if __name__ == "__main__":
-    ret_val = main(sys.argv, None)
+    ret_val = main(sys.argv)
     sys.exit(ret_val)

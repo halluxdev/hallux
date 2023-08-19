@@ -7,57 +7,43 @@ from pathlib import Path
 from tempfile import TemporaryDirectory
 from unittest.mock import patch
 
-import pytest
 import yaml
 
+from auxilary import set_directory
 from hallux import CONFIG_FILE, Hallux, main
-
-
-def test_hallux():
-    assert "python" in Hallux.default_plugins
-    assert "cpp" in Hallux.default_plugins
-    assert "sonar" in Hallux.default_plugins
-
-
-@pytest.mark.parametrize(
-    "argv, config, expected",
-    [
-        ([], {}, {}),
-        ([], {"whatever": {}}, {"whatever": {}}),
-        (["--python"], {}, {"python": {"ruff": "."}}),
-        (["--cpp"], {}, {"cpp": {"compile": True}}),
-        (["--sonar"], {}, {"sonar": True}),
-    ],
-)
-def test_init_plugins(argv: list[str], config: dict, expected: dict):
-    argv = ["hallux", "fix"] + argv
-    actual = Hallux.init_plugins(argv, config)
-    assert actual == expected
 
 
 @patch("builtins.print")
 def test_Hallux_main(mock_print):
-    random_path = Path("/tmp/ertyuikjhg")
     # prints usage, and quits
-    out_val: int = main([], random_path)
+    out_val: int = main([])
     assert out_val == 0
     assert len(mock_print.mock_calls) > 30
 
     # same as before
     mock_print.mock_calls.clear()
-    out_val: int = main(["hallux"], random_path)
+    out_val: int = main(["hallux"])
     assert out_val == 0
     assert len(mock_print.mock_calls) > 30
 
-    # ask for fix ., but nothing configured => quit
+    # ask for fix . in empty dir
     mock_print.mock_calls.clear()
-    out_val = main(["hallux", "--cache", "."], random_path)
-    assert out_val == 0
-    assert len(mock_print.mock_calls) == 0
+    with TemporaryDirectory() as t:
+        with set_directory(t):
+            out_val = main(["hallux", "--cache", "."])
+            assert out_val == 0
+            assert len(mock_print.mock_calls) == 4
+
+    mock_print.mock_calls.clear()
+    with TemporaryDirectory() as t:
+        with set_directory(t):
+            out_val = main(["hallux", "--cache", "--verbose", "."])
+            assert out_val == 0
+            assert len(mock_print.mock_calls) == 4
 
     # asked to fix python, but no path
     mock_print.mock_calls.clear()
-    out_val = main(["hallux", "--cache", "--python"], random_path)
+    out_val = main(["hallux", "--cache", "--python"])
     assert 10 > out_val > 0  #
 
 

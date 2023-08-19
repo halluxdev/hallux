@@ -1,3 +1,4 @@
+import os
 from pathlib import Path
 from typing import Final
 from unittest.mock import Mock, patch
@@ -13,11 +14,15 @@ SONAR_PROJECT: Final[str] = "test_project"
 
 # Tests for Sonar_IssueSolver
 def test_list_issues():
+    print(os.getcwd())
+
     with patch.object(requests, "get") as mocked_get:
         mocked_get.return_value.status_code = 200
         mocked_get.return_value.text = '{"issues": []}'
 
-        sonar_solver = Sonar_IssueSolver(url="http://localhost", token=SONAR_SAMPLE_TOKEN, project=SONAR_PROJECT)
+        sonar_solver = Sonar_IssueSolver(
+            Path(), Path(), True, url="http://localhost", token=SONAR_SAMPLE_TOKEN, project=SONAR_PROJECT
+        )
         issues = sonar_solver.list_issues()
 
         assert issues == []
@@ -33,7 +38,9 @@ def test_list_issues_bad_response():
     with patch.object(requests, "get") as mocked_get:
         mocked_get.return_value.status_code = 404
 
-        sonar_solver = Sonar_IssueSolver(url="http://localhost", token=SONAR_SAMPLE_TOKEN, project="test_project")
+        sonar_solver = Sonar_IssueSolver(
+            Path(), Path(), False, url="http://localhost", token=SONAR_SAMPLE_TOKEN, project="test_project"
+        )
         issues = sonar_solver.list_issues()
 
         assert issues == []

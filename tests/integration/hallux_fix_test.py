@@ -86,6 +86,7 @@ def test_hallux_python(
     target: str = "--files",
 ):
     backend = "--gpt3" if real_openai_test else "--cache"
+
     # Create project dir, if not already provided
     if tmp_proj_dir is None:
         tmp_dir = hallux_tmp_dir()

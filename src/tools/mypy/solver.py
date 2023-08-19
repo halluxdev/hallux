@@ -3,23 +3,35 @@
 from __future__ import annotations
 
 import subprocess
+from pathlib import Path
 
+from auxilary import set_directory
 from issues.issue import IssueDescriptor
 from tools.issue_solver import IssueSolver
 from tools.python.python_issue import PythonIssue
 
 
 class Mypy_IssueSolver(IssueSolver):
-    def __init__(self, mypy_args: str | None = None):
-        super().__init__()
-        self.mypy_args: str = mypy_args if mypy_args is not None else "--ignore-missing-imports ."
+    def __init__(
+        self,
+        config_path: Path,
+        run_path: Path,
+        command_dir: str = ".",
+        verbose: bool = False,
+        success_test: str | None = None,
+        args: str | None = None,
+    ):
+        super().__init__(config_path, run_path, command_dir, verbose, success_test=success_test)
+        self.args: str = args if args is not None else "--ignore-missing-imports"
 
     def list_issues(self) -> list[IssueDescriptor]:
         issues: list[IssueDescriptor] = []
-        try:
-            mypy_output = subprocess.check_output(["mypy", self.mypy_args])
-        except subprocess.CalledProcessError as e:
-            mypy_output = e.output
+
+        with set_directory(self.run_path):
+            try:
+                mypy_output = subprocess.check_output(["mypy", self.args, self.command_dir])
+            except subprocess.CalledProcessError as e:
+                mypy_output = e.output
 
         issues.extend(PythonIssue.parseIssues(mypy_output.decode("utf-8"), tool="mypy", keyword="error:"))
 

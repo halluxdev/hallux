@@ -1,3 +1,4 @@
+from pathlib import Path
 from unittest.mock import Mock
 
 import pytest
@@ -19,7 +20,7 @@ class ExampleIssueSolver(IssueSolver):
 # Define a fixture for the IssueSolver instance
 @pytest.fixture
 def issue_solver():
-    return ExampleIssueSolver()
+    return ExampleIssueSolver(Path(), Path())
 
 
 # Define a fixture for the diff_target mock
