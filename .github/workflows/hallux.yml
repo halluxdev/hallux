@@ -24,7 +24,7 @@ jobs:
     - name: Unit-Tests
       run: |
         export PATH=$(pwd)/bin:$PATH
-        export PYTHONPATH=$(pwd)/bin:${PYTHONPATH}
+        export PYTHONPATH=$(pwd)/src:${PYTHONPATH}
         python -m pytest \
           --cov-branch \
           --cov-report=term \
@@ -36,34 +36,9 @@ jobs:
           tests/integration/hallux_fix_test.py
         ls -la
 
-#    - name: Integration Tests
-#      run: |
-#        export PATH=$(pwd)/bin:$PATH
-#        export PYTHONPATH=$(pwd)/bin:${PYTHONPATH}
-#        python -m pytest tests/integration/hallux_fix_test.py
 
-      # If you wish to fail your job when the Quality Gate is red, uncomment the
-      # following lines. This would typically be used to fail a deployment.
-      # - uses: sonarsource/sonarqube-quality-gate-action@master
-      #   timeout-minutes: 5
-      #   env:
-      #     SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
     - uses: sonarsource/sonarqube-scan-action@master
       env:
         SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
         SONAR_PROJECT_VERSION: ${{ github.run_number }}
-        # PROJECT_VERSION: 0.1-$(git branch --show-current)-$(git rev-list --count HEAD)-$(git rev-parse --short HEAD)
-
-#    - name: Self-Hallux
-#      pull_request:
-#        branches: [ master ]
-#
-#      run:
-#        export PATH=$(pwd)/bin:$PATH
-#        export PYTHONPATH=$(pwd)/bin:${PYTHONPATH}
-#        python ./bin/hallux.py fix --openai --sonar --github https://github.com/halluxai/hallux/pull/${{ github.event.pull_request.number }}
-#      env:
-#        GITHUB_TOKEN: ${{ secrets.HALLUX_GITHUB_TOKEN }}
-#        OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-#        PULL_REQUEST_NUMBER: ${{ github.event.pull_request.number }}
