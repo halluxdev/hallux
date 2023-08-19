@@ -50,7 +50,10 @@ class RestBackend(QueryBackend):
 
             # Successful response
             if response.status_code == 200:
-                return response.json()
+                if(response.headers['Content-Type'] == 'application/json'):
+                    return response.json()
+                else:
+                    return response.text
 
             else:
                 print(f"Error status code: {response.status_code}")
@@ -59,6 +62,28 @@ class RestBackend(QueryBackend):
             print(f"Host {self.url} is not reachable.")
 
         return None
+
+    def _get_by_path(self, response: str | None | dict):
+        keys = self.response_body.split(".")[1:]
+
+        current = response
+
+        try:
+            for key in keys:
+                if isinstance(current, dict):
+                    current = current[key]
+                elif isinstance(current, list):
+                    if key.isdigit():
+                        key = int(key)
+                        current = current[key]
+                    else:
+                        return []
+                else:
+                    return []
+        except (KeyError, IndexError, ValueError):
+            return []
+
+        return [current]
 
     """
     Takes the response object and response_body configuration in the following format:
@@ -73,26 +98,7 @@ class RestBackend(QueryBackend):
             return [response]
 
         elif self.response_body.startswith("$RESPONSE."):
-            keys = self.response_body.split(".")[1:]
-
-            current = response
-
-            try:
-                for key in keys:
-                    if isinstance(current, dict):
-                        current = current[key]
-                    elif isinstance(current, list):
-                        if key.isdigit():
-                            key = int(key)
-                            current = current[key]
-                        else:
-                            return []
-                    else:
-                        return []
-            except (KeyError, IndexError, ValueError):
-                return []
-
-            return [current]
+            return self._get_by_path(response)
 
         else:
             return []
