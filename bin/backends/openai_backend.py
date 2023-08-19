@@ -51,4 +51,5 @@ class OpenAiChatGPT(QueryBackend):
                     print(line)
                 print()
                 print()
+
         return answers

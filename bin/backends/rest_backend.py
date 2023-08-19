@@ -1,12 +1,15 @@
 # Copyright: Hallux team, 2023
 
 from __future__ import annotations
+
 import json
 from pathlib import Path
 from typing import Any
+
+import requests
 from backends.query_backend import QueryBackend
 from issues.issue import IssueDescriptor
-import requests
+
 
 class RestBackend(QueryBackend):
     def __init__(
@@ -57,20 +60,20 @@ class RestBackend(QueryBackend):
 
         return None
 
-
     """
     Takes the response object and response_body configuration in the following format:
     "$RESPONSE.answer.0.value" and returns the value of the response object at that path.
     """
+
     def _parse_response(self, response: str | None | dict) -> list[str]:
-        if(response is None):
+        if response is None:
             return []
 
-        if(self.response_body == "$RESPONSE" and self._is_string(response)):
+        if self.response_body == "$RESPONSE" and self._is_string(response):
             return [response]
 
-        elif(self.response_body.startswith("$RESPONSE.")):
-            keys = self.response_body.split('.')[1:]
+        elif self.response_body.startswith("$RESPONSE."):
+            keys = self.response_body.split(".")[1:]
 
             current = response
 
@@ -94,16 +97,15 @@ class RestBackend(QueryBackend):
         else:
             return []
 
-
     def query(self, request: str, issue: IssueDescriptor | None = None, issue_lines: list[str] = list) -> list[str]:
-        if(self._is_object(self.request_body)):
+        if self._is_object(self.request_body):
             json_data = json.dumps(self.request_body)
             parsed_request = json_data.replace("$PROMPT", request)
-            self.headers.update({'Content-Type': 'application/json'})
+            self.headers.update({"Content-Type": "application/json"})
 
-        elif(self._is_string(self.request_body)):
+        elif self._is_string(self.request_body):
             parsed_request = self.request_body.replace("$PROMPT", request)
-            self.headers.update({'Content-Type': 'text/plain'})
+            self.headers.update({"Content-Type": "text/plain"})
 
         else:
             print("Invalid request body")

@@ -24,14 +24,6 @@ def get_version() -> str:
 
     return "DEVELOP"
 
-def get_version(rel_path: str) -> str:
-    with open(here / rel_path) as fp:
-        for line in fp.read().splitlines():
-            if line.startswith("__version__"):
-                delim = '"' if '"' in line else "'"
-                return line.split(delim)[1]
-    raise RuntimeError("Unable to find version string.")
-
 
 # Get the long description from the README file
 long_description = (here / "README.md").read_text(encoding="utf-8")

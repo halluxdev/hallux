@@ -6,12 +6,12 @@
       "type": "python",
       "request": "launch",
       "console": "integratedTerminal",
-      "program": "${workspaceFolder}/bin/hallux.py",
-      "cwd": "${workspaceFolder}",
+      "program": "${workspaceFolder}/hallux.py",
+      "cwd": "/tmp/hallux/tmpeg3cah1x",
       "env": {
         "PYTHONPATH": "${workspaceFolder}/bin",
       },
-      "args" : ["--verbose", "--rest", "./tests/test-python-project"]
+      "args" : ["fix", "--cpp"]
     },
     {
       "name": "Python: Current File",
