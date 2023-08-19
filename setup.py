@@ -22,6 +22,8 @@ def get_version() -> str:
     if version_env is not None:
         return version_env
 
+    return "DEVELOP"
+
 def get_version(rel_path: str) -> str:
     with open(here / rel_path) as fp:
         for line in fp.read().splitlines():

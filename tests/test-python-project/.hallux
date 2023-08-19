@@ -1,12 +1,7 @@
 backends:
-    # - cache:
-    #     type: dummy
-    #     filename: dummy.json
-
-    # - gpt3:
-    #     type: openai
-    #     model: gpt-3.5-turbo
-    #     max_tokens: 4096
+    - cache:
+        type: dummy
+        filename: dummy.json
 
     - rest:
         type: rest
