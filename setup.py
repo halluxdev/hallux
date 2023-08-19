@@ -34,10 +34,9 @@ setup(
     description="Convenient Coding Assistant.",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/halluxai/hallux",
+    url="https://github.com/halluxdev/hallux",
     project_urls={
         "Documentation": "https://hallux.dev/doc",
-        "Source": "https://github.com/halluxai/hallux",
     },
     author="Hallux.Dev Team",
     author_email="sergey@hallux.dev",

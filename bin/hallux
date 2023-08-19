@@ -6,7 +6,7 @@ HALLUX_ROOT="${SCRIPT_DIR}/.."
 
 if [ ! -d "${HALLUX_ROOT}/venv" ]
 then
-  python3 -m venv --prompt="Hallux-0.1" "${HALLUX_ROOT}/venv"
+  python3 -m venv --prompt="Hallux-0.2" "${HALLUX_ROOT}/venv"
   source ${HALLUX_ROOT}/venv/bin/activate
   pip install pip --upgrade
   pip install wheel
@@ -15,4 +15,4 @@ fi
 
 source ${HALLUX_ROOT}/activate.sh
 
-python3 ${HALLUX_ROOT}/bin/hallux.py "$@"
+python3 ${HALLUX_ROOT}/src/hallux.py "$@"

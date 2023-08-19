@@ -16,7 +16,7 @@ from auxilary import set_directory
 from targets.github_proposal_traget import GithubProposalTraget
 from github import Github, Repository, PullRequest
 
-GITHUB_PULLREQUEST_URL = "https://github.com/halluxai/hallux/pull/26"
+GITHUB_PULLREQUEST_URL = "https://github.com/halluxdev/hallux/pull/26"
 
 
 @pytest.mark.skipif(
@@ -37,7 +37,7 @@ def test_hallux_github(tmp_proj_dir: str | None = None):
 
     base_url, repo_name, pr_id = GithubProposalTraget.parse_pr_url(GITHUB_PULLREQUEST_URL)
     assert base_url == "https://api.github.com"
-    assert repo_name == "halluxai/hallux"
+    assert repo_name == "halluxdev/hallux"
     assert pr_id == 26
 
     github = Github(os.environ["GITHUB_TOKEN"], base_url=base_url)

@@ -21,4 +21,4 @@ htmlcov/
 .DS_Store
 dummy.json
 # this file is auto-generated
-bin/__version__.py
+src/__version__.py

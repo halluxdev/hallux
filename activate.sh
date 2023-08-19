@@ -8,6 +8,6 @@ export HALLUX_ROOT="${HALLUX_ROOT:-${PROJECT_DIR}}"
 
 source ${HALLUX_ROOT}/venv/bin/activate
 
-export PYTHONPATH="${HALLUX_ROOT}/bin:${HALLUX_ROOT}/tests:${PYTHONPATH}"
+export PYTHONPATH="${HALLUX_ROOT}/src:${HALLUX_ROOT}/tests:${PYTHONPATH}"
 
 export PATH="${HALLUX_ROOT}/bin:${PATH}"
