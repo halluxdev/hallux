@@ -28,6 +28,7 @@ app.post("/generate", async (req: Request, res: Response) => {
     const answer = await generate(message);
 
     // "$RESPONSE.answer.0.value"
+    // res.send(answer);
     res.send({ answer: [{value: answer}] });
 
   } catch (error) {
