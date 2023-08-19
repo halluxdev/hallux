@@ -6,6 +6,7 @@ from setuptools import setup
 
 here = pathlib.Path(__file__).parent.resolve()
 
+
 def get_version() -> str:
     # check auto-genertated file for latest version
     version_py = here / "bin/__version__.py"
@@ -17,7 +18,7 @@ def get_version() -> str:
                     return line.split(delim)[1]
 
     # check env variable
-    version_env : str | None = os.environ.get("HALLUX_VERSION", None)
+    version_env: str | None = os.environ.get("HALLUX_VERSION", None)
     if version_env is not None:
         return version_env
 
