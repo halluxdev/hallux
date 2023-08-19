@@ -68,7 +68,7 @@ def test_hallux_github(tmp_proj_dir: str | None = None):
             pytest.fail(e, pytrace=True)  # Cannot checkout PR commit
 
         try:
-            subprocess.check_output(["hallux", "--python", "--github", GITHUB_PULLREQUEST_URL, "."])
+            subprocess.check_output(["hallux", "--cache", "--python", "--github", GITHUB_PULLREQUEST_URL, "."])
         except subprocess.CalledProcessError as e:
             pytest.fail(
                 e, pytrace=True
