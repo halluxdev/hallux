@@ -3,5 +3,11 @@ backends:
         type: dummy
         filename: dummy.json
 
+    - rest:
+        type: rest
+        url: http://localhost:8181/generate
+        request_body: { message: Think in step by step manner. $PROMPT } # Defaults to: $PROMPT
+        response_body: $RESPONSE.answer.0.value # Defaults to $RESPONSE
+
 python:
     ruff: .
