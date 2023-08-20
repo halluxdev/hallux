@@ -5,7 +5,7 @@ source ./activate.sh
 python -m pytest -v $1 \
     --cov-branch \
     --cov-report=term \
-    --cov=bin \
+    --cov=src \
     --cov-report=xml \
     --cov-report=html \
     --junitxml xunit-reports/xunit-result-unit.xml \

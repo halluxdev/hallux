@@ -47,29 +47,10 @@ class DummyBackend(QueryBackend):
                 json.dump(self.json, file)
 
     def report_succesfull_fix(self, issue: IssueDescriptor, proposal: DiffProposal) -> None:
-        language = self.json.get(issue.language)
-        if language is None:
-            language = self.json[issue.language] = {}
-
-        tool = language.get(issue.tool)
-        if tool is None:
-            tool = language[issue.tool] = {}
-
-        issue_file = Path(issue.filename) if Path(issue.filename).exists() else self.base_path.joinpath(issue.filename)
-        found_issues: dict | None = None
-        for filename, file_issues in tool.items():
-            answer_file = self.base_path.joinpath(filename)
-            if issue_file.samefile(answer_file):
-                found_issues = file_issues
-                break
-
-        if found_issues is None:
-            found_issues = tool[issue.filename] = {}
-
         hash = self.issue_hash(issue.description, proposal.issue_lines)
 
-        if hash not in found_issues:
-            found_issues[hash] = "\n".join(proposal.proposed_lines)
+        if hash not in self.json:
+            self.json[hash] = "\n".join(proposal.proposed_lines)
 
         self.was_modified = True
 
@@ -79,31 +60,10 @@ class DummyBackend(QueryBackend):
     def query(
         self, request: str, issue: IssueDescriptor | None = None, issue_lines: list[str] | None = None
     ) -> list[str]:
-        if issue is None or issue_lines is None or len(issue_lines) == 0:
-            return []
 
-        language = self.json.get(issue.language)
-        if language is None:
-            return []
-
-        tool = language.get(issue.tool)
-        if tool is None:
-            return []
-
-        issue_file = Path(issue.filename) if Path(issue.filename).exists() else self.base_path.joinpath(issue.filename)
-        found_issues: dict | None = None
-        for filename, file_issues in tool.items():
-            answer_file = self.base_path.joinpath(filename)
-            if issue_file.samefile(answer_file):
-                found_issues = file_issues
-                break
-
-        if found_issues is None:
-            return []
-
-        hash = self.issue_hash(issue.description, issue_lines)
-
-        if hash in found_issues:
-            return found_issues[hash]
+        if issue is not None and issue_lines is not None:
+            hash = self.issue_hash(issue.description, issue_lines)
+            return self.json.get(hash, [])
 
         return []
+

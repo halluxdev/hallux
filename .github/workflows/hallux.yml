@@ -28,7 +28,7 @@ jobs:
         python -m pytest \
           --cov-branch \
           --cov-report=term \
-          --cov=bin \
+          --cov=src \
           --cov-report=xml \
           --cov-fail-under=65 \
           --junitxml xunit-reports/xunit-result-unit.xml \

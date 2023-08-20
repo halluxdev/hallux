@@ -1,1 +1,5 @@
-{"python": {"ruff": {"python/parse_cpp_tree_test.py": {"7deff2819dede14a08528cced9db9e57": ["\n        try:\n            token1 = next(tokens1)\n            token2 = next(tokens2)\n        except StopIteration:\n            break\n\n\n@pytest.mark.parametrize("]}}}}
+{
+  "7deff2819dede14a08528cced9db9e57": [
+    "\n        try:\n            token1 = next(tokens1)\n            token2 = next(tokens2)\n        except StopIteration:\n            break\n\n\n@pytest.mark.parametrize("
+  ]
+}
