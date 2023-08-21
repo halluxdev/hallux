@@ -4,11 +4,17 @@ set -e
 
 cd "${0%/*}/../.."
 
-echo "CHECK FORMATTING"
-black bin --check || exit 1
+black . --check
+if [ $? -ne 0 ]; then
+ echo "Python code needs formatting: run 'black .' command"
+ exit 1
+fi
 
-echo "CHECK IMPORTS ORDER"
-isort bin --check || exit 1
+isort . --check
+if [ $? -ne 0 ]; then
+ echo "Python code needs imports re-ordering: run 'isort .' command"
+ exit 1
+fi
 
 ./hallux-test.sh -x
 if [ $? -ne 0 ]; then
