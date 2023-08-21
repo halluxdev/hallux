@@ -68,7 +68,7 @@ def test_hallux_cpp(
     with set_directory(Path(tmp_proj_dir)):
         try:
             main(["hallux", target, backend, "."], None)
-        except subprocess.CalledProcessError as e:
+        except Exception as e:
             pytest.fail(e, pytrace=True)  # hallux must not fail ?
 
     # ASSERT: must be no remaining c++ compilation issues

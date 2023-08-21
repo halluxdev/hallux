@@ -71,7 +71,7 @@ def test_hallux_github(tmp_proj_dir: str | None = None):
 
         try:
             main(["hallux", "--cache", "--python", "--github", GITHUB_PULLREQUEST_URL, "."], None)
-        except subprocess.CalledProcessError as e:
+        except Exception as e:
             pytest.fail(
                 e, pytrace=True
             )  # Fail during running `hallux --python --github https://github.com/halluxai/hallux/pull/26 .`
