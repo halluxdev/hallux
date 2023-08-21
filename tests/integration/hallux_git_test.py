@@ -22,6 +22,7 @@ def test_hallux_git_cpp(proj_name: str = "test-cpp-project", tmp_proj_dir: str |
     with set_directory(Path(tmp_proj_dir)):
         try:
             subprocess.check_output(["git", "init"])
+
         except subprocess.CalledProcessError as e:
             pytest.fail(e, pytrace=True)  # Cannot call `git init`
 

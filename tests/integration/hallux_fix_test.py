@@ -12,6 +12,7 @@ from pathlib import Path
 import pytest
 
 from auxilary import set_directory
+from hallux import main
 
 
 def test_hallux_cpp(
@@ -66,8 +67,8 @@ def test_hallux_cpp(
     # run hallux from the temporal project directory
     with set_directory(Path(tmp_proj_dir)):
         try:
-            subprocess.check_output(["hallux", target, backend, "."])
-        except subprocess.CalledProcessError as e:
+            main(["hallux", target, backend, "."], None)
+        except Exception as e:
             pytest.fail(e, pytrace=True)  # hallux must not fail ?
 
     # ASSERT: must be no remaining c++ compilation issues

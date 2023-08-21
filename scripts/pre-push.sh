@@ -16,7 +16,7 @@ if [ $? -ne 0 ]; then
  exit 1
 fi
 
-./hallux-test.sh -x
+./hallux-test.sh -x --cov-fail-under=70
 if [ $? -ne 0 ]; then
  echo "TESTS MUST PASS BEFORE PUSH!!"
  exit 1

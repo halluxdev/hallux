@@ -15,6 +15,7 @@ import pytest
 from github import Github, PullRequest, Repository
 
 from auxilary import set_directory
+from hallux import main
 from targets.github_proposal_traget import GithubProposalTraget
 
 GITHUB_PULLREQUEST_URL = "https://github.com/halluxdev/hallux/pull/26"
@@ -69,8 +70,8 @@ def test_hallux_github(tmp_proj_dir: str | None = None):
             pytest.fail(e, pytrace=True)  # Cannot checkout PR commit
 
         try:
-            subprocess.check_output(["hallux", "--cache", "--python", "--github", GITHUB_PULLREQUEST_URL, "."])
-        except subprocess.CalledProcessError as e:
+            main(["hallux", "--cache", "--python", "--github", GITHUB_PULLREQUEST_URL, "."], None)
+        except Exception as e:
             pytest.fail(
                 e, pytrace=True
             )  # Fail during running `hallux --python --github https://github.com/halluxai/hallux/pull/26 .`
