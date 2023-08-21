@@ -3,11 +3,14 @@
 
 # HALLUX TEST : checks that `hallux .` command indeed capable of fixing all issues in the test-project(s)
 from __future__ import annotations
-import tempfile
-import pytest
+
 import shutil
-from pathlib import Path
 import subprocess
+import tempfile
+from pathlib import Path
+
+import pytest
+
 from auxilary import set_directory
 
 

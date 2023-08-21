@@ -6,8 +6,9 @@ from __future__ import annotations
 from inspect import currentframe, getframeinfo
 from pathlib import Path
 
-from proposals.python_proposal import PythonProposal
 from unit.common.testing_issue import TestingIssue
+
+from proposals.python_proposal import PythonProposal
 
 
 def test_python_proposal():

@@ -2,12 +2,15 @@
 # Copyright: Hallux team, 2023
 
 from __future__ import annotations
-import pytest
+
 from pathlib import Path
-from unittest.mock import patch
-from hallux import Hallux, main, CONFIG_FILE
-import yaml
 from tempfile import TemporaryDirectory
+from unittest.mock import patch
+
+import pytest
+import yaml
+
+from hallux import CONFIG_FILE, Hallux, main
 
 
 def test_hallux():

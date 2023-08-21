@@ -1,15 +1,15 @@
 #!/bin/env python
 # Copyright: Hallux team, 2023
+import json
+import tempfile
+from pathlib import Path
 from unittest.mock import Mock
 
 import pytest
-import json
-from pathlib import Path
-from backends.dummy_backend import DummyBackend
-import tempfile
-
-from proposals.diff_proposal import DiffProposal
 from unit.common.testing_issue import TestingIssue
+
+from backends.dummy_backend import DummyBackend
+from proposals.diff_proposal import DiffProposal
 
 
 class TestDummyBackend:

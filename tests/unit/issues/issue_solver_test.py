@@ -1,11 +1,12 @@
-import pytest
 from unittest.mock import Mock
+
+import pytest
+from unit.common.testing_issue import TestingIssue
+
+from backends.query_backend import QueryBackend
 from issues.issue_solver import IssueSolver
 from proposals.diff_proposal import DiffProposal
 from targets.diff_target import DiffTarget
-from backends.query_backend import QueryBackend
-
-from unit.common.testing_issue import TestingIssue
 
 
 # Create a concrete subclass of IssueSolver for testing

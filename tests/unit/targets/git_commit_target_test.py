@@ -1,8 +1,10 @@
-import pytest
+from typing import Final
 from unittest.mock import Mock, patch
+
+import pytest
+
 from targets.filesystem_target import FilesystemTarget
 from targets.git_commit_target import GitCommitTarget
-from typing import Final
 
 TEST_PROJECT_PATH: Final[str] = "/current/dir"
 

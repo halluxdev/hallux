@@ -6,6 +6,7 @@ import os
 import subprocess
 
 from github import Github, GithubException, PullRequest, Repository
+
 from proposals.diff_proposal import DiffProposal
 from targets.filesystem_target import FilesystemTarget
 

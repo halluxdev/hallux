@@ -4,17 +4,18 @@
 # HALLUX COMMIT TEST : checks that `hallux fix` command indeed capable of fixing all issues in the test-project(s)
 from __future__ import annotations
 
+import os
+import shutil
+import subprocess
 import tempfile
+from pathlib import Path
 from typing import Final
 
 import pytest
-import shutil
-import os
-from pathlib import Path
-import subprocess
+from github import Github, PullRequest, Repository
+
 from auxilary import set_directory
 from targets.github_proposal_traget import GithubProposalTraget
-from github import Github, Repository, PullRequest
 
 GITHUB_PULLREQUEST_URL = "https://github.com/halluxdev/hallux/pull/26"
 

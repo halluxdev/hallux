@@ -1,8 +1,9 @@
-import unittest
-from unittest.mock import patch, Mock
-from pathlib import Path
-from processors.cpp.cpp import CppProcessor
 import tempfile
+import unittest
+from pathlib import Path
+from unittest.mock import Mock, patch
+
+from processors.cpp.cpp import CppProcessor
 
 
 class TestCppProcessor(unittest.TestCase):

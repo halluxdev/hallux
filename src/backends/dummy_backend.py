@@ -60,10 +60,8 @@ class DummyBackend(QueryBackend):
     def query(
         self, request: str, issue: IssueDescriptor | None = None, issue_lines: list[str] | None = None
     ) -> list[str]:
-
         if issue is not None and issue_lines is not None:
             hash = self.issue_hash(issue.description, issue_lines)
             return self.json.get(hash, [])
 
         return []
-

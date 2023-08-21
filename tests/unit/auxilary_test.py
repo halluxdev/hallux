@@ -2,10 +2,13 @@
 # Copyright: Hallux team, 2023
 
 from __future__ import annotations
-import pytest
+
 import os
 import tempfile
-from auxilary import set_directory, find_arg, Path
+
+import pytest
+
+from auxilary import Path, find_arg, set_directory
 
 
 @pytest.mark.parametrize(

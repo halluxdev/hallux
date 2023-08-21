@@ -4,13 +4,13 @@
 from __future__ import annotations
 
 from typing import Final
-from unittest.mock import patch, mock_open
+from unittest.mock import mock_open, patch
 
 import pytest
-
-from targets.filesystem_target import FilesystemTarget
-from proposals.simple_proposal import SimpleProposal
 from unit.common.testing_issue import TestingIssue
+
+from proposals.simple_proposal import SimpleProposal
+from targets.filesystem_target import FilesystemTarget
 
 
 def test_filesystem_target():

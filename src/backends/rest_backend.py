@@ -7,6 +7,7 @@ from pathlib import Path
 from typing import Any
 
 import requests
+
 from backends.query_backend import QueryBackend
 from issues.issue import IssueDescriptor
 
@@ -50,7 +51,7 @@ class RestBackend(QueryBackend):
 
             # Successful response
             if response.status_code == 200:
-                if(response.headers['Content-Type'] == 'application/json'):
+                if response.headers["Content-Type"] == "application/json":
                     return response.json()
                 else:
                     return response.text

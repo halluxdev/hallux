@@ -1,10 +1,11 @@
-from typing import Final
-import requests
-from unittest.mock import Mock, patch
 from pathlib import Path
+from typing import Final
+from unittest.mock import Mock, patch
+
+import requests
+
 from issues.issue import IssueDescriptor
 from processors.sonar import Sonar_IssueSolver, SonarIssue
-
 
 SONAR_SAMPLE_TOKEN: Final[str] = "sqt-deadbeefdeadbeefdeadbeefdeadbeef"
 SONAR_PROJECT: Final[str] = "test_project"

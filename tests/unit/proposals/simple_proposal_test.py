@@ -3,11 +3,12 @@
 
 from __future__ import annotations
 
-import pytest
 from pathlib import Path
 
-from proposals.simple_proposal import SimpleProposal
+import pytest
 from unit.common.testing_issue import TestingIssue
+
+from proposals.simple_proposal import SimpleProposal
 
 
 @pytest.mark.parametrize(

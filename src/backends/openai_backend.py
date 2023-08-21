@@ -7,9 +7,10 @@ from pathlib import Path
 from typing import Final
 
 import openai
+from openai.api_resources import ChatCompletion
+
 from backends.query_backend import QueryBackend
 from issues.issue import IssueDescriptor
-from openai.api_resources import ChatCompletion
 
 
 class OpenAiChatGPT(QueryBackend):

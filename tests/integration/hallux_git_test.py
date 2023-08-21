@@ -4,13 +4,13 @@
 # HALLUX COMMIT TEST : checks that `hallux fix` command indeed capable of fixing all issues in the test-project(s)
 from __future__ import annotations
 
-import tempfile
-import pytest
 import shutil
-from pathlib import Path
 import subprocess
+import tempfile
+from pathlib import Path
 
-from integration.hallux_fix_test import test_hallux_python, test_hallux_cpp, set_directory
+import pytest
+from integration.hallux_fix_test import set_directory, test_hallux_cpp, test_hallux_python
 
 
 def test_hallux_git_cpp(proj_name: str = "test-cpp-project", tmp_proj_dir: str | None = None):

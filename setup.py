@@ -1,7 +1,8 @@
 from __future__ import annotations
 
-import pathlib
 import os
+import pathlib
+
 from setuptools import setup
 
 here = pathlib.Path(__file__).parent.resolve()

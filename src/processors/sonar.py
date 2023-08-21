@@ -7,6 +7,7 @@ import os
 from pathlib import Path
 
 import requests
+
 from backends.query_backend import QueryBackend
 from issues.issue import IssueDescriptor
 from issues.issue_solver import IssueSolver
