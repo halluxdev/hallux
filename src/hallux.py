@@ -12,7 +12,7 @@ from __future__ import annotations
 
 import sys
 from pathlib import Path
-from typing import Final
+from typing import Any, Final
 
 import yaml
 
@@ -28,9 +28,9 @@ from targets.github_proposal_traget import GithubProposalTraget
 
 try:
     from __version__ import version
-except:
-    version = ".DEVELOP"
-
+except ImportError:
+    with open(Path(__file__).resolve().parent.parent.joinpath("version.txt"), "rt") as f:
+        version = f.read().split("\n")[0] + ".DEVELOP"
 
 DEBUG: Final[bool] = False
 CONFIG_FILE: Final[str] = ".hallux"
@@ -56,7 +56,7 @@ class Hallux:
         self.config_path: Final[Path] = config_path if config_path is not None else run_path
         self.verbose: bool = verbose
 
-    def process(self):
+    def process(self, command_dir: str):
         if "python" in self.config.keys():
             python = PythonProcessor(
                 self.query_backend,
@@ -118,8 +118,8 @@ class Hallux:
         print("--cache     (highest priority) Reads solutions from JSON file, specified in the config")
         print("            If upper-level backend successfully solves an issue, solution stored for future use")
         print("            If JSON file is not specified in the config, 'dummy.json' is used")
-        print("--free      Uses free Hallux.dev backend for solving issues (limited capacity)")
-        print("--gpt3      Uses OpenAI ChatGPT v3.5  for solving issues")
+        # print("--free      Uses free Hallux.dev backend for solving issues (limited capacity)")
+        print("--gpt3      Uses OpenAI ChatGPT v3.5 for solving issues")
         print("            Requires valid ${OPENAI_API_KEY} env variable.")
         print("--gpt4      (lowest priority) Uses OpenAI ChatGPT v4 for solving issues")
         print("            Requires valid ${OPENAI_API_KEY} env variable.")
@@ -178,6 +178,11 @@ class Hallux:
 
 
 def main(argv: list[str], run_path: Path | None = None) -> int:
+    """
+    :param argv:
+    :param run_path: Path (dir), from where hallux is running
+    :return: error code or 0, if successful
+    """
     verbose: bool = find_arg(argv, "--verbose") > 0 or find_arg(argv, "-v") > 0
 
     if len(argv) < 2:
@@ -185,12 +190,17 @@ def main(argv: list[str], run_path: Path | None = None) -> int:
         return 0
 
     if run_path is None:
-        if Path(argv[-1]).exists() and Path(argv[-1]).is_dir():
-            run_path = Path(argv[-1]).absolute()
-        else:
-            print(f"{argv[-1]} is not a valid DIR", file=sys.stderr)
-            return 1
+        run_path = Path().resolve()
 
+    if Path(argv[-1]).exists() and Path(argv[-1]).is_dir():
+        # directory, which needs to be processed, as requested from the CLI. Relative to run_path. Could be "."
+        command_dir: str = argv[-1]
+    else:
+        print(f"{argv[-1]} is not a valid DIR", file=sys.stderr)
+        return 1
+
+    config: dict[str, Any]
+    config_path: Path  # Path, where config file is found. Shall be only used for filename/paths, defined in the config itself
     config, config_path = Hallux.find_config(run_path)
 
     try:
@@ -202,7 +212,7 @@ def main(argv: list[str], run_path: Path | None = None) -> int:
         return 2
 
     try:
-        target: DiffTarget = Hallux.init_target(argv, config["target"] if "target" in config else {}, verbose)
+        target: DiffTarget = Hallux.init_target(argv, config.get("target", {}), verbose)
     except Exception as e:
         print(f"Error during TARGET initialization: {e}", file=sys.stderr)
         if verbose:
@@ -233,7 +243,7 @@ def main(argv: list[str], run_path: Path | None = None) -> int:
         return 5
 
     try:
-        hallux.process()
+        hallux.process(command_dir)
     except Exception as e:
         print(f"Error during process: {e.args}", file=sys.stderr)
         if verbose:
