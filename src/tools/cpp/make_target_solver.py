@@ -8,10 +8,10 @@ from pathlib import Path
 from auxilary import set_directory
 from backends.query_backend import QueryBackend
 from issues.issue import IssueDescriptor
-from issues.issue_solver import IssueSolver
 from proposals.proposal_engine import ProposalEngine, ProposalList
 from proposals.simple_proposal import SimpleProposal
 from targets.diff_target import DiffTarget
+from tools.issue_solver import IssueSolver
 
 
 class MakeCompile_IssueSolver(IssueSolver):

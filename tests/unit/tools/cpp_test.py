@@ -3,7 +3,7 @@ import unittest
 from pathlib import Path
 from unittest.mock import Mock, patch
 
-from processors.cpp.cpp import CppProcessor
+from tools.cpp.cpp import CppProcessor
 
 
 class TestCppProcessor(unittest.TestCase):

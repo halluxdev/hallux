@@ -6,10 +6,10 @@ from pathlib import Path
 
 from auxilary import set_directory
 from backends.query_backend import QueryBackend
-from processors.code_processor import CodeProcessor
-from processors.python.mypy import Mypy_IssueSolver
-from processors.python.ruff import Ruff_IssueSolver
 from targets.diff_target import DiffTarget
+from tools.code_processor import CodeProcessor
+from tools.mypy.solver import Mypy_IssueSolver
+from tools.ruff.solver import Ruff_IssueSolver
 
 
 class PythonProcessor(CodeProcessor):

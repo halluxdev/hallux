@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import os
+import sys
 from pathlib import Path
 from typing import Final
 
@@ -25,11 +26,14 @@ class OpenAiChatGPT(QueryBackend):
     ):
         assert type == "openai"
         super().__init__(base_path, previous_backend, verbose=verbose)
+        self.valid = True
         if model is None or len(model) < 2:
-            raise SystemExit(f"Wrong model name for OpenAI API: {model}")
+            print(f"Wrong model name for OpenAI Backend: {model}", file=sys.stderr)
+            self.valid = False
 
         if os.getenv("OPENAI_API_KEY") is None:
-            raise SystemExit("Environment variable OPENAI_API_KEY is required for OpenAI API backend")
+            print("Environment variable OPENAI_API_KEY is required for OpenAI Backend", file=sys.stderr)
+            self.valid = False
 
         self.model: Final[str] = model
         self.max_tokens: Final[int] = max_tokens
@@ -37,8 +41,10 @@ class OpenAiChatGPT(QueryBackend):
         openai.api_key = os.getenv("OPENAI_API_KEY")
 
     def query(self, request: str, issue: IssueDescriptor | None = None, issue_lines: list[str] = list) -> list[str]:
+        if not self.valid:
+            return []
         if self.verbose:
-            print("REQUEST")
+            print("[OpenAI Backend REQUEST]:")
             print(request)
         result = ChatCompletion.create(messages=[{"role": "user", "content": request}], model=self.model)
         answers = []
@@ -46,11 +52,10 @@ class OpenAiChatGPT(QueryBackend):
             for variant in result["choices"]:
                 answers.append(variant["message"]["content"])
         if self.verbose:
-            print("ANSWERS")
+            print("[OpenAI Backend ANSWERS]:")
             for ans in answers:
                 for line in ans.split("\n"):
                     print(line)
-                print()
-                print()
+                print("\n")
 
         return answers

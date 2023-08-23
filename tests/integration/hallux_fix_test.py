@@ -6,10 +6,10 @@ from __future__ import annotations
 
 import shutil
 import subprocess
-import tempfile
 from pathlib import Path
 
 import pytest
+from utils import hallux_tmp_dir
 
 from auxilary import set_directory
 from hallux import main
@@ -22,11 +22,11 @@ def test_hallux_cpp(
     target: str = "--files",
 ):
     backend = "--gpt3" if real_openai_test else "--cache"
-    # Create temporal dir, if not already exists
+
+    # Create project dir, if not already provided
     if tmp_proj_dir is None:
-        if not Path("/tmp/hallux").exists():
-            Path("/tmp/hallux").mkdir()
-        tmp_proj_dir = tempfile.mkdtemp(dir="/tmp/hallux")
+        tmp_dir = hallux_tmp_dir()
+        tmp_proj_dir = tmp_dir.name
 
     # original/reference test-project directory
     proj_dir = Path(__file__).resolve().parent.parent.joinpath(proj_name)
@@ -34,11 +34,11 @@ def test_hallux_cpp(
     # copy reference project into temp folder
     shutil.copytree(str(proj_dir), tmp_proj_dir, ignore_dangling_symlinks=False, dirs_exist_ok=True)
 
-    # temporal dir for cmake init
-    cmake_tmp_dir = tempfile.mkdtemp(dir="/tmp/hallux")
+    # another temporal dir for cmake init
+    cmake_tmp_dir = hallux_tmp_dir()
 
     # check that temporal project has c++ compilation issues
-    with set_directory(Path(cmake_tmp_dir)):
+    with set_directory(cmake_tmp_dir):
         try:
             subprocess.check_output(["cmake", tmp_proj_dir])
         except subprocess.CalledProcessError as e:
@@ -65,14 +65,14 @@ def test_hallux_cpp(
             real_config_file.rename(dummy_config_file)
 
     # run hallux from the temporal project directory
-    with set_directory(Path(tmp_proj_dir)):
+    with set_directory(tmp_proj_dir):
         try:
-            main(["hallux", target, backend, "."], None)
+            main(["hallux", "--cpp", target, backend, "."])
         except Exception as e:
             pytest.fail(e, pytrace=True)  # hallux must not fail ?
 
     # ASSERT: must be no remaining c++ compilation issues
-    with set_directory(Path(cmake_tmp_dir)):
+    with set_directory(cmake_tmp_dir):
         try:
             subprocess.check_output(["make", "cpp/test_cpp_project.o"], stderr=subprocess.DEVNULL)
         except subprocess.CalledProcessError as e:
@@ -86,11 +86,10 @@ def test_hallux_python(
     target: str = "--files",
 ):
     backend = "--gpt3" if real_openai_test else "--cache"
-    # Create temporal dir, if not already exists
+    # Create project dir, if not already provided
     if tmp_proj_dir is None:
-        if not Path("/tmp/hallux").exists():
-            Path("/tmp/hallux").mkdir()
-        tmp_proj_dir = tempfile.mkdtemp(dir="/tmp/hallux")
+        tmp_dir = hallux_tmp_dir()
+        tmp_proj_dir = tmp_dir.name
 
     # original/reference test-project directory
     proj_dir = Path(__file__).resolve().parent.parent.joinpath(proj_name)
@@ -99,7 +98,7 @@ def test_hallux_python(
     shutil.copytree(str(proj_dir), tmp_proj_dir, ignore_dangling_symlinks=False, dirs_exist_ok=True)
 
     # check that temporal project has ruff issues
-    with set_directory(Path(tmp_proj_dir)):
+    with set_directory(tmp_proj_dir):
         returncode: int = 0
         try:
             subprocess.check_output(["ruff", "check", "."])
@@ -119,9 +118,9 @@ def test_hallux_python(
             real_config_file.rename(dummy_config_file)
 
     # run hallux from the temporal project directory
-    with set_directory(Path(tmp_proj_dir)):
+    with set_directory(tmp_proj_dir):
         try:
-            subprocess.check_output(["hallux", target, backend, "."])
+            main(["hallux", target, backend, "."])
         except subprocess.CalledProcessError as e:
             pytest.fail(e, pytrace=True)  # hallux must not fail ?
 

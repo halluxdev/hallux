@@ -5,7 +5,7 @@ from unittest.mock import Mock, patch
 import requests
 
 from issues.issue import IssueDescriptor
-from processors.sonar import Sonar_IssueSolver, SonarIssue
+from tools.sonarqube.solver import Sonar_IssueSolver, SonarIssue
 
 SONAR_SAMPLE_TOKEN: Final[str] = "sqt-deadbeefdeadbeefdeadbeefdeadbeef"
 SONAR_PROJECT: Final[str] = "test_project"

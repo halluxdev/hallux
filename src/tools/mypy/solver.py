@@ -5,8 +5,8 @@ from __future__ import annotations
 import subprocess
 
 from issues.issue import IssueDescriptor
-from issues.issue_solver import IssueSolver
-from issues.python_issue import PythonIssue
+from tools.issue_solver import IssueSolver
+from tools.python.python_issue import PythonIssue
 
 
 class Mypy_IssueSolver(IssueSolver):
@@ -24,3 +24,7 @@ class Mypy_IssueSolver(IssueSolver):
         issues.extend(PythonIssue.parseIssues(mypy_output.decode("utf-8"), tool="mypy", keyword="error:"))
 
         return issues
+
+    def solve_issues(self, diff_target, query_backend):
+        print("Process mypy:")
+        super().solve_issues(diff_target, query_backend)

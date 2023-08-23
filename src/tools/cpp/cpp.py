@@ -12,9 +12,9 @@ from typing import Final
 
 from auxilary import set_directory
 from backends.query_backend import QueryBackend
-from processors.code_processor import CodeProcessor
-from processors.cpp.make_compile import MakeCompile_IssueSolver
 from targets.diff_target import DiffTarget
+from tools.code_processor import CodeProcessor
+from tools.cpp.make_target_solver import MakeCompile_IssueSolver
 
 
 @dataclass
@@ -58,9 +58,6 @@ class CppProcessor(CodeProcessor):
         # if "compile" in self.config.keys():
         with set_directory(self.base_path):
             self.solve_make_compile(self.config["compile"], makefile_path)
-
-        if "linking" in self.config.keys():
-            self.cpp_linking(self.config["linking"])
 
     def makefile_from_cmake(self, cmake_path: str = ".") -> Path | None:
         Path("/tmp/hallux").mkdir(exist_ok=True)
@@ -111,9 +108,3 @@ class CppProcessor(CodeProcessor):
                 inner_makefile = makefile_dir.joinpath(str(inner_dir), "Makefile")
                 if inner_makefile.exists():
                     self.list_compile_targets(makefile_dir.joinpath(str(inner_dir)), compile_targets)
-
-    def cpp_linking(self, params: dict | str):
-        """
-        Add a nested comment explaining why this method is empty
-        """
-        pass
