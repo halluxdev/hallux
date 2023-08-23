@@ -6,8 +6,8 @@ backends:
     - rest:
         type: rest
         url: http://localhost:8000/generate
-        request_body: { message: Think in step by step manner. $PROMPT } # Defaults to: $PROMPT
-        response_body: $RESPONSE.answer.0.value # Defaults to $RESPONSE
+        request_body: { message: $PROMPT } # Defaults to: $PROMPT
+        response_body: $RESPONSE.answer # Defaults to $RESPONSE
 
     - gpt3:
         type: openai

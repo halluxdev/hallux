@@ -204,7 +204,9 @@ def main(argv: list[str], run_path: Path | None = None) -> int:
     config, config_path = Hallux.find_config(run_path)
 
     try:
-        query_backend: QueryBackend = BackendFactory.init_backend(argv, config.get("backends", None), config_path)
+        query_backend: QueryBackend = BackendFactory.init_backend(
+            argv, config.get("backends", None), config_path, verbose=verbose
+        )
     except Exception as e:
         print(f"Error during BACKEND initialization: {e}", file=sys.stderr)
         if verbose:

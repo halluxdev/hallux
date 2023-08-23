@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import subprocess
+import sys
 from abc import ABC, abstractmethod
 from pathlib import Path
 from typing import Final
@@ -33,15 +34,21 @@ class CodeProcessor(ABC):
         if success_test is not None:
             try:
                 if self.verbose:
-                    print(f"Try running success test: {success_test} ...")
+                    print(f"Try running success test: {success_test} ...", end="")
+                    sys.stdout.flush()
                 with set_directory(self.base_path):
                     subprocess.check_output(
                         ["bash"] + success_test.split(" "),
                     )
+                if self.verbose:
+                    print("\033[92m PASSED\033[0m")
             except subprocess.CalledProcessError as e:
+                if self.verbose:
+                    print("\033[91m FAILED\033[0m")
                 raise SystemError(f"Success Test '{success_test}' is failing right from the start") from e
 
         self.success_test: Final[str | None] = success_test
+        sys.stdout.flush()
 
     def is_fix_successful(self) -> bool:
         if self.success_test is not None:
