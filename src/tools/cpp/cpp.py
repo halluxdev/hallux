@@ -12,9 +12,9 @@ from typing import Final
 
 from auxilary import set_directory
 from backends.query_backend import QueryBackend
+from issues.issue import IssueDescriptor
 from targets.diff_target import DiffTarget
-from tools.code_processor import CodeProcessor
-from tools.cpp.make_target_solver import MakeCompile_IssueSolver
+from tools.cpp.make_target_solver import IssueSolver, MakeTargetSolver
 
 
 @dataclass
@@ -23,68 +23,71 @@ class CompileTarget:
     makefile_dir: Path
 
 
-class CppProcessor(CodeProcessor):
+class Cpp_IssueSolver(IssueSolver):
     makefile: Final[str] = "Makefile"
     cmakelists: Final[str] = "CMakeLists.txt"
 
     def __init__(
         self,
-        query_backend: QueryBackend,
-        diff_target: DiffTarget,
+        config_path: Path,
         run_path: Path,
-        base_path: Path,
-        config: dict,
+        command_dir: str = ".",
         verbose: bool = False,
+        success_test: str | None = None,
     ):
-        super().__init__(query_backend, diff_target, run_path, base_path, config, verbose)
+        super().__init__(config_path, run_path, command_dir, verbose=verbose, success_test=success_test)
+        self.tmp_dir: tempfile.TemporaryDirectory | None = None
 
-    def process(self) -> None:
-        print("Process C++ issues:")
+    def list_issues(self) -> list[IssueDescriptor]:
+        return []
 
+    def solve_issues(self, diff_target: DiffTarget, query_backend: QueryBackend):
         makefile_path: Path
         # Try some options for searching Makefile / CMakelists.txt
-        if self.base_path.joinpath(self.makefile).exists():
-            makefile_path = self.base_path.joinpath(self.makefile)
-        elif self.base_path.joinpath("build", self.makefile).exists():
-            makefile_path = self.base_path.joinpath("build", self.makefile)
-        elif self.base_path.joinpath(self.cmakelists).exists():
-            makefile_path = self.makefile_from_cmake(str(self.base_path))
-        elif self.base_path.parent.joinpath(self.cmakelists).exists():
-            makefile_path = self.makefile_from_cmake(str(self.base_path.parent))
+        if self.run_path.joinpath(self.command_dir, self.makefile).exists():
+            # command_dir/Makefile
+            makefile_path = self.run_path.joinpath(self.makefile)
+        elif self.run_path.joinpath("build", self.makefile).exists():
+            # if command_dir/build/Makefile
+            makefile_path = self.run_path.joinpath("build", self.makefile)
+        elif self.run_path.joinpath(self.command_dir, self.cmakelists).exists():
+            # command_dir/CMakeLists.txt
+            makefile_path = self.makefile_from_cmake(self.run_path.joinpath(self.command_dir))
         else:
-            print("C++ is enabled, but cannot `Makefile` nor 'CMakeLists.txt'")
+            print("Process C/C++: cannot find `Makefile` nor 'CMakeLists.txt'")
             return
+        print("Process C/C++:")
 
-        # if "compile" in self.config.keys():
-        with set_directory(self.base_path):
-            self.solve_make_compile(self.config["compile"], makefile_path)
+        with set_directory(makefile_path.parent):
+            self.solve_make_compile(diff_target, query_backend, makefile_path)
 
-    def makefile_from_cmake(self, cmake_path: str = ".") -> Path | None:
-        Path("/tmp/hallux").mkdir(exist_ok=True)
-        makefile_dir = tempfile.mkdtemp(dir="/tmp/hallux")
-        os.chdir(makefile_dir)
-        try:
-            subprocess.check_output(["cmake", f"{str(cmake_path)}"])
-            print("CMake initialized succesfully")
-        except subprocess.CalledProcessError as e:
-            cmake_output = e.output.decode("utf-8")
-            print(cmake_output, file=sys.stderr)
-            raise SystemError("CMake initialization failed") from e
+    def makefile_from_cmake(self, cmake_path: Path) -> Path | None:
+        self.tmp_dir = tempfile.TemporaryDirectory()
+        with set_directory(Path(self.tmp_dir.name)):
+            try:
+                subprocess.check_output(["cmake", f"{str(cmake_path)}"])
+                if self.verbose:
+                    print("CMake initialized successfully")
+            except subprocess.CalledProcessError as e:
+                cmake_output = e.output.decode("utf-8")
+                if self.verbose:
+                    print(cmake_output, file=sys.stderr)
+                raise SystemError("CMake initialization failed") from e
 
-        return Path(makefile_dir).joinpath(self.makefile)
+            return Path(self.tmp_dir.name).joinpath(self.makefile)
 
-    def solve_make_compile(self, params: dict | str, makefile_path: Path):
+    def solve_make_compile(self, diff_target: DiffTarget, query_backend: QueryBackend, makefile_path: Path):
         makefile_dir: Path = makefile_path.parent
 
         compile_targets: list[CompileTarget] = []
         self.list_compile_targets(makefile_dir, compile_targets)
 
         if self.verbose:
-            print(f"{len(compile_targets)} targets found")
+            print(f"{len(compile_targets)} Makefile targets found")
         target: CompileTarget
         for target in compile_targets:
-            solver = MakeCompile_IssueSolver(target.target, target.makefile_dir, self.verbose)
-            solver.solve_issues(diff_target=self.diff_target, query_backend=self.query_backend)
+            solver = MakeTargetSolver(run_path=target.makefile_dir, make_target=target.target, verbose=self.verbose)
+            solver.solve_issues(diff_target=diff_target, query_backend=query_backend)
 
     def list_compile_targets(self, makefile_dir: Path, compile_targets: list[CompileTarget]):
         with set_directory(makefile_dir):

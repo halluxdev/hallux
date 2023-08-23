@@ -2,41 +2,89 @@
 
 from __future__ import annotations
 
+import subprocess
+import sys
 from abc import ABC, abstractmethod
+from pathlib import Path
+from typing import Final
 
+from auxilary import set_directory
 from backends.query_backend import QueryBackend
 from issues.issue import IssueDescriptor
 from proposals.diff_proposal import DiffProposal
 from targets.diff_target import DiffTarget
 
 
-# Base class for "proper" issue solving, i.e. issues solved one-by-one, with double-checking that fix was appropriate
-# If fix wasn't successfull, we ignore it and go to the next issue
-# For every tool such as 'ruff', or 'make compile', inherit separate class out of IssueSolver and define list_issues()
 class IssueSolver(ABC):
-    def __init__(self, success_test=None):
-        self.success_test = success_test
+    """
+    Base abstract class for issue solving.
+    For every tool such as 'ruff', or 'make', one need to inherit a class out and define list_issues()
+    Issues repeatedly solved one-by-one, with check that fix was appropriate (is_issue_fixed func is used).
+    If fix wasn't successful, we ignore issue (and revert corresponding fix) and go to the next one.
+    """
+
+    def __init__(
+        self,
+        config_path: Path,
+        run_path: Path,
+        command_dir: str = ".",
+        verbose: bool = False,
+        success_test: str | None = None,
+    ):
+        self.config_path: Final[Path] = config_path
+        self.run_path: Final[Path] = run_path
+        self.command_dir: Final[str] = command_dir
+        self.verbose: Final[bool] = verbose
+        self.success_test: Final[str] = success_test
+
+        if success_test is not None:
+            try:
+                if self.verbose:
+                    print(f"Try running success test: {success_test} ...", end="")
+                    sys.stdout.flush()
+                with set_directory(self.config_path):
+                    subprocess.check_output(
+                        ["bash"] + success_test.split(" "),
+                    )
+            except subprocess.CalledProcessError as e:
+                if self.verbose:
+                    print("\033[92m PASSED\033[0m")
+                raise SystemError(f"Success Test '{success_test}' is failing right from the start") from e
+            sys.stdout.flush()
 
     @abstractmethod
     def list_issues(self) -> list[IssueDescriptor]:
+        """
+        Shall be implemented in child class
+        :return: List of issued for a particular Processor/Solver
+        """
         pass
 
-    def is_issue_fixed(self, target_issues: list[IssueDescriptor]) -> bool:
+    def is_issue_fixed(self) -> bool:
+        """
+        :returns: True, if latest fix was successful
+        """
         if self.success_test is not None:
-            return self.success_test()
+            try:
+                with set_directory(self.config_path):
+                    subprocess.check_output(["bash"] + self.success_test.split(" "))
+                if self.verbose:
+                    print(f"\033[92m success test: {self.success_test} PASSED\033[0m")
+                return True
+            except subprocess.CalledProcessError:
+                if self.verbose:
+                    print(f"\033[91m success test: {self.success_test} FAILED\033[0m")
+                return False
         else:
             new_issues = self.list_issues()
             # Number of issues decreased => FIX SUCCESFULL
-            return len(new_issues) < len(target_issues)
-
-    def report_succesfull_fix(self, issue: IssueDescriptor, proposal: DiffProposal, query_backend: QueryBackend):
-        query_backend.report_succesfull_fix(issue, proposal)
+            return len(new_issues) < len(self.target_issues)
 
     def solve_issues(self, diff_target: DiffTarget, query_backend: QueryBackend):
         issue_index: int = 0
-        target_issues = self.list_issues()
-        while issue_index < len(target_issues):
-            issue = target_issues[issue_index]
+        self.target_issues = self.list_issues()
+        while issue_index < len(self.target_issues):
+            issue = self.target_issues[issue_index]
 
             proposals = issue.list_proposals()
             fixing_successful: bool = False
@@ -59,7 +107,7 @@ class IssueSolver(ABC):
                         raise e
 
                     if applying_successful:
-                        fixing_successful = self.is_issue_fixed(target_issues)
+                        fixing_successful = self.is_issue_fixed()
                     else:
                         diff_target.revert_diff()
                         continue
@@ -78,9 +126,9 @@ class IssueSolver(ABC):
 
             if fixing_successful:
                 # provide feedback, in order to collect training data
-                self.report_succesfull_fix(issue, proposal, query_backend)
+                query_backend.report_succesfull_fix(issue, proposal)
                 if diff_target.requires_refresh():
-                    target_issues = self.list_issues()
+                    self.target_issues = self.list_issues()
                 else:
                     issue_index += 1
                 print(" \033[92m successfully fixed\033[0m")

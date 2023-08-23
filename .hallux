@@ -29,12 +29,23 @@ backends:
         model: gpt-4-32k
         max_tokens: 32768
 
-python:
-    ruff: . # command-line arguments for ruff
-    mypy: --ignore-missing-imports . # command-line arguments for mypy
+processors:
+    ruff:
+        # command-line arguments for ruff
+        args:
+    mypy:
+        # command-line arguments for mypy
+        args: --ignore-missing-imports
+    sonar:
+        url: https://sonarqube.hallux.dev
+        success_test: ./hallux-test.sh -x
+        project: halluxdev_hallux_AYoO6xqSKwloFfC93W-F
+    cpp:
 
-sonar:
-    url: https://sonarqube.hallux.dev
-    success_test: ./hallux-test.sh -x
-    project: halluxdev_hallux_AYoO6xqSKwloFfC93W-F
+
+groups:
+    all: ["ruff", "mypy", "sonar", "cpp"]
+    python: ["ruff", "mypy"]
+
+
 
