@@ -4,17 +4,15 @@ set -e
 
 cd "${0%/*}/../.."
 
+echo "FORMATTING CHECK:"
 black . --check
-if [ $? -ne 0 ]; then
- echo "Python code needs formatting: run 'black .' command"
- exit 1
-fi
 
+echo "IMPORT SORT CHECK:"
 isort . --check
-if [ $? -ne 0 ]; then
- echo "Python code needs imports re-ordering: run 'isort .' command"
- exit 1
-fi
+
+echo "LINTING CHECK:"
+ruff check .
+
 
 ./hallux-test.sh -x --cov-fail-under=70
 if [ $? -ne 0 ]; then

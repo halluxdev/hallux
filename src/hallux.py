@@ -200,7 +200,8 @@ def main(argv: list[str], run_path: Path | None = None) -> int:
         return 1
 
     config: dict[str, Any]
-    config_path: Path  # Path, where config file is found. Shall be only used for filename/paths, defined in the config itself
+    # Path, where config file is found. Shall be only used for filename/paths, defined in the config itself
+    config_path: Path
     config, config_path = Hallux.find_config(run_path)
 
     try:

@@ -4,6 +4,7 @@ line_length = 120
 [tool.ruff]
 # Same as Black.
 line-length = 120
+exclude = ["tests/test-python-project"]
 
 [tool.isort]
 line_length = 120
