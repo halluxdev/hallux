@@ -5,10 +5,11 @@ from __future__ import annotations
 import os
 from contextlib import contextmanager
 from pathlib import Path
+from tempfile import TemporaryDirectory
 
 
 @contextmanager
-def set_directory(path: Path):
+def set_directory(path: str | Path | TemporaryDirectory):
     """Sets the cwd within the context
 
     Args:
@@ -18,8 +19,9 @@ def set_directory(path: Path):
         None
     """
     origin = Path().absolute()
+    path_str = path.name if isinstance(path, TemporaryDirectory) else str(path)
     try:
-        os.chdir(path)
+        os.chdir(path_str)
         yield
     finally:
         os.chdir(origin)

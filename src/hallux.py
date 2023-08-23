@@ -18,13 +18,13 @@ import yaml
 
 from auxilary import find_arg
 from backends.factory import BackendFactory, QueryBackend
-from processors.cpp.cpp import CppProcessor
-from processors.python.python import PythonProcessor
-from processors.sonar import SonarProcessor
 from targets.diff_target import DiffTarget
 from targets.filesystem_target import FilesystemTarget
 from targets.git_commit_target import GitCommitTarget
 from targets.github_proposal_traget import GithubProposalTraget
+from tools.cpp.cpp import CppProcessor
+from tools.python.python import PythonProcessor
+from tools.sonarqube.solver import SonarProcessor
 
 try:
     from __version__ import version
@@ -87,6 +87,11 @@ class Hallux:
 
     @staticmethod
     def find_config(run_path: Path) -> tuple[dict, Path]:
+        """
+        Finds
+        :param run_path:
+        :return: (config, config_path), config_path shall only be used for filenames, mentioned in config.yaml
+        """
         config_path = run_path
         while not config_path.joinpath(CONFIG_FILE).exists() and config_path.parent != config_path:
             config_path = config_path.parent
@@ -130,7 +135,6 @@ class Hallux:
         print("--python    try fixing only python issues")
         print("--ruff      try fixing only only ruff issues")
         print("--cpp       try fixing only c++ issues")
-        print("--gcc       try fixing only only gcc / make issues")
         print("Options for [OTHER]:")
         print("--verbose   Print debug tracebacks on errors")
 
@@ -179,8 +183,8 @@ class Hallux:
 
 def main(argv: list[str], run_path: Path | None = None) -> int:
     """
-    :param argv:
-    :param run_path: Path (dir), from where hallux is running
+    :param argv: list of command-line arguments
+    :param run_path: Path, from where main executable is running
     :return: error code or 0, if successful
     """
     verbose: bool = find_arg(argv, "--verbose") > 0 or find_arg(argv, "-v") > 0

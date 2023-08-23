@@ -17,7 +17,7 @@ class BackendFactory:
     ) -> QueryBackend:
         default_list = [
             {"cache": {"type": "dummy", "filename": "dummy.json"}},
-            {"free": {"type": "hallux", "url": "https://free-trial.hallux.dev/api/v1"}},
+            {"rest": {"type": "rest", "url": "http://localhost:8000/generate"}},
             {"gpt3": {"type": "openai", "model": "gpt-3.5-turbo", "max_tokens": 4096}},
             # Gonna be enabled soon {"gpt4": {"type": "openai", "model": "gpt-4", "max_tokens": 8192}},
         ]

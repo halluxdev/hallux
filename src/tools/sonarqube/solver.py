@@ -10,13 +10,13 @@ import requests
 
 from backends.query_backend import QueryBackend
 from issues.issue import IssueDescriptor
-from issues.issue_solver import IssueSolver
-from processors.code_processor import CodeProcessor
 from proposals.diff_proposal import DiffProposal
 from proposals.proposal_engine import ProposalEngine, ProposalList
 from proposals.python_proposal import PythonProposal
 from proposals.simple_proposal import SimpleProposal
 from targets.diff_target import DiffTarget
+from tools.code_processor import CodeProcessor
+from tools.issue_solver import IssueSolver
 
 
 class Sonar_IssueSolver(IssueSolver):

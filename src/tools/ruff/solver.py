@@ -5,8 +5,8 @@ from __future__ import annotations
 import subprocess
 
 from issues.issue import IssueDescriptor
-from issues.issue_solver import IssueSolver
-from issues.python_issue import PythonIssue
+from tools.issue_solver import IssueSolver
+from tools.python.python_issue import PythonIssue
 
 
 class Ruff_IssueSolver(IssueSolver):

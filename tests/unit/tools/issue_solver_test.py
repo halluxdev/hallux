@@ -4,9 +4,9 @@ import pytest
 from unit.common.testing_issue import TestingIssue
 
 from backends.query_backend import QueryBackend
-from issues.issue_solver import IssueSolver
 from proposals.diff_proposal import DiffProposal
 from targets.diff_target import DiffTarget
+from tools.issue_solver import IssueSolver
 
 
 # Create a concrete subclass of IssueSolver for testing

@@ -70,7 +70,7 @@ def test_hallux_github(tmp_proj_dir: str | None = None):
             pytest.fail(e, pytrace=True)  # Cannot checkout PR commit
 
         try:
-            main(["hallux", "--cache", "--python", "--github", GITHUB_PULLREQUEST_URL, "."], None)
+            main(["hallux", "--cache", "--python", "--github", GITHUB_PULLREQUEST_URL, "."])
         except Exception as e:
             pytest.fail(
                 e, pytrace=True
