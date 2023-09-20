@@ -146,7 +146,7 @@ def main(argv: list[str], run_path: Path | None = None) -> int:
     """
     verbose: bool = find_arg(argv, "--verbose") > 0 or find_arg(argv, "-v") > 0
     if verbose:
-        logging.basicConfig(level=logging.INFO)
+        logging.basicConfig(level=logging.DEBUG)
 
     if len(argv) < 2:
         Hallux.print_usage()
