@@ -21,7 +21,6 @@ class ProcessorFactory:
         config_path: Path,
         run_path: Path,
         command_dir: str = ".",
-        verbose: bool = False,
     ) -> list[IssueSolver]:
         config = config if config is not None else {}
         mapping: dict = {
@@ -62,9 +61,7 @@ class ProcessorFactory:
         for name in requested_names:
             classname = mapping[name]
             config_params = config.get(name, {})
-            solver = classname(
-                **config_params, config_path=config_path, run_path=run_path, command_dir=command_dir, verbose=verbose
-            )
+            solver = classname(**config_params, config_path=config_path, run_path=run_path, command_dir=command_dir)
             solvers.append(solver)
 
         return solvers

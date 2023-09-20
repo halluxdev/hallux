@@ -12,9 +12,7 @@ from backends.rest_backend import RestBackend
 
 class BackendFactory:
     @staticmethod
-    def init_backend(
-        argv: list[str], backends_list: list[dict] | None, config_path: Path, verbose: bool = False
-    ) -> QueryBackend:
+    def init_backend(argv: list[str], backends_list: list[dict] | None, config_path: Path) -> QueryBackend:
         default_list = [
             {"cache": {"type": "dummy", "filename": "dummy.json"}},
             {"rest": {"type": "rest", "url": "http://localhost:8000/generate"}},
@@ -29,7 +27,7 @@ class BackendFactory:
 
         for name_dict in backends_list:
             name, settings = BackendFactory._validate_settings(name_dict)
-            backend = BackendFactory._create_backend(settings, config_path, backend, verbose)
+            backend = BackendFactory._create_backend(settings, config_path, backend)
             if find_arg(argv, "--" + name) > 0:
                 return backend  # stop early if required by CLI
         return backend
@@ -47,12 +45,10 @@ class BackendFactory:
         return name, settings
 
     @staticmethod
-    def _create_backend(
-        settings: dict, config_path: Path, previous_backend: QueryBackend, verbose: bool
-    ) -> QueryBackend:
+    def _create_backend(settings: dict, config_path: Path, previous_backend: QueryBackend) -> QueryBackend:
         type_to_class = {"dummy": DummyBackend, "openai": OpenAiChatGPT, "rest": RestBackend}
         backend_type = settings["type"]
         backend_class = type_to_class.get(backend_type)
         if backend_class is None:
             raise SystemError(f"Unknown BACKEND type: {backend_type}")
-        return backend_class(**settings, base_path=config_path, previous_backend=previous_backend, verbose=verbose)
+        return backend_class(**settings, base_path=config_path, previous_backend=previous_backend)

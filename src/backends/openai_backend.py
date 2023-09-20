@@ -2,8 +2,8 @@
 
 from __future__ import annotations
 
+import logging
 import os
-import sys
 from pathlib import Path
 from typing import Final
 
@@ -20,19 +20,18 @@ class OpenAiChatGPT(QueryBackend):
         model: str = "",
         max_tokens: int = 4097,
         type="openai",
-        verbose: bool = False,
         base_path: Path = Path(),
         previous_backend: QueryBackend | None = None,
     ):
         assert type == "openai"
-        super().__init__(base_path, previous_backend, verbose=verbose)
+        super().__init__(base_path, previous_backend)
         self.valid = True
         if model is None or len(model) < 2:
-            print(f"Wrong model name for OpenAI Backend: {model}", file=sys.stderr)
+            logging.warning(f"Wrong model name for OpenAI Backend: {model}")
             self.valid = False
 
         if os.getenv("OPENAI_API_KEY") is None:
-            print("Environment variable OPENAI_API_KEY is required for OpenAI Backend", file=sys.stderr)
+            logging.warning("Environment variable OPENAI_API_KEY is required for OpenAI Backend")
             self.valid = False
 
         self.model: Final[str] = model
@@ -43,19 +42,18 @@ class OpenAiChatGPT(QueryBackend):
     def query(self, request: str, issue: IssueDescriptor | None = None, issue_lines: list[str] = list) -> list[str]:
         if not self.valid:
             return []
-        if self.verbose:
-            print("[OpenAI Backend REQUEST]:")
-            print(request)
+
+        logging.debug("[OpenAI REQUEST]:")
+        logging.debug(request)
         result = ChatCompletion.create(messages=[{"role": "user", "content": request}], model=self.model)
         answers = []
         if len(result["choices"]) > 0:
             for variant in result["choices"]:
                 answers.append(variant["message"]["content"])
-        if self.verbose:
-            print("[OpenAI Backend ANSWERS]:")
-            for ans in answers:
-                for line in ans.split("\n"):
-                    print(line)
-                print("\n")
+
+        logging.debug("[OpenAI ANSWERS]:")
+        for ans in answers:
+            for line in ans.split("\n"):
+                logging.debug(line)
 
         return answers

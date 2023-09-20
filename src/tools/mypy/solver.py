@@ -17,11 +17,10 @@ class Mypy_IssueSolver(IssueSolver):
         config_path: Path,
         run_path: Path,
         command_dir: str = ".",
-        verbose: bool = False,
         success_test: str | None = None,
         args: str | None = None,
     ):
-        super().__init__(config_path, run_path, command_dir, verbose, success_test=success_test)
+        super().__init__(config_path, run_path, command_dir, success_test=success_test)
         self.args: str = args if args is not None else "--ignore-missing-imports"
 
     def list_issues(self) -> list[IssueDescriptor]:

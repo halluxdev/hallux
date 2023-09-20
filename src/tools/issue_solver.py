@@ -2,8 +2,8 @@
 
 from __future__ import annotations
 
+import logging
 import subprocess
-import sys
 from abc import ABC, abstractmethod
 from pathlib import Path
 from typing import Final
@@ -28,29 +28,24 @@ class IssueSolver(ABC):
         config_path: Path,
         run_path: Path,
         command_dir: str = ".",
-        verbose: bool = False,
         success_test: str | None = None,
     ):
         self.config_path: Final[Path] = config_path
         self.run_path: Final[Path] = run_path
         self.command_dir: Final[str] = command_dir
-        self.verbose: Final[bool] = verbose
         self.success_test: Final[str] = success_test
 
         if success_test is not None:
             try:
-                if self.verbose:
-                    print(f"Try running success test: {success_test} ...", end="")
-                    sys.stdout.flush()
+                logging.info(f"Try running success test: {success_test} ...")
+
                 with set_directory(self.config_path):
                     subprocess.check_output(
                         ["bash"] + success_test.split(" "),
                     )
+                    logging.info("\033[92m PASSED\033[0m")
             except subprocess.CalledProcessError as e:
-                if self.verbose:
-                    print("\033[92m PASSED\033[0m")
                 raise SystemError(f"Success Test '{success_test}' is failing right from the start") from e
-            sys.stdout.flush()
 
     @abstractmethod
     def list_issues(self) -> list[IssueDescriptor]:
@@ -68,12 +63,10 @@ class IssueSolver(ABC):
             try:
                 with set_directory(self.config_path):
                     subprocess.check_output(["bash"] + self.success_test.split(" "))
-                if self.verbose:
-                    print(f"\033[92m success test: {self.success_test} PASSED\033[0m")
+                logging.info(f"\033[92m success test: {self.success_test} PASSED\033[0m")
                 return True
             except subprocess.CalledProcessError:
-                if self.verbose:
-                    print(f"\033[91m success test: {self.success_test} FAILED\033[0m")
+                logging.info(f"\033[91m success test: {self.success_test} FAILED\033[0m")
                 return False
         else:
             new_issues = self.list_issues()
@@ -131,7 +124,7 @@ class IssueSolver(ABC):
                     self.target_issues = self.list_issues()
                 else:
                     issue_index += 1
-                print(" \033[92m successfully fixed\033[0m")
+                logging.info(" \033[92m successfully fixed\033[0m")
             else:
                 issue_index += 1
-                print(" \033[91m unable to fix\033[0m")
+                logging.info(" \033[91m unable to fix\033[0m")
