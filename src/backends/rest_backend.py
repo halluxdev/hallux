@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import logging
 from pathlib import Path
 from typing import Any
 
@@ -22,9 +23,8 @@ class RestBackend(QueryBackend):
         type="rest",
         base_path: Path = Path(),
         previous_backend: QueryBackend | None = None,
-        verbose: bool = False,
     ):
-        super().__init__(base_path, previous_backend, verbose=verbose)
+        super().__init__(base_path, previous_backend)
         assert type == "rest"
         self.url = url
         self.token = token
@@ -57,10 +57,10 @@ class RestBackend(QueryBackend):
                     return response.text
 
             else:
-                print(f"Error status code: {response.status_code}")
+                logging.warning(f"Error status code: {response.status_code}")
 
         except requests.ConnectionError:
-            print(f"Host {self.url} is not reachable.")
+            logging.warning(f"Host {self.url} is not reachable.")
 
         return None
 
@@ -115,18 +115,16 @@ class RestBackend(QueryBackend):
             self.headers.update({"Content-Type": "text/plain"})
 
         else:
-            print("Invalid request body")
+            logging.warning("Invalid request body")
             return []
 
-        if self.verbose:
-            print("REQUEST")
-            print(parsed_request)
+        logging.debug("RestBackend REQUEST")
+        logging.debug(parsed_request)
 
         response = self._make_request(parsed_request)
         parsed_response = self._parse_response(response)
 
-        if self.verbose:
-            print("ANSWERS")
-            print(parsed_response)
+        logging.debug("RestBackend ANSWERS")
+        logging.debug(parsed_response)
 
         return parsed_response

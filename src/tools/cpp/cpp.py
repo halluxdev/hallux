@@ -2,9 +2,9 @@
 
 from __future__ import annotations
 
+import logging
 import os
 import subprocess
-import sys
 import tempfile
 from dataclasses import dataclass
 from pathlib import Path
@@ -32,10 +32,9 @@ class Cpp_IssueSolver(IssueSolver):
         config_path: Path,
         run_path: Path,
         command_dir: str = ".",
-        verbose: bool = False,
         success_test: str | None = None,
     ):
-        super().__init__(config_path, run_path, command_dir, verbose=verbose, success_test=success_test)
+        super().__init__(config_path, run_path, command_dir, success_test=success_test)
         self.tmp_dir: tempfile.TemporaryDirectory | None = None
 
     def list_issues(self) -> list[IssueDescriptor]:
@@ -54,7 +53,7 @@ class Cpp_IssueSolver(IssueSolver):
             # command_dir/CMakeLists.txt
             makefile_path = self.makefile_from_cmake(self.run_path.joinpath(self.command_dir))
         else:
-            print("Process C/C++: cannot find `Makefile` nor 'CMakeLists.txt'")
+            logging.error("Process C/C++: cannot find `Makefile` nor 'CMakeLists.txt'")
             return
         print("Process C/C++:")
 
@@ -66,12 +65,10 @@ class Cpp_IssueSolver(IssueSolver):
         with set_directory(Path(self.tmp_dir.name)):
             try:
                 subprocess.check_output(["cmake", f"{str(cmake_path)}"])
-                if self.verbose:
-                    print("CMake initialized successfully")
+                logging.info("CMake initialized successfully")
             except subprocess.CalledProcessError as e:
                 cmake_output = e.output.decode("utf-8")
-                if self.verbose:
-                    print(cmake_output, file=sys.stderr)
+                logging.error(cmake_output)
                 raise SystemError("CMake initialization failed") from e
 
             return Path(self.tmp_dir.name).joinpath(self.makefile)
@@ -82,11 +79,10 @@ class Cpp_IssueSolver(IssueSolver):
         compile_targets: list[CompileTarget] = []
         self.list_compile_targets(makefile_dir, compile_targets)
 
-        if self.verbose:
-            print(f"{len(compile_targets)} Makefile targets found")
+        logging.info(f"{len(compile_targets)} Makefile targets found")
         target: CompileTarget
         for target in compile_targets:
-            solver = MakeTargetSolver(run_path=target.makefile_dir, make_target=target.target, verbose=self.verbose)
+            solver = MakeTargetSolver(run_path=target.makefile_dir, make_target=target.target)
             solver.solve_issues(diff_target=diff_target, query_backend=query_backend)
 
     def list_compile_targets(self, makefile_dir: Path, compile_targets: list[CompileTarget]):

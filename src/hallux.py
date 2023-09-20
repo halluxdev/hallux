@@ -10,6 +10,7 @@
 
 from __future__ import annotations
 
+import logging
 import sys
 from pathlib import Path
 from typing import Any, Final
@@ -32,6 +33,8 @@ except ImportError:
 
 DEBUG: Final[bool] = False
 CONFIG_FILE: Final[str] = ".hallux"
+
+logging.basicConfig(level=logging.INFO)
 
 
 class Hallux:
@@ -121,7 +124,7 @@ class Hallux:
                 )
 
         if find_arg(argv, "--git") > 0:
-            return GitCommitTarget(verbose=verbose)
+            return GitCommitTarget()
 
         if find_arg(argv, "--files") > 0:
             return FilesystemTarget()
@@ -142,6 +145,8 @@ def main(argv: list[str], run_path: Path | None = None) -> int:
     :return: error code or 0, if successful
     """
     verbose: bool = find_arg(argv, "--verbose") > 0 or find_arg(argv, "-v") > 0
+    if verbose:
+        logging.basicConfig(level=logging.DEBUG)
 
     if len(argv) < 2:
         Hallux.print_usage()
@@ -154,7 +159,7 @@ def main(argv: list[str], run_path: Path | None = None) -> int:
         # directory, which needs to be processed, as requested from the CLI. Relative to run_path. Could be "."
         command_dir: str = argv[-1]
     else:
-        print(f"{argv[-1]} is not a valid DIR", file=sys.stderr)
+        logging.error(f"{argv[-1]} is not a valid DIR")
         return 1
 
     config: dict[str, Any]
@@ -163,11 +168,9 @@ def main(argv: list[str], run_path: Path | None = None) -> int:
     config, config_path = Hallux.find_config(run_path)
 
     try:
-        query_backend: QueryBackend = BackendFactory.init_backend(
-            argv, config.get("backends", None), config_path, verbose=verbose
-        )
+        query_backend: QueryBackend = BackendFactory.init_backend(argv, config.get("backends", None), config_path)
     except Exception as e:
-        print(f"Error during BACKEND initialization: {e}", file=sys.stderr)
+        logging.error(f"Error during BACKEND initialization: {e}")
         if verbose:
             raise e
         return 2
@@ -175,7 +178,7 @@ def main(argv: list[str], run_path: Path | None = None) -> int:
     try:
         target: DiffTarget = Hallux.init_target(argv, config.get("target", {}), verbose)
     except Exception as e:
-        print(f"Error during TARGET initialization: {e}", file=sys.stderr)
+        logging.error(f"Error during TARGET initialization: {e}")
         if verbose:
             raise e
         return 3
@@ -188,10 +191,9 @@ def main(argv: list[str], run_path: Path | None = None) -> int:
             config_path=config_path,
             run_path=run_path,
             command_dir=command_dir,
-            verbose=verbose,
         )
     except Exception as e:
-        print(f"Error during SOLVERS initialization: {e}", file=sys.stderr)
+        logging.error(f"Error during SOLVERS initialization: {e}")
         if verbose:
             raise e
         return 4
@@ -201,10 +203,9 @@ def main(argv: list[str], run_path: Path | None = None) -> int:
             solvers=solvers,
             run_path=run_path,
             config_path=config_path,
-            verbose=verbose,
         )
     except Exception as e:
-        print(f"Error during initialization: {e}", file=sys.stderr)
+        logging.error(f"Error during initialization: {e}")
         if verbose:
             raise e
         return 5
@@ -212,7 +213,7 @@ def main(argv: list[str], run_path: Path | None = None) -> int:
     try:
         hallux.process(query_backend=query_backend, diff_target=target)
     except Exception as e:
-        print(f"Error during process: {e.args}", file=sys.stderr)
+        logging.error(f"Error during process: {e.args}")
         if verbose:
             raise e
         return 6

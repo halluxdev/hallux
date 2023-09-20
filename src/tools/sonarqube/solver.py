@@ -42,13 +42,12 @@ class Sonar_IssueSolver(IssueSolver):
         config_path: Path,
         run_path: Path,
         command_dir: str = ".",
-        verbose: bool = False,
         success_test: str | None = None,
         url: str | None = None,
         token: str | None = None,
         project: str | None = None,
     ):
-        super().__init__(config_path, run_path, command_dir, verbose, success_test=success_test)
+        super().__init__(config_path, run_path, command_dir, success_test=success_test)
 
         if token is None:
             if os.getenv(self.SONAR_TOKEN) is not None:

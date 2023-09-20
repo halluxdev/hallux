@@ -18,10 +18,9 @@ class DummyBackend(QueryBackend):
         base_path: Path,
         type="dummy",
         previous_backend: QueryBackend | None = None,
-        verbose: bool = False,
     ):
         assert type == "dummy"
-        super().__init__(base_path, previous_backend, verbose=verbose)
+        super().__init__(base_path, previous_backend)
 
         self.filename: str
         self.was_modified: bool = False
