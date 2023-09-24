@@ -3,7 +3,7 @@ import unittest
 from pathlib import Path
 from unittest.mock import Mock, patch
 
-from tools.cpp.cpp import Cpp_IssueSolver
+from hallux.tools.cpp.cpp import Cpp_IssueSolver
 
 
 class TestCpp_IssueSolver(unittest.TestCase):
@@ -40,4 +40,5 @@ class TestCpp_IssueSolver(unittest.TestCase):
         processor = Cpp_IssueSolver(self.base_path, self.base_path)
         with patch("logging.error") as mock_print:
             processor.solve_issues(self.query_backend, self.diff_target)
-            mock_print.assert_called_with("Process C/C++: cannot find `Makefile` nor 'CMakeLists.txt'")
+            mock_print.assert_called_with(
+                "Process C/C++: cannot find `Makefile` nor 'CMakeLists.txt'")

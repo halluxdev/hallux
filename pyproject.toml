@@ -1,10 +1,112 @@
-[tool.black]
-line_length = 120
+[build-system]
+requires = ["setuptools", "wheel"]
+
+[project]
+name = "hallux"
+version = "0.0.3"
+authors = [
+  { name="Hallux Team", email="team@hallux.dev" },
+]
+description = "Fixing project issues automagically with AI."
+readme = "README.md"
+license = {file = "LICENSE.txt"}
+requires-python = ">=3.8, <4.0"
+dependencies = [
+  'ruff==0.0.272',
+  'mypy==1.4.1',
+  'black==23.3.0',
+  'openai==0.27.8',
+  'pyyaml==6.0',
+  'types-PyYAML==6.0.12.11',
+  'PyGithub==1.59',
+  'isort==5.12.0',
+  'wheel==0.40.0',
+  'pyinstaller==5.13.0',
+]
+
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Programming Language :: Python :: 3.8",
+  "Programming Language :: Python :: 3.9",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
+  "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
+
+[project.optional-dependencies]
+test = [
+  "pytest >= 7.3.1",
+  'pytest-cov==4.1.0',
+]
+
+[project.scripts]
+hallux = 'hallux.main:main'
+
+[project.urls]
+"Homepage" = "https://github.com/halluxdev/hallux"
+"Bug Tracker" = "https://github.com/halluxdev/hallux/issues"
+
 
 [tool.ruff]
-# Same as Black.
+select = ["F", "E", "W", "I001"]
 line-length = 120
-exclude = ["tests/test-python-project"]
+show-fixes = false
+target-version = "py311"
+task-tags = ["TODO", "FIXME"]
+exclude = [
+    "tests/test-python-project",
+    ".git",
+    ".ruff_cache",
+    ".scannerwork",
+    ".vscode",
+    ".venv",
+    "__pypackages__",
+    "_build",
+    "buck-out",
+    "build",
+    "htmlcov",
+    "dist",
+    "node_modules",
+    "venv",
+    "scripts",
+]
+
+
+[tool.ruff.isort]
+known-first-party = []
+known-third-party = []
+section-order = [
+    "future",
+    "standard-library",
+    "third-party",
+    "first-party",
+    "local-folder",
+]
+combine-as-imports = true
+split-on-trailing-comma = false
+lines-between-types = 1
+
+[tool.black]
+line-length = 120
+target-version = ["py311"]
+include = '\.pyi?$'
+exclude = '''
+(
+  /(
+      \.direnv
+    | \.eggs
+    | \.git
+    | \.tox
+    | \.venv
+    | _build
+    | build
+    | dist
+    | venv
+  )/
+)
+'''
+
 
 [tool.isort]
 line_length = 120

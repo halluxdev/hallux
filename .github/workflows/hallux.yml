@@ -33,7 +33,7 @@ jobs:
           --cov-fail-under=65 \
           --junitxml xunit-reports/xunit-result-unit.xml \
           tests/unit \
-          tests/integration/hallux_fix_test.py         
+          tests/integration/hallux_fix_test.py
 
     - uses: sonarsource/sonarqube-scan-action@master
       env:

@@ -4,10 +4,10 @@ from unittest.mock import Mock
 import pytest
 from unit.common.testing_issue import TestingIssue
 
-from backends.query_backend import QueryBackend
-from proposals.diff_proposal import DiffProposal
-from targets.diff_target import DiffTarget
-from tools.issue_solver import IssueSolver
+from hallux.backends.query_backend import QueryBackend
+from hallux.proposals.diff_proposal import DiffProposal
+from hallux.targets.diff import DiffTarget
+from hallux.tools.issue_solver import IssueSolver
 
 
 # Create a concrete subclass of IssueSolver for testing
