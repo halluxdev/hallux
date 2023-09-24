@@ -9,9 +9,21 @@
       "program": "${workspaceFolder}/bin/hallux.py",
       "cwd": "${workspaceFolder}",
       "env": {
-        "PYTHONPATH": "${workspaceFolder}/bin",
+        "PYTHONPATH": "${workspaceFolder}/bin:$PYTHONPATH",
       },
       "args" : ["--verbose", "--rest", "./tests/test-python-project"]
+    },
+    {
+      "name": "Python: Current test file",
+      "type": "python",
+      "request": "launch",
+      "program": "${file}",
+      "purpose": ["debug-test"],
+      "console": "integratedTerminal",
+      "cwd": "${workspaceFolder}",
+      "env": {
+        "PYTHONPATH": "${workspaceFolder}/src:${workspaceFolder}/tests:$PYTHONPATH",
+      }
     },
     {
       "name": "Python: Current File",

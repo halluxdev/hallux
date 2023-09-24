@@ -14,10 +14,12 @@ from issues.issue import IssueDescriptor
 
 
 class RestBackend(QueryBackend):
+    PROMPT_STRING = "$PROMPT"
+
     def __init__(
         self,
         url: str,
-        request_body: Any = "$PROMPT",
+        request_body: str | dict = PROMPT_STRING,
         response_body: str = "$RESPONSE",
         token: str | None = None,
         type="rest",
@@ -107,11 +109,12 @@ class RestBackend(QueryBackend):
     def query(self, request: str, issue: IssueDescriptor | None = None, issue_lines: list[str] = list) -> list[str]:
         if self._is_object(self.request_body):
             json_data = json.dumps(self.request_body)
-            parsed_request = json_data.replace("$PROMPT", request)
+            parsed_request = json_data.replace(self.PROMPT_STRING, request)
             self.headers.update({"Content-Type": "application/json"})
 
         elif self._is_string(self.request_body):
-            parsed_request = self.request_body.replace("$PROMPT", request)
+            parsed_request = self.request_body.replace(
+                self.PROMPT_STRING, request)
             self.headers.update({"Content-Type": "text/plain"})
 
         else:

@@ -26,8 +26,9 @@ For more command-line commands and just type `$ hallux`
 
 ## Installation
 
-In order to setup Python virtual environment run `./scripts/setup-python.sh`
+In order to setup Python virtual environment run `./scripts/setup-venv.sh`
 
 For activating environment run `cd /path/to/hallux && source activate.sh` 
 
 You might need to add `export PATH="/Path/to/hallux/bin:$PATH"` into your `~/.bashrc` or `~/.zshrc` file.
+
