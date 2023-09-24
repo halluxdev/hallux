@@ -5,8 +5,8 @@ from unittest.mock import Mock, patch
 
 import requests
 
-from issues.issue import IssueDescriptor
-from tools.sonarqube.solver import Sonar_IssueSolver, SonarIssue
+from hallux.issues.issue import IssueDescriptor
+from hallux.tools.sonarqube.solver import Sonar_IssueSolver, SonarIssue
 
 SONAR_SAMPLE_TOKEN: Final[str] = "sqt-deadbeefdeadbeefdeadbeefdeadbeef"
 SONAR_PROJECT: Final[str] = "test_project"
@@ -58,7 +58,8 @@ def test_try_fixing_no_results(filename=__file__):
 
     sonar_issue = SonarIssue(
         filename=str(test_file.absolute()),
-        text_range={"startLine": 2, "endLine": 2, "startOffset": 0, "endOffset": 0},
+        text_range={"startLine": 2, "endLine": 2,
+                    "startOffset": 0, "endOffset": 0},
         issue_line=2,
     )
     proposals = sonar_issue.list_proposals()

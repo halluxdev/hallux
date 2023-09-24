@@ -14,9 +14,9 @@ from typing import Final
 import pytest
 from github import Github, PullRequest, Repository
 
-from auxilary import set_directory
-from hallux import main
-from targets.github_proposal_traget import GithubProposalTraget
+from hallux.auxilary import set_directory
+from hallux.main import main
+from hallux.targets.github_proposal import GithubProposalTraget
 
 GITHUB_PULLREQUEST_URL = "https://github.com/halluxdev/hallux/pull/26"
 
@@ -37,7 +37,8 @@ def test_hallux_github(tmp_proj_dir: str | None = None):
     hallux_git_dir = Path(__file__).resolve().parent.parent.parent
     assert hallux_git_dir.joinpath(".git").exists()
 
-    base_url, repo_name, pr_id = GithubProposalTraget.parse_pr_url(GITHUB_PULLREQUEST_URL)
+    base_url, repo_name, pr_id = GithubProposalTraget.parse_pr_url(
+        GITHUB_PULLREQUEST_URL)
     assert base_url == "https://api.github.com"
     assert repo_name == "halluxdev/hallux"
     assert pr_id == 26
@@ -60,23 +61,28 @@ def test_hallux_github(tmp_proj_dir: str | None = None):
     # re-calculate comments_count
     initial_comments_count: Final[int] = pull_request.get_comments().totalCount
 
-    shutil.copytree(str(hallux_git_dir), tmp_proj_dir, ignore_dangling_symlinks=False, dirs_exist_ok=True)
+    shutil.copytree(str(hallux_git_dir), tmp_proj_dir,
+                    ignore_dangling_symlinks=False, dirs_exist_ok=True)
     with set_directory(Path(tmp_proj_dir)):
         try:
             subprocess.check_output(["git", "reset", "--hard"])
-            subprocess.check_output(["git", "fetch", "origin", CORRESPONDING_COMMIT_SHA])
-            subprocess.check_output(["git", "checkout", CORRESPONDING_COMMIT_SHA])
+            subprocess.check_output(
+                ["git", "fetch", "origin", CORRESPONDING_COMMIT_SHA])
+            subprocess.check_output(
+                ["git", "checkout", CORRESPONDING_COMMIT_SHA])
         except subprocess.CalledProcessError as e:
             pytest.fail(e, pytrace=True)  # Cannot checkout PR commit
 
         try:
-            main(["hallux", "--cache", "--python", "--github", GITHUB_PULLREQUEST_URL, "."])
+            main(["hallux", "--cache", "--python",
+                 "--github", GITHUB_PULLREQUEST_URL, "."])
         except Exception as e:
             pytest.fail(
                 e, pytrace=True
             )  # Fail during running `hallux --python --github https://github.com/halluxai/hallux/pull/26 .`
 
-    processed_comments_count: Final[int] = pull_request.get_comments().totalCount
+    processed_comments_count: Final[int] = pull_request.get_comments(
+    ).totalCount
 
     assert processed_comments_count > initial_comments_count
 

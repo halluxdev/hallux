@@ -9,8 +9,8 @@ from unittest.mock import mock_open, patch
 import pytest
 from unit.common.testing_issue import TestingIssue
 
-from proposals.simple_proposal import SimpleProposal
-from targets.filesystem_target import FilesystemTarget
+from hallux.proposals.simple_proposal import SimpleProposal
+from hallux.targets.filesystem import FilesystemTarget
 
 
 def test_filesystem_target():

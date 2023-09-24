@@ -9,12 +9,12 @@ from unittest.mock import patch
 
 import yaml
 
-from auxilary import set_directory
-from hallux import CONFIG_FILE, Hallux, main
+from hallux.auxilary import set_directory
+from hallux.main import CONFIG_FILE, Hallux, main
 
 
 @patch("builtins.print")
-def test_Hallux_main(mock_print):
+def test_hallux_main(mock_print):
     # prints usage, and quits
     out_val: int = main([])
     assert out_val == 0

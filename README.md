@@ -18,17 +18,25 @@ If you want `hallux` to propose you fixes and corrections directly into your Pul
 In order for `hallux` to understand your repo you need to provide `.hallux` configuration file, in the repo root folder.  
 For more command-line commands and just type `$ hallux` 
 
-## Folder structure
-* **bin** main hallux executable
-* **src** main source codes for hallux
-* **scripts** complimentary scripts for managing the repo
-* **tests** unit- and integration- tests for hallux 
 
 ## Installation
+
+```bash
+pip install hallux
+
+hallux
+```
+
+
+## Local development
 
 In order to setup Python virtual environment run `./scripts/setup-venv.sh`
 
 For activating environment run `cd /path/to/hallux && source activate.sh` 
 
-You might need to add `export PATH="/Path/to/hallux/bin:$PATH"` into your `~/.bashrc` or `~/.zshrc` file.
 
+## Folder structure
+* **bin** main hallux executable
+* **src** main source codes for hallux
+* **scripts** complimentary scripts for managing the repo
+* **tests** unit- and integration- tests for hallux 

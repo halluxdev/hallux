@@ -8,7 +8,7 @@ from pathlib import Path
 
 from unit.common.testing_issue import TestingIssue
 
-from proposals.python_proposal import PythonProposal
+from hallux.proposals.python_proposal import PythonProposal
 
 
 def test_python_proposal():
@@ -17,12 +17,15 @@ def test_python_proposal():
     print("B")  # This is THE line
     print("C")
 
-    issue = TestingIssue(filename=str(Path(__file__).resolve()), language="python", issue_line=line + 2)
+    issue = TestingIssue(filename=str(Path(__file__).resolve()),
+                         language="python", issue_line=line + 2)
     proposal = PythonProposal(issue, radius_or_range=1)
     assert proposal.code_offset == 4
-    assert proposal.issue_lines == ['print("A")', 'print("B")  # This is THE line', 'print("C")']
+    assert proposal.issue_lines == [
+        'print("A")', 'print("B")  # This is THE line', 'print("C")']
 
-    assert proposal._merge_lines(['print("A")', 'print("BBBBBB")', 'print("C")']) is True
+    assert proposal._merge_lines(
+        ['print("A")', 'print("BBBBBB")', 'print("C")']) is True
 
     proposal2 = PythonProposal(issue, extract_function=True)
     assert line > proposal2.start_line >= line - 2
@@ -33,8 +36,10 @@ def test_python_proposal():
 def test_python_proposal_code_offset():
     line = getframeinfo(currentframe()).lineno
     if line > 0:
-        issue = TestingIssue(filename=str(Path(__file__).resolve()), language="python", issue_line=line + 3)
-        proposal0 = PythonProposal(issue, radius_or_range=0)  # This line is used for testing
+        issue = TestingIssue(filename=str(
+            Path(__file__).resolve()), language="python", issue_line=line + 3)
+        # This line is used for testing
+        proposal0 = PythonProposal(issue, radius_or_range=0)
         assert proposal0.code_offset == 8
 
         proposal1 = PythonProposal(issue, radius_or_range=1)

@@ -30,7 +30,10 @@
       "type": "python",
       "request": "launch",
       "program": "${file}",
-      "console": "integratedTerminal"
+      "console": "integratedTerminal",
+      "env": {
+        "PYTHONPATH": "/usr/local/lib/python3.11/site-packages/:$PYTHONPATH",
+      }
     }
   ]
 }

@@ -3,8 +3,7 @@ from unittest.mock import patch, MagicMock
 
 import pytest
 from unit.common.testing_issue import TestingIssue
-
-from backends.rest_backend import RestBackend
+from hallux.backends.rest_backend import RestBackend
 
 
 class TestRestBackend:
