@@ -5,7 +5,7 @@ from __future__ import annotations
 import json
 import logging
 from pathlib import Path
-from typing import Any
+from typing import Any, Final
 
 import requests
 
@@ -21,6 +21,8 @@ class RestBackend(QueryBackend):
         url: str,
         request_body: str | dict = PROMPT_STRING,
         response_body: str = "$RESPONSE",
+        report_url: str | None = None,
+        report_body: str = '{"issue": $ISSUE, "proposal":$PROPOSAL}',
         token: str | None = None,
         type="rest",
         base_path: Path = Path(),
@@ -32,8 +34,10 @@ class RestBackend(QueryBackend):
         self.token = token
         self.method = "POST"
         self.headers = {}
-        self.request_body = request_body
-        self.response_body = response_body
+        self.request_body: Final = request_body
+        self.response_body: Final = response_body
+        self.report_url: Final = report_url
+        self.report_body: Final = report_body
 
     def _is_string(self, obj):
         if isinstance(obj, str):
@@ -110,11 +114,16 @@ class RestBackend(QueryBackend):
         if self._is_object(self.request_body):
             json_data = json.dumps(self.request_body)
             parsed_request = json_data.replace(self.PROMPT_STRING, request)
+            if "$ISSUE" in parsed_request:
+                parsed_request = parsed_request.replace("$ISSUE", json.dumps(issue))
+
+            if "$ISSUE_LINES" in parsed_request:
+                parsed_request = parsed_request.replace("$ISSUE_LINES", json.dumps(issue_lines))
+
             self.headers.update({"Content-Type": "application/json"})
 
         elif self._is_string(self.request_body):
-            parsed_request = self.request_body.replace(
-                self.PROMPT_STRING, request)
+            parsed_request = self.request_body.replace(self.PROMPT_STRING, request)
             self.headers.update({"Content-Type": "text/plain"})
 
         else:
@@ -131,3 +140,13 @@ class RestBackend(QueryBackend):
         logging.debug(parsed_response)
 
         return parsed_response
+
+    def report_succesfull_fix(self, issue, proposal) -> None:
+        if self.report_url is not None and self.report_body is not None:
+            request = self.report_body.replace("$ISSUE", json.dumps(issue))
+            request = request.replace("$PROPOSAL", json.dumps(proposal))
+            self.headers.update({"Content-Type": "text/plain"})
+            self._make_request(request)
+
+        if self.previous is not None:
+            self.previous.report_succesfull_fix(issue, proposal)
