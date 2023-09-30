@@ -24,11 +24,11 @@ jobs:
     - name: Unit-Tests
       run: |
         export PATH=$(pwd)/bin:$PATH
-        export PYTHONPATH=$(pwd)/src:${PYTHONPATH}
+        export PYTHONPATH=$(pwd)/hallux:${PYTHONPATH}
         python -m pytest \
           --cov-branch \
           --cov-report=term \
-          --cov=src \
+          --cov=hallux \
           --cov-report=xml \
           --cov-fail-under=65 \
           --junitxml xunit-reports/xunit-result-unit.xml \
