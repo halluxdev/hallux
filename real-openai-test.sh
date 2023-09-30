@@ -6,4 +6,4 @@ python -m pytest -v --real-openai-test  tests/integration/hallux_fix_test.py
 
 ./scripts/sonar-scanner.sh
 
-python src/hallux.py --openai --sonar --git bin
+python hallux/main.py --openai --sonar --git bin
