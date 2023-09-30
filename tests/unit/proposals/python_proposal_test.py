@@ -40,7 +40,7 @@ def test_python_proposal_code_offset():
             Path(__file__).resolve()), language="python", issue_line=line + 3)
         # This line is used for testing
         proposal0 = PythonProposal(issue, radius_or_range=0)
-        assert proposal0.code_offset == 8
+        assert proposal0.code_offset == 12
 
         proposal1 = PythonProposal(issue, radius_or_range=1)
         assert proposal1.code_offset == 8
