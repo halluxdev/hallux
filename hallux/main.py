@@ -24,7 +24,7 @@ from hallux.targets.filesystem import FilesystemTarget
 from hallux.targets.git_commit import GitCommitTarget
 from hallux.targets.github_proposal import GithubProposalTraget
 from hallux.tools.factory import IssueSolver, ProcessorFactory
-from hallux.__version__ import version
+
 
 DEBUG: Final[bool] = False
 CONFIG_FILE: Final[str] = ".hallux"
@@ -72,7 +72,7 @@ class Hallux:
 
     @staticmethod
     def print_usage():
-        print(f"Hallux v{version} - Convenient Coding Assistant")
+        print(f"Hallux v{get_version()} - Convenient Coding Assistant")
         print("USAGE: ")
         print("hallux [TARGET] [BACKEND] [PLUGINS] [OTHER] DIR")
         print()
@@ -134,6 +134,11 @@ class Hallux:
             return GitCommitTarget()
         # If no other targets were found - use default
         return FilesystemTarget()
+
+
+def get_version():
+    with open(Path(__file__).parent / 'VERSION') as version_file:
+        return version_file.read().strip()
 
 
 def main(argv: list[str] | None = None, run_path: Path | None = None) -> int:

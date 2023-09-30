@@ -1,9 +1,10 @@
 [build-system]
 requires = ["setuptools", "wheel"]
+build-backend = "setuptools.build_meta"
 
 [project]
 name = "hallux"
-version = "0.0.3"
+dynamic = ["version"]
 authors = [
   { name="Hallux Team", email="team@hallux.dev" },
 ]
@@ -39,6 +40,9 @@ test = [
   "pytest >= 7.3.1",
   'pytest-cov==4.1.0',
 ]
+
+[tool.setuptools.dynamic]
+version = {file = "hallux/VERSION"}
 
 [project.scripts]
 hallux = 'hallux.main:main'
