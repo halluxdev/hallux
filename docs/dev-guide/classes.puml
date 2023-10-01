@@ -1,0 +1,92 @@
+@startuml classDiagram
+
+class IssueDescriptor{
+  +tool: str
+  +filename: str
+  +issue_line: int
+  +description: str
+  +issue_type: str
+  +language: str
+}
+
+class DiffProposal{
+  +filename: str
+  +description: str
+  +issue_line: int
+  +try_fixing()
+}
+
+class SimpleProposal{
+}
+
+class PythonProposal{
+}
+
+class DiffTarget{
+  +apply_diff()
+  +revert_diff()
+  +commit_diff()
+}
+
+class FilesystemTarget{
+}
+
+class GitCommitTarget{
+}
+
+class GithubProposalTarget{
+}
+
+class QueryBackend{
+  +query()
+}
+
+class OpenAiChatGPT{
+}
+
+class RestBackend{
+}
+
+class DummyBackend{
+}
+
+class BackendFactory{
+  +init_backend()
+}
+
+class IssueSolver{
+  +solve_issues()
+}
+
+class ProcessorFactory{
+  +init_solvers()
+}
+
+class Hallux{
+  -solvers
+  -run_path
+  -process()
+}
+
+IssueDescriptor -- DiffProposal
+DiffProposal <|-- SimpleProposal
+DiffProposal <|-- PythonProposal
+
+DiffTarget <|-- FilesystemTarget
+DiffTarget <|-- GitCommitTarget
+DiffTarget <|-- GithubProposalTarget
+
+QueryBackend <|-- OpenAiChatGPT
+QueryBackend <|-- RestBackend
+QueryBackend <|-- DummyBackend
+
+BackendFactory ..> QueryBackend
+
+IssueSolver ..> DiffTarget
+IssueSolver ..> QueryBackend
+
+ProcessorFactory ..> IssueSolver
+
+Hallux o-- IssueSolver
+Hallux ..> DiffTarget
+Hallux ..> QueryBackend
