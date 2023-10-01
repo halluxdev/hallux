@@ -40,5 +40,4 @@ class TestCpp_IssueSolver(unittest.TestCase):
         processor = Cpp_IssueSolver(self.base_path, self.base_path)
         with patch("logging.error") as mock_print:
             processor.solve_issues(self.query_backend, self.diff_target)
-            mock_print.assert_called_with(
-                "Process C/C++: cannot find `Makefile` nor 'CMakeLists.txt'")
+            mock_print.assert_called_with("Process C/C++: cannot find `Makefile` nor 'CMakeLists.txt'")

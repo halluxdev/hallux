@@ -32,8 +32,7 @@ def test_hallux_cpp(
     proj_dir = Path(__file__).resolve().parent.parent.joinpath(proj_name)
 
     # copy reference project into temp folder
-    shutil.copytree(str(proj_dir), tmp_proj_dir,
-                    ignore_dangling_symlinks=False, dirs_exist_ok=True)
+    shutil.copytree(str(proj_dir), tmp_proj_dir, ignore_dangling_symlinks=False, dirs_exist_ok=True)
 
     # another temporal dir for cmake init
     cmake_tmp_dir = hallux_tmp_dir()
@@ -47,8 +46,7 @@ def test_hallux_cpp(
 
         make_succesfull: bool = True
         try:
-            subprocess.check_output(
-                ["make", "cpp/test_cpp_project.o"], stderr=subprocess.DEVNULL)
+            subprocess.check_output(["make", "cpp/test_cpp_project.o"], stderr=subprocess.DEVNULL)
         except subprocess.CalledProcessError as e:
             make_succesfull = False
             returncode = e.returncode
@@ -76,8 +74,7 @@ def test_hallux_cpp(
     # ASSERT: must be no remaining c++ compilation issues
     with set_directory(cmake_tmp_dir):
         try:
-            subprocess.check_output(
-                ["make", "cpp/test_cpp_project.o"], stderr=subprocess.DEVNULL)
+            subprocess.check_output(["make", "cpp/test_cpp_project.o"], stderr=subprocess.DEVNULL)
         except subprocess.CalledProcessError as e:
             pytest.fail(e, pytrace=True)  # make must not find any issues
 
@@ -99,8 +96,7 @@ def test_hallux_python(
     proj_dir = Path(__file__).resolve().parent.parent.joinpath(proj_name)
 
     # copy reference project into temp folder
-    shutil.copytree(str(proj_dir), tmp_proj_dir,
-                    ignore_dangling_symlinks=False, dirs_exist_ok=True)
+    shutil.copytree(str(proj_dir), tmp_proj_dir, ignore_dangling_symlinks=False, dirs_exist_ok=True)
 
     # check that temporal project has ruff issues
     with set_directory(tmp_proj_dir):

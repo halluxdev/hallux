@@ -60,8 +60,7 @@ cpp = Cpp_IssueSolver(Path(), Path())
 )
 def test_init_solvers(argv: list[str], config: dict, groups: dict, expected_list: list):
     argv = ["hallux"] + argv
-    solvers_list = ProcessorFactory.init_solvers(
-        argv, config, groups, Path(), Path())
+    solvers_list = ProcessorFactory.init_solvers(argv, config, groups, Path(), Path())
     assert len(solvers_list) == len(expected_list)
     assert len(solvers_list) >= 1  # shall always return at least one processor
     for i in range(len(solvers_list)):

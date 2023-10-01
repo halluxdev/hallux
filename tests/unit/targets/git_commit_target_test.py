@@ -77,8 +77,7 @@ def test_commit_diff(git_target_factory, diff_proposal):
 
         # Check that subprocess.check_output was called with the expected arguments
         mock_subprocess.assert_any_call(["git", "add", "file"])
-        mock_subprocess.assert_any_call(
-            ["git", "commit", "-m", f"HALLUX: {diff_proposal.description}"])
+        mock_subprocess.assert_any_call(["git", "commit", "-m", f"HALLUX: {diff_proposal.description}"])
 
         # Check that os.chdir was called to change into and back out of the git directory
         mock_chdir.assert_any_call("/path/to")

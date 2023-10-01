@@ -20,13 +20,11 @@ class TestingIssue(IssueDescriptor):
         language: str | None = None,
         base_path: Path | None = None,
     ):
-        self.base_path: Final[Path] = base_path if base_path is not None else Path(
-            __file__).resolve().parent
+        self.base_path: Final[Path] = base_path if base_path is not None else Path(__file__).resolve().parent
         test_file = self.base_path.joinpath(filename)
 
         # By-default contain absolute full-path, but can contain relative name too, if base_path provided
-        testing_filename: str = str(
-            test_file) if base_path is None else filename
+        testing_filename: str = str(test_file) if base_path is None else filename
 
         super().__init__(
             tool=tool,
