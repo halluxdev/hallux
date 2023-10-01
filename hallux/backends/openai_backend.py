@@ -31,8 +31,7 @@ class OpenAiChatGPT(QueryBackend):
             self.valid = False
 
         if os.getenv("OPENAI_API_KEY") is None:
-            logging.warning(
-                "Environment variable OPENAI_API_KEY is required for OpenAI Backend")
+            logging.warning("Environment variable OPENAI_API_KEY is required for OpenAI Backend")
             self.valid = False
 
         self.model: Final[str] = model
@@ -46,8 +45,7 @@ class OpenAiChatGPT(QueryBackend):
 
         logging.debug("[OpenAI REQUEST]:")
         logging.debug(request)
-        result = ChatCompletion.create(
-            messages=[{"role": "user", "content": request}], model=self.model)
+        result = ChatCompletion.create(messages=[{"role": "user", "content": request}], model=self.model)
         answers = []
         if len(result["choices"]) > 0:
             for variant in result["choices"]:

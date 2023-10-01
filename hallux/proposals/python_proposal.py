@@ -30,8 +30,7 @@ class PythonProposal(SimpleProposal):
         with open(issue.filename, "rt") as f:
             python_source = f.read()
         parsed_ast = ast.parse(python_source, filename=issue.filename)
-        target_function = self.find_target_function(
-            parsed_ast, issue.issue_line)
+        target_function = self.find_target_function(parsed_ast, issue.issue_line)
         if target_function:
             func_range = (target_function.lineno, target_function.end_lineno)
             self._set_code_range(func_range)
@@ -46,12 +45,11 @@ class PythonProposal(SimpleProposal):
         for line in self.issue_lines:
             lsline = line.lstrip(" ")
             if len(lsline) > 0:
-                self.code_offset = min(
-                    self.code_offset, len(line) - len(lsline))
+                self.code_offset = min(self.code_offset, len(line) - len(lsline))
 
     def remove_code_offset(self):
         for i, line in enumerate(self.issue_lines):
-            self.issue_lines[i] = line[self.code_offset:]
+            self.issue_lines[i] = line[self.code_offset :]
         self.proposed_lines = copy.deepcopy(self.issue_lines)
 
     def _merge_lines(self, proposed_lines: list[str]) -> bool:

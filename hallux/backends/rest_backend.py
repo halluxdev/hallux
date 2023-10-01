@@ -113,8 +113,7 @@ class RestBackend(QueryBackend):
             self.headers.update({"Content-Type": "application/json"})
 
         elif self._is_string(self.request_body):
-            parsed_request = self.request_body.replace(
-                self.PROMPT_STRING, request)
+            parsed_request = self.request_body.replace(self.PROMPT_STRING, request)
             self.headers.update({"Content-Type": "text/plain"})
 
         else:

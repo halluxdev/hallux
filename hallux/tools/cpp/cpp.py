@@ -51,11 +51,9 @@ class Cpp_IssueSolver(IssueSolver):
             makefile_path = self.run_path.joinpath("build", self.makefile)
         elif self.run_path.joinpath(self.command_dir, self.cmakelists).exists():
             # command_dir/CMakeLists.txt
-            makefile_path = self.makefile_from_cmake(
-                self.run_path.joinpath(self.command_dir))
+            makefile_path = self.makefile_from_cmake(self.run_path.joinpath(self.command_dir))
         else:
-            logging.error(
-                "Process C/C++: cannot find `Makefile` nor 'CMakeLists.txt'")
+            logging.error("Process C/C++: cannot find `Makefile` nor 'CMakeLists.txt'")
             return
         print("Process C/C++:")
 
@@ -84,10 +82,8 @@ class Cpp_IssueSolver(IssueSolver):
         logging.info(f"{len(compile_targets)} Makefile targets found")
         target: CompileTarget
         for target in compile_targets:
-            solver = MakeTargetSolver(
-                run_path=target.makefile_dir, make_target=target.target)
-            solver.solve_issues(diff_target=diff_target,
-                                query_backend=query_backend)
+            solver = MakeTargetSolver(run_path=target.makefile_dir, make_target=target.target)
+            solver.solve_issues(diff_target=diff_target, query_backend=query_backend)
 
     def list_compile_targets(self, makefile_dir: Path, compile_targets: list[CompileTarget]):
         with set_directory(makefile_dir):
@@ -103,14 +99,11 @@ class Cpp_IssueSolver(IssueSolver):
                 if target.endswith(".o"):
                     target = target.lstrip(".")
                     target = target.lstrip(" ")
-                    compile_targets.append(CompileTarget(
-                        target=target, makefile_dir=makefile_dir))
+                    compile_targets.append(CompileTarget(target=target, makefile_dir=makefile_dir))
 
             inner_dirs: list = os.listdir(makefile_dir)
 
             for inner_dir in inner_dirs:
-                inner_makefile = makefile_dir.joinpath(
-                    str(inner_dir), "Makefile")
+                inner_makefile = makefile_dir.joinpath(str(inner_dir), "Makefile")
                 if inner_makefile.exists():
-                    self.list_compile_targets(makefile_dir.joinpath(
-                        str(inner_dir)), compile_targets)
+                    self.list_compile_targets(makefile_dir.joinpath(str(inner_dir)), compile_targets)

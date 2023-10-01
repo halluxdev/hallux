@@ -57,8 +57,7 @@ class ProposalEngineRepeat(ProposalEngine):
         except StopIteration:
             if self.index < self.times:
                 self.index += 1
-                self.proposal_engine_current = copy.deepcopy(
-                    self.proposal_engine)
+                self.proposal_engine_current = copy.deepcopy(self.proposal_engine)
                 return next(self.proposal_engine_current)
             else:
                 raise StopIteration

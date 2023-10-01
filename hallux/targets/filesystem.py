@@ -17,12 +17,10 @@ class FilesystemTarget(DiffTarget):
 
     def apply_diff(self, proposal: DiffProposal) -> bool:
         if self.existing_proposal is not None:
-            raise SystemError(
-                "FilesystemTarget: Cannot apply new diff, before last one committed or reverted")
+            raise SystemError("FilesystemTarget: Cannot apply new diff, before last one committed or reverted")
 
         if not Path(proposal.filename).exists():
-            raise SystemError(
-                f"FilesystemTarget: Cannot find file: {proposal.filename}")
+            raise SystemError(f"FilesystemTarget: Cannot find file: {proposal.filename}")
 
         self.base_path = Path().absolute()
         self.existing_proposal = proposal  # save new diff in the memory

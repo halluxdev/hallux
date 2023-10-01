@@ -28,13 +28,11 @@ class Mypy_IssueSolver(IssueSolver):
 
         with set_directory(self.run_path):
             try:
-                mypy_output = subprocess.check_output(
-                    ["mypy", self.args, self.command_dir])
+                mypy_output = subprocess.check_output(["mypy", self.args, self.command_dir])
             except subprocess.CalledProcessError as e:
                 mypy_output = e.output
 
-        issues.extend(PythonIssue.parseIssues(
-            mypy_output.decode("utf-8"), tool="mypy", keyword="error:"))
+        issues.extend(PythonIssue.parseIssues(mypy_output.decode("utf-8"), tool="mypy", keyword="error:"))
 
         return issues
 

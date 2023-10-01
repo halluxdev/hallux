@@ -61,8 +61,7 @@ class ProcessorFactory:
         for name in requested_names:
             classname = mapping[name]
             config_params = config.get(name, {})
-            solver = classname(**config_params, config_path=config_path,
-                               run_path=run_path, command_dir=command_dir)
+            solver = classname(**config_params, config_path=config_path, run_path=run_path, command_dir=command_dir)
             solvers.append(solver)
 
         return solvers

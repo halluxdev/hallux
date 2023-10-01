@@ -45,8 +45,7 @@ class IssueSolver(ABC):
                     )
                     logging.info("\033[92m PASSED\033[0m")
             except subprocess.CalledProcessError as e:
-                raise SystemError(
-                    f"Success Test '{success_test}' is failing right from the start") from e
+                raise SystemError(f"Success Test '{success_test}' is failing right from the start") from e
 
     @abstractmethod
     def list_issues(self) -> list[IssueDescriptor]:
@@ -63,14 +62,11 @@ class IssueSolver(ABC):
         if self.success_test is not None:
             try:
                 with set_directory(self.config_path):
-                    subprocess.check_output(
-                        ["bash"] + self.success_test.split(" "))
-                logging.info(
-                    f"\033[92m success test: {self.success_test} PASSED\033[0m")
+                    subprocess.check_output(["bash"] + self.success_test.split(" "))
+                logging.info(f"\033[92m success test: {self.success_test} PASSED\033[0m")
                 return True
             except subprocess.CalledProcessError:
-                logging.info(
-                    f"\033[91m success test: {self.success_test} FAILED\033[0m")
+                logging.info(f"\033[91m success test: {self.success_test} FAILED\033[0m")
                 return False
         else:
             new_issues = self.list_issues()
@@ -85,8 +81,7 @@ class IssueSolver(ABC):
 
             proposals = issue.list_proposals()
             fixing_successful: bool = False
-            print(
-                f"{issue.filename}:{issue.issue_line}: {issue.description} : ", end="")
+            print(f"{issue.filename}:{issue.issue_line}: {issue.description} : ", end="")
 
             proposal: DiffProposal | None = None
             for proposal in proposals:
