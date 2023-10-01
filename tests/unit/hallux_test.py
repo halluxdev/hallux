@@ -32,14 +32,14 @@ def test_hallux_main(mock_print):
         with set_directory(t):
             out_val = main(["hallux", "--cache", "."])
             assert out_val == 0
-            assert len(mock_print.mock_calls) == 3
+            assert len(mock_print.mock_calls) == 2
 
     mock_print.mock_calls.clear()
     with TemporaryDirectory() as t:
         with set_directory(t):
             out_val = main(["hallux", "--cache", "--verbose", "."])
             assert out_val == 0
-            assert len(mock_print.mock_calls) == 3
+            assert len(mock_print.mock_calls) == 2
 
     # asked to fix python, but no path
     mock_print.mock_calls.clear()

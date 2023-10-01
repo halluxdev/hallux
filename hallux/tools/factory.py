@@ -16,13 +16,13 @@ class ProcessorFactory:
     @staticmethod
     def init_solvers(
         argv: list[str],
-        config: dict | None,
+        tools_config: dict | None,
         groups: dict[str, list[str]] | None,
         config_path: Path,
         run_path: Path,
         command_dir: str = ".",
     ) -> list[IssueSolver]:
-        config = config if config is not None else {}
+        tools_config = tools_config if tools_config is not None else {}
         mapping: dict = {
             "ruff": Ruff_IssueSolver,
             "mypy": Mypy_IssueSolver,
@@ -60,7 +60,7 @@ class ProcessorFactory:
         solvers: list[IssueSolver] = []
         for name in requested_names:
             classname = mapping[name]
-            config_params = config.get(name, {})
+            config_params = tools_config.get(name, {})
             solver = classname(**config_params, config_path=config_path, run_path=run_path, command_dir=command_dir)
             solvers.append(solver)
 

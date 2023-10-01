@@ -189,7 +189,7 @@ def main(argv: list[str] | None = None, run_path: Path | None = None) -> int:
     try:
         solvers: list[IssueSolver] = ProcessorFactory.init_solvers(
             argv,
-            config.get("solvers"),
+            config.get("tools"),
             config.get("groups"),
             config_path=config_path,
             run_path=run_path,
