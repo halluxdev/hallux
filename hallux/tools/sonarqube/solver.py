@@ -1,6 +1,7 @@
 # Copyright: Hallux team, 2023
 
 from __future__ import annotations
+import logging
 
 import os
 from pathlib import Path
@@ -35,7 +36,7 @@ class OverrideQueryBackend(QueryBackend):
 
 
 class Sonar_IssueSolver(IssueSolver):
-    SONAR_TOKEN: Final[str] = "SONAR_TOKEN"
+    SONARQUBE_TOKEN: Final[str] = "SONARQUBE_TOKEN"
 
     def __init__(
         self,
@@ -50,18 +51,20 @@ class Sonar_IssueSolver(IssueSolver):
         super().__init__(config_path, run_path, command_dir, success_test=success_test)
 
         if token is None:
-            if os.getenv(self.SONAR_TOKEN) is not None:
-                token = os.getenv(self.SONAR_TOKEN)
+            if os.getenv(self.SONARQUBE_TOKEN) is not None:
+                token = os.getenv(self.SONARQUBE_TOKEN)
 
         self.token: Final[str | None] = token
         self.url: Final[str | None] = url
         self.project: Final[str | None] = project
+
         # With SonarQube we only may solve 1 issue per file.
         self.already_fixed_files: Final[list[str]] = []
 
     def solve_issues(self, diff_target: DiffTarget, query_backend: QueryBackend):
         if not self.token or not self.url or not self.project:
-            print("Process SonarQube: not configured")
+            logging.error("SonarQube: token, url or project not configured")
+
         else:
             print("Process SonarQube:")
             new_query_backend = OverrideQueryBackend(query_backend, self.already_fixed_files)

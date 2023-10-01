@@ -29,6 +29,6 @@ def test_set_directory():
     tmp_dir = Path(tempfile.mkdtemp())
 
     with set_directory(tmp_dir):
-        assert os.getcwd() == str(tmp_dir.absolute())
+        assert os.getcwd() == os.path.realpath(tmp_dir)
 
     assert os.getcwd() == current_dir
