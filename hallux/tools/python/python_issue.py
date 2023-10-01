@@ -17,12 +17,9 @@ class PythonIssue(IssueDescriptor):
         line_comment: str = f" # line {str(self.issue_line)}"
         return ProposalList(
             [
-                PythonProposal(self, extract_function=True,
-                               issue_line_comment=line_comment),
-                PythonProposal(self, radius_or_range=4,
-                               issue_line_comment=line_comment),
-                PythonProposal(self, radius_or_range=6,
-                               issue_line_comment=line_comment),
+                PythonProposal(self, extract_function=True, issue_line_comment=line_comment),
+                PythonProposal(self, radius_or_range=4, issue_line_comment=line_comment),
+                PythonProposal(self, radius_or_range=6, issue_line_comment=line_comment),
             ]
         )
 

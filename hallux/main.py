@@ -34,8 +34,7 @@ logging.basicConfig(level=logging.INFO)
 
 class Hallux:
     # static-like const field
-    default_plugins: Final[dict] = {"python": {
-        "ruff": "."}, "cpp": {"compile": True}, "sonar": True}
+    default_plugins: Final[dict] = {"python": {"ruff": "."}, "cpp": {"compile": True}, "sonar": True}
 
     def __init__(
         self,
@@ -86,13 +85,11 @@ class Hallux:
         print("            head SHA in local git and on Github must be same,")
         print("            env variable ${GITHUB_TOKEN} must be properly set,")
         print()
-        print(
-            "Options for [BACKEND]: If specified, Hallux will not try other, less prioritized backends")
+        print("Options for [BACKEND]: If specified, Hallux will not try other, less prioritized backends")
         print("Here is list of BACKENDS, sorted by their priority (may be changed in config file):")
         print("--cache     (highest priority) Reads solutions from JSON file, specified in the config")
         print("            If upper-level backend successfully solves an issue, solution stored for future use")
-        print(
-            "            If JSON file is not specified in the config, 'dummy.json' is used")
+        print("            If JSON file is not specified in the config, 'dummy.json' is used")
         # print("--free      Uses free Hallux.dev backend for solving issues (limited capacity)")
         print("--gpt3      Uses OpenAI ChatGPT v3.5 for solving issues")
         print("            Requires valid ${OPENAI_API_KEY} env variable.")
@@ -137,7 +134,7 @@ class Hallux:
 
 
 def get_version():
-    with open(Path(__file__).parent / 'VERSION') as version_file:
+    with open(Path(__file__).parent / "VERSION") as version_file:
         return version_file.read().strip()
 
 
@@ -174,8 +171,7 @@ def main(argv: list[str] | None = None, run_path: Path | None = None) -> int:
     config, config_path = Hallux.find_config(run_path)
 
     try:
-        query_backend: QueryBackend = BackendFactory.init_backend(
-            argv, config.get("backends", None), config_path)
+        query_backend: QueryBackend = BackendFactory.init_backend(argv, config.get("backends", None), config_path)
     except Exception as e:
         logging.error(f"Error during BACKEND initialization: {e}")
         if verbose:
@@ -183,8 +179,7 @@ def main(argv: list[str] | None = None, run_path: Path | None = None) -> int:
         return 2
 
     try:
-        target: DiffTarget = Hallux.init_target(
-            argv, config.get("target", {}), verbose)
+        target: DiffTarget = Hallux.init_target(argv, config.get("target", {}), verbose)
     except Exception as e:
         logging.error(f"Error during TARGET initialization: {e}")
         if verbose:

@@ -19,11 +19,9 @@ class GitCommitTarget(FilesystemTarget):
     def __init__(self):
         # ToDo: assert we're in GIT repo, crash if not
         FilesystemTarget.__init__(self)
-        git_status_output = subprocess.check_output(
-            ["git", "status", "--porcelain"]).decode("utf8")
+        git_status_output = subprocess.check_output(["git", "status", "--porcelain"]).decode("utf8")
         if len(git_status_output) > 0:
-            raise SystemError(
-                "for GIT TARGET you must be in the GIT REPO with no local uncommitted changes!")
+            raise SystemError("for GIT TARGET you must be in the GIT REPO with no local uncommitted changes!")
 
     def apply_diff(self, diff: DiffProposal) -> bool:
         return FilesystemTarget.apply_diff(self, diff)
@@ -37,20 +35,16 @@ class GitCommitTarget(FilesystemTarget):
         os.chdir(git_dir)
         success: bool = True
         try:
-            logging.debug(
-                f"git add {os.path.relpath(self.existing_proposal.filename, start=git_dir)}")
+            logging.debug(f"git add {os.path.relpath(self.existing_proposal.filename, start=git_dir)}")
             output = subprocess.check_output(
-                ["git", "add", os.path.relpath(
-                    self.existing_proposal.filename, start=git_dir)]
+                ["git", "add", os.path.relpath(self.existing_proposal.filename, start=git_dir)]
             )
-            git_message = "HALLUX: " + \
-                self.existing_proposal.description.replace('"', "")
+            git_message = "HALLUX: " + self.existing_proposal.description.replace('"', "")
 
             logging.debug(output.decode("utf8"))
             logging.debug(f"git commit -m {git_message}")
 
-            output = subprocess.check_output(
-                ["git", "commit", "-m", f"{git_message}"])
+            output = subprocess.check_output(["git", "commit", "-m", f"{git_message}"])
 
             logging.debug(output.decode("utf8"))
             FilesystemTarget.commit_diff(self)

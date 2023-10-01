@@ -28,8 +28,7 @@ class Ruff_IssueSolver(IssueSolver):
         issues: list[IssueDescriptor] = []
         with set_directory(self.run_path):
             try:
-                ruff_output = subprocess.check_output(
-                    ["ruff", self.args, self.command_dir])
+                ruff_output = subprocess.check_output(["ruff", self.args, self.command_dir])
             except subprocess.CalledProcessError as e:
                 ruff_output = e.output
 

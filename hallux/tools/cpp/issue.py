@@ -20,14 +20,10 @@ class CppIssue(IssueDescriptor):
         line_comment: str = f" // line {str(self.issue_line)}"
         return ProposalList(
             [
-                SimpleProposal(self, radius_or_range=3,
-                               issue_line_comment=line_comment),
-                SimpleProposal(self, radius_or_range=4,
-                               issue_line_comment=line_comment),
-                SimpleProposal(self, radius_or_range=5,
-                               issue_line_comment=line_comment),
-                SimpleProposal(self, radius_or_range=6,
-                               issue_line_comment=line_comment),
+                SimpleProposal(self, radius_or_range=3, issue_line_comment=line_comment),
+                SimpleProposal(self, radius_or_range=4, issue_line_comment=line_comment),
+                SimpleProposal(self, radius_or_range=5, issue_line_comment=line_comment),
+                SimpleProposal(self, radius_or_range=6, issue_line_comment=line_comment),
             ]
         )
 

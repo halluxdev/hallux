@@ -25,8 +25,7 @@ class SimpleProposal(DiffProposal):
         :param radius_or_range: "safety buffer" to read around the issue_line
         :param issue_line_comment: add comment into one line from issue_lines,
         """
-        super().__init__(filename=issue.filename,
-                         description=issue.description, issue_line=issue.issue_line)
+        super().__init__(filename=issue.filename, description=issue.description, issue_line=issue.issue_line)
         self.issue: Final[IssueDescriptor] = issue
         self.issue_line_comment = issue_line_comment
         with open(issue.filename, "rt") as file:
@@ -46,24 +45,20 @@ class SimpleProposal(DiffProposal):
     def _set_code_range(self, range: tuple[int, int]):
         self.start_line = max(1, range[0])
         self.end_line = min(len(self.all_lines), range[1])
-        self.safety_radius = min(
-            self.issue.issue_line - self.start_line, self.end_line - self.issue.issue_line)
+        self.safety_radius = min(self.issue.issue_line - self.start_line, self.end_line - self.issue.issue_line)
         self._set_issue_lines()
 
     def _set_code_radius(self, radius: int):
         self.safety_radius = abs(int(radius))
         self.start_line = max(1, self.issue.issue_line - self.safety_radius)
-        self.end_line = min(len(self.all_lines),
-                            self.issue.issue_line + self.safety_radius)
+        self.end_line = min(len(self.all_lines), self.issue.issue_line + self.safety_radius)
         self._set_issue_lines()
 
     def _set_issue_lines(self):
-        self.issue_lines: list[str] = copy.deepcopy(
-            self.all_lines[self.start_line - 1: self.end_line])
+        self.issue_lines: list[str] = copy.deepcopy(self.all_lines[self.start_line - 1 : self.end_line])
         self.proposed_lines: list[str] = copy.deepcopy(self.issue_lines)
         if self.issue_line_comment is not None:
-            self.issue_lines[self.issue.issue_line -
-                             self.start_line] += self.issue_line_comment
+            self.issue_lines[self.issue.issue_line - self.start_line] += self.issue_line_comment
 
     def try_fixing(self, query_backend: QueryBackend, diff_target: DiffTarget) -> bool:
         """
@@ -75,15 +70,13 @@ class SimpleProposal(DiffProposal):
         """
 
         request_lines = [
-            "Fix " + self.issue.language + " " + self.issue.issue_type +
-            " issue: " + self.issue.description,
+            "Fix " + self.issue.language + " " + self.issue.issue_type + " issue: " + self.issue.description,
             "from corresponding code:\n```",
             *self.issue_lines,
             "```\nWrite ONLY fixed code, without explanations. Keep formatting.",
         ]
         request = "\n".join(request_lines)
-        query_results: list[str] = query_backend.query(
-            request, self.issue, issue_lines=self.issue_lines)
+        query_results: list[str] = query_backend.query(request, self.issue, issue_lines=self.issue_lines)
         if len(query_results) == 0:
             return False
 
@@ -115,8 +108,7 @@ class SimpleProposal(DiffProposal):
 
         merge_result: bool
         if issue_line_found is not None:
-            merge_result = self._merge_from_issue_line(
-                proposed_lines, issue_line_found)
+            merge_result = self._merge_from_issue_line(proposed_lines, issue_line_found)
         else:
             merge_result = self._merge_from_both_ends(proposed_lines)
 
@@ -124,8 +116,7 @@ class SimpleProposal(DiffProposal):
 
     def _merge_from_both_ends(self, proposed_lines: list[str]) -> bool:
         # merge starting code
-        line_diff: list[str] = list(
-            difflib.ndiff(self.issue_lines, proposed_lines))
+        line_diff: list[str] = list(difflib.ndiff(self.issue_lines, proposed_lines))
         issue_index: int = 0
         prop_index: int = 0
 
@@ -135,8 +126,7 @@ class SimpleProposal(DiffProposal):
             elif line_diff[i].startswith("- "):
                 issue_index += 1
             elif line_diff[i].startswith("  "):
-                proposed_lines = self.issue_lines[:issue_index] + \
-                    proposed_lines[prop_index:]
+                proposed_lines = self.issue_lines[:issue_index] + proposed_lines[prop_index:]
                 break
             else:
                 prop_index += 1
@@ -157,8 +147,7 @@ class SimpleProposal(DiffProposal):
             elif line_diff[-i - 1].startswith("- "):
                 issue_index += 1
             elif line_diff[-i - 1].startswith("  "):
-                proposed_lines = proposed_lines[: -prop_index -
-                                                1] + self.issue_lines[-issue_index - 1:]
+                proposed_lines = proposed_lines[: -prop_index - 1] + self.issue_lines[-issue_index - 1 :]
                 break
             else:
                 prop_index += 1
@@ -196,8 +185,7 @@ class SimpleProposal(DiffProposal):
                     index2 += 1
             return index1, index2
 
-        orig_issue_line_index: Final[int] = self.issue.issue_line - \
-            self.start_line
+        orig_issue_line_index: Final[int] = self.issue.issue_line - self.start_line
         issue_lines_start = self.issue_lines[:orig_issue_line_index]
         proposed_lines_start = proposed_lines[:found_issue_line_index]
         issue_lines_start.reverse()
@@ -206,17 +194,15 @@ class SimpleProposal(DiffProposal):
         issue_lines_end = self.issue_lines[orig_issue_line_index:]
         proposed_lines_end = proposed_lines[found_issue_line_index:]
 
-        issue_index_above, proposed_index_above = find_first_match(
-            issue_lines_start, proposed_lines_start)
-        issue_index_below, proposed_index_below = find_first_match(
-            issue_lines_end, proposed_lines_end)
+        issue_index_above, proposed_index_above = find_first_match(issue_lines_start, proposed_lines_start)
+        issue_index_below, proposed_index_below = find_first_match(issue_lines_end, proposed_lines_end)
 
         self.proposed_lines = (
             self.issue_lines[: orig_issue_line_index - issue_index_above]
             + proposed_lines[
-                found_issue_line_index - proposed_index_above: found_issue_line_index + proposed_index_below
+                found_issue_line_index - proposed_index_above : found_issue_line_index + proposed_index_below
             ]
-            + self.issue_lines[orig_issue_line_index + issue_index_below:]
+            + self.issue_lines[orig_issue_line_index + issue_index_below :]
         )
 
         return True

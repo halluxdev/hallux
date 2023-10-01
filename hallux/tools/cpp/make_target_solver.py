@@ -31,8 +31,7 @@ class MakeTargetSolver(IssueSolver):
 
         with set_directory(self.run_path):
             try:
-                subprocess.check_output(
-                    ["make", self.make_target], stderr=subprocess.STDOUT)
+                subprocess.check_output(["make", self.make_target], stderr=subprocess.STDOUT)
             except subprocess.CalledProcessError as e:
                 make_output: str = e.output.decode("utf-8")
                 issues.extend(CppIssue.parseMakeIssues(make_output))

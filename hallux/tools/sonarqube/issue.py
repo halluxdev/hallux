@@ -45,14 +45,11 @@ class SonarIssue(IssueDescriptor):
         if self.language == "python":
             line_comment: str = f" # line {str(self.issue_line)}"
             proposal_list = [
-                PythonProposal(self, extract_function=True,
-                               issue_line_comment=line_comment),
-                PythonProposal(self, radius_or_range=4,
-                               issue_line_comment=line_comment),
+                PythonProposal(self, extract_function=True, issue_line_comment=line_comment),
+                PythonProposal(self, radius_or_range=4, issue_line_comment=line_comment),
             ]
             if end_line - start_line > 4:
-                proposal_list.append(PythonProposal(
-                    self, radius_or_range=code_range, issue_line_comment=line_comment))
+                proposal_list.append(PythonProposal(self, radius_or_range=code_range, issue_line_comment=line_comment))
 
         else:
             proposal_list = [
@@ -60,8 +57,7 @@ class SonarIssue(IssueDescriptor):
                 SimpleProposal(self, radius_or_range=6),
             ]
             if end_line - start_line > 4:
-                proposal_list.append(SimpleProposal(
-                    self, radius_or_range=code_range))
+                proposal_list.append(SimpleProposal(self, radius_or_range=code_range))
 
         return ProposalList(proposal_list)
 

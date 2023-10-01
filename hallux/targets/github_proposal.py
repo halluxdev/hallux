@@ -29,12 +29,10 @@ class GithubProposalTraget(FilesystemTarget):
         self.pull_request: PullRequest = self.repo.get_pull(PR_ID)
 
         if self.pull_request.closed_at is not None:  # self.pull_request.is_merged :
-            raise SystemError(
-                f"Pull Request {PR_ID} is either closed or merged already")
+            raise SystemError(f"Pull Request {PR_ID} is either closed or merged already")
 
         latest_github_sha: str = self.pull_request.head.sha
-        git_log = subprocess.check_output(
-            ["git", "log", "--pretty=oneline"]).decode("utf8")
+        git_log = subprocess.check_output(["git", "log", "--pretty=oneline"]).decode("utf8")
         local_git_sha = git_log.split("\n")[0].split(" ")[0]
 
         if local_git_sha != latest_github_sha:
@@ -50,7 +48,7 @@ class GithubProposalTraget(FilesystemTarget):
         :return: (base_url, base_url = "https://api." + url_items[0], PR_ID) OR None
         """
         if pr_url.startswith("https://"):
-            pr_url = pr_url[len("https://"):]
+            pr_url = pr_url[len("https://") :]
             url_items = pr_url.split("/")
             if len(url_items) == 5 and url_items[3] == "pull":
                 if url_items[0] == "github.com":

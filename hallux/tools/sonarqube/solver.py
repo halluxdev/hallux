@@ -64,8 +64,7 @@ class Sonar_IssueSolver(IssueSolver):
             print("Process SonarQube: not configured")
         else:
             print("Process SonarQube:")
-            new_query_backend = OverrideQueryBackend(
-                query_backend, self.already_fixed_files)
+            new_query_backend = OverrideQueryBackend(query_backend, self.already_fixed_files)
             super().solve_issues(diff_target, new_query_backend)
 
     def list_issues(self) -> list[IssueDescriptor]:
@@ -77,13 +76,11 @@ class Sonar_IssueSolver(IssueSolver):
             )
             if self.project is not None:
                 request += "&componentKeys=" + self.project
-            x = requests.get(url=request, headers={
-                             "Authorization": "Bearer " + self.token})
+            x = requests.get(url=request, headers={"Authorization": "Bearer " + self.token})
         except Exception:
             return []
 
         if x.status_code == 200:
-            issues.extend(SonarIssue.parseIssues(
-                x.text, self.already_fixed_files))
+            issues.extend(SonarIssue.parseIssues(x.text, self.already_fixed_files))
 
         return issues
