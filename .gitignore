@@ -21,6 +21,6 @@ htmlcov/
 .DS_Store
 dummy.json
 # this file is auto-generated
-src/__version__.py
+hallux/VERSION
 dist
 **/hallux.egg-info
