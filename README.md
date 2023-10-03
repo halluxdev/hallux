@@ -37,6 +37,6 @@ For activating environment run `cd /path/to/hallux && source activate.sh`
 
 ## Folder structure
 * **bin** main hallux executable
-* **src** main source codes for hallux
+* **hallux** main source codes for hallux
 * **scripts** complimentary scripts for managing the repo
 * **tests** unit- and integration- tests for hallux 
