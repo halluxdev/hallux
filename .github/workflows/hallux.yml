@@ -25,6 +25,8 @@ jobs:
       run: |
         export PATH=$(pwd)/bin:$PATH
         export PYTHONPATH=$(pwd)/hallux:${PYTHONPATH}
+        ./scripts/set-version.sh
+
         python -m pytest \
           --cov-branch \
           --cov-report=term \
