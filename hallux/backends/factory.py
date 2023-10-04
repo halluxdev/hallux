@@ -46,7 +46,12 @@ class BackendFactory:
 
     @staticmethod
     def _create_backend(settings: dict, config_path: Path, previous_backend: QueryBackend) -> QueryBackend:
-        type_to_class = {"dummy": DummyBackend, "openai": OpenAiChatGPT, "rest": RestBackend}
+        type_to_class = {
+            "dummy": DummyBackend,
+            "openai": OpenAiChatGPT,
+            "openai.azure": OpenAiChatGPT,
+            "rest": RestBackend,
+        }
         backend_type = settings["type"]
         backend_class = type_to_class.get(backend_type)
         if backend_class is None:
