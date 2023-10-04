@@ -71,7 +71,7 @@ class Hallux:
 
     @staticmethod
     def print_usage():
-        print(f"Hallux v{get_version()} - Convenient Coding Assistant")
+        print(f"Hallux v{get_version()} - Convenient Coding Assistant\n")
         print("USAGE: ")
         print("hallux [TARGET] [BACKEND] [PLUGINS] [OTHER] DIR")
         print()
@@ -102,8 +102,9 @@ class Hallux:
         print("--python    try fixing only python issues")
         print("--ruff      try fixing only only ruff issues")
         print("--cpp       try fixing only c++ issues")
-        print("Options for [OTHER]:")
+        print("\nOptions for [OTHER]:")
         print("--verbose   Print debug tracebacks on errors")
+        print("--help      Print help section")
 
     @staticmethod
     def init_target(argv: list[str], config: dict | str, verbose: bool = False) -> DiffTarget:
@@ -151,7 +152,7 @@ def main(argv: list[str] | None = None, run_path: Path | None = None) -> int:
     if verbose:
         logging.basicConfig(level=logging.DEBUG)
 
-    if len(argv) < 2:
+    if len(argv) < 2 or len(argv) == 2 and argv[1] == "--help":
         Hallux.print_usage()
         return 0
 
