@@ -14,7 +14,7 @@ In addition to the YAML configuration file, Hallux also supports configuring opt
  * **AZURE_OPENAI_ENDPOINT** - Endpoint for Azure OpenAI APIs
 
 ### Tools
- * **SONARQUBE_TOKEN** - Token for authenticating with SonarQube server
+ * **SONAR_TOKEN** - Token for authenticating with SonarQube server
 
 
 ## Configuration file

@@ -2,10 +2,11 @@
 
 from __future__ import annotations
 
-import logging
 import os
 import subprocess
 from pathlib import Path
+
+from hallux.logger import logger
 
 from ..proposals.diff_proposal import DiffProposal
 from .filesystem import FilesystemTarget
@@ -35,22 +36,22 @@ class GitCommitTarget(FilesystemTarget):
         os.chdir(git_dir)
         success: bool = True
         try:
-            logging.debug(f"git add {os.path.relpath(self.existing_proposal.filename, start=git_dir)}")
+            logger.debug(f"git add {os.path.relpath(self.existing_proposal.filename, start=git_dir)}")
             output = subprocess.check_output(
                 ["git", "add", os.path.relpath(self.existing_proposal.filename, start=git_dir)]
             )
             git_message = "HALLUX: " + self.existing_proposal.description.replace('"', "")
 
-            logging.debug(output.decode("utf8"))
-            logging.debug(f"git commit -m {git_message}")
+            logger.debug(output.decode("utf8"))
+            logger.debug(f"git commit -m {git_message}")
 
             output = subprocess.check_output(["git", "commit", "-m", f"{git_message}"])
 
-            logging.debug(output.decode("utf8"))
+            logger.debug(output.decode("utf8"))
             FilesystemTarget.commit_diff(self)
         except subprocess.CalledProcessError as e:
-            logging.debug("ERROR:")
-            logging.debug(e.output.decode("utf8"))
+            logger.debug("ERROR:")
+            logger.debug(e.output.decode("utf8"))
             FilesystemTarget.revert_diff(self)
             success = False
         finally:

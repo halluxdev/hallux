@@ -42,3 +42,21 @@ jobs:
         SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
         SONAR_PROJECT_VERSION: ${{ github.run_number }}
+
+
+    - name: ImproveQualtity
+      env:
+        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+        SONAR_PROJECT_VERSION: ${{ github.run_number }}
+        GITHUB_TOKEN: ${{ secrets.HALLUX_GITHUB_TOKEN }}
+        OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+      run: |
+        
+        export PYTHONPATH=$(pwd):${PYTHONPATH}
+        echo "python3 ./hallux/main.py --sonar --gpt3 --github https://github.com/halluxdev/hallux/pull/${{ github.event.pull_request.number }} hallux"
+        LOG_LEVEL=DEBUG python3 ./hallux/main.py --sonar --gpt3 --github https://github.com/halluxdev/hallux/pull/${{ github.event.pull_request.number }} hallux
+        # source ./activate.sh
+        # pip install hallux
+        #ls -la
+        #./bin/hallux.sh --gpt3 --github https://github.com/halluxdev/hallux/pull/${{ github.event.pull_request.number }} hallux

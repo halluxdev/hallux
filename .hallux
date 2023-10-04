@@ -14,21 +14,17 @@ backends:
         model: gpt-3.5-turbo
         max_tokens: 4096
 
-
-
 tools:
-    ruff:
-        # command-line arguments for ruff
-        args:
-    mypy:
-        # command-line arguments for mypy
-        args: --ignore-missing-imports
+    #ruff:
+    #    # command-line arguments for ruff
+    #    args:
+    #mypy:
+    #    # command-line arguments for mypy
+    #    args: --ignore-missing-imports
     sonar:
         url: https://sonarqube.hallux.dev
         success_test: ./hallux-test.sh -x
         project: halluxdev_hallux_AYpIk3Z__hwOMJbIE7XQ
-    cpp:
-
 
 groups:
     all: ["ruff", "mypy", "sonar", "cpp"]

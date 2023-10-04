@@ -3,10 +3,11 @@
 from __future__ import annotations
 
 import json
-import logging
 from pathlib import Path
 
 import requests
+
+from hallux.logger import logger
 
 from ..backends.query_backend import QueryBackend
 from ..issues.issue import IssueDescriptor
@@ -58,10 +59,10 @@ class RestBackend(QueryBackend):
                     return response.text
 
             else:
-                logging.warning(f"Error status code: {response.status_code}")
+                logger.warning(f"Error status code: {response.status_code}")
 
         except requests.ConnectionError:
-            logging.warning(f"Host {self.url} is not reachable.")
+            logger.warning(f"Host {self.url} is not reachable.")
 
         return None
 
@@ -116,16 +117,16 @@ class RestBackend(QueryBackend):
             self.headers.update({"Content-Type": "text/plain"})
 
         else:
-            logging.warning("Invalid request body")
+            logger.warning("Invalid request body")
             return []
 
-        logging.debug("RestBackend REQUEST")
-        logging.debug(parsed_request)
+        logger.debug("RestBackend REQUEST")
+        logger.debug(parsed_request)
 
         response = self._make_request(parsed_request)
         parsed_response = self._parse_response(response)
 
-        logging.debug("RestBackend ANSWERS")
-        logging.debug(parsed_response)
+        logger.debug("RestBackend ANSWERS")
+        logger.debug(parsed_response)
 
         return parsed_response

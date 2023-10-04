@@ -2,13 +2,14 @@
 
 from __future__ import annotations
 
-import logging
 import os
 import subprocess
 import tempfile
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Final
+
+from hallux.logger import logger
 
 from ...auxilary import set_directory
 from ...backends.query_backend import QueryBackend
@@ -53,7 +54,7 @@ class Cpp_IssueSolver(IssueSolver):
             # command_dir/CMakeLists.txt
             makefile_path = self.makefile_from_cmake(self.run_path.joinpath(self.command_dir))
         else:
-            logging.error("Process C/C++: cannot find `Makefile` nor 'CMakeLists.txt'")
+            logger.error("Process C/C++: cannot find `Makefile` nor 'CMakeLists.txt'")
             return
         print("Process C/C++:")
 
@@ -65,10 +66,10 @@ class Cpp_IssueSolver(IssueSolver):
         with set_directory(Path(self.tmp_dir.name)):
             try:
                 subprocess.check_output(["cmake", f"{str(cmake_path)}"])
-                logging.info("CMake initialized successfully")
+                logger.info("CMake initialized successfully")
             except subprocess.CalledProcessError as e:
                 cmake_output = e.output.decode("utf-8")
-                logging.error(cmake_output)
+                logger.error(cmake_output)
                 raise SystemError("CMake initialization failed") from e
 
             return Path(self.tmp_dir.name).joinpath(self.makefile)
@@ -79,7 +80,7 @@ class Cpp_IssueSolver(IssueSolver):
         compile_targets: list[CompileTarget] = []
         self.list_compile_targets(makefile_dir, compile_targets)
 
-        logging.info(f"{len(compile_targets)} Makefile targets found")
+        logger.info(f"{len(compile_targets)} Makefile targets found")
         target: CompileTarget
         for target in compile_targets:
             solver = MakeTargetSolver(run_path=target.makefile_dir, make_target=target.target)

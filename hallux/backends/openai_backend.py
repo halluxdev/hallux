@@ -2,13 +2,14 @@
 
 from __future__ import annotations
 
-import logging
 import os
 from pathlib import Path
 from typing import Final
 
 import openai
 from openai.api_resources import ChatCompletion
+
+from hallux.logger import logger
 
 from ..backends.query_backend import QueryBackend
 from ..issues.issue import IssueDescriptor
@@ -28,7 +29,7 @@ class OpenAiChatGPT(QueryBackend):
 
         self.valid = True
         if model is None or len(model) < 2:
-            logging.warning(f"Wrong model name for OpenAI Backend: {model}")
+            logger.warning(f"Wrong model name for OpenAI Backend: {model}")
             self.valid = False
 
         self.model: Final[str] = model
@@ -53,24 +54,24 @@ class OpenAiChatGPT(QueryBackend):
         if not self.valid:
             return []
 
-        logging.debug("[OpenAI REQUEST]:")
-        logging.debug(request)
+        logger.debug("[OpenAI REQUEST]:")
+        logger.debug(request)
         result = ChatCompletion.create(messages=[{"role": "user", "content": request}], model=self.model)
         answers = []
         if len(result["choices"]) > 0:
             for variant in result["choices"]:
                 answers.append(variant["message"]["content"])
 
-        logging.debug("[OpenAI ANSWERS]:")
+        logger.debug("[OpenAI ANSWERS]:")
         for ans in answers:
             for line in ans.split("\n"):
-                logging.debug(line)
+                logger.debug(line)
 
         return answers
 
     def validate_env(self, key: str, message: str) -> None | str:
         if os.getenv(key) is None:
-            logging.warning(message.format(key=key))
+            logger.warning(message.format(key=key))
             self.valid = False
         else:
             return os.getenv(key)

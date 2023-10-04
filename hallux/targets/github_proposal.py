@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import os
-import subprocess
 
 from github import Github, GithubException, PullRequest, Repository
 
@@ -31,14 +30,15 @@ class GithubProposalTraget(FilesystemTarget):
         if self.pull_request.closed_at is not None:  # self.pull_request.is_merged :
             raise SystemError(f"Pull Request {PR_ID} is either closed or merged already")
 
-        latest_github_sha: str = self.pull_request.head.sha
-        git_log = subprocess.check_output(["git", "log", "--pretty=oneline"]).decode("utf8")
-        local_git_sha = git_log.split("\n")[0].split(" ")[0]
+        # latest_commit_sha: str = self.pull_request.merge_commit_sha
+        # latest_github_sha: str = self.pull_request.head.sha
+        # git_log = subprocess.check_output(["git", "log", "--pretty=oneline"]).decode("utf8")
+        # local_git_sha = git_log.split("\n")[0].split(" ")[0]
 
-        if local_git_sha != latest_github_sha:
-            raise SystemError(
-                f"Local git commit `{local_git_sha}` and head from pull-request `{latest_github_sha}` do not coincide!"
-            )
+        # if not (local_git_sha == latest_github_sha or latest_commit_sha == latest_github_sha):
+        #     raise SystemError(
+        #       f"Local git commit `{local_git_sha}` and head from pull-request `{latest_github_sha}` do not coincide!"
+        #     )
 
     @staticmethod
     def parse_pr_url(pr_url: str) -> tuple[str, str, int] | tuple[None, None, None]:

@@ -2,11 +2,12 @@
 
 from __future__ import annotations
 
-import logging
 import subprocess
 from abc import ABC, abstractmethod
 from pathlib import Path
 from typing import Final
+
+from hallux.logger import logger
 
 from ..auxilary import set_directory
 from ..backends.query_backend import QueryBackend
@@ -37,13 +38,13 @@ class IssueSolver(ABC):
 
         if success_test is not None:
             try:
-                logging.info(f"Try running success test: {success_test} ...")
+                logger.info(f"Try running success test: {success_test} ...")
 
                 with set_directory(self.config_path):
                     subprocess.check_output(
                         ["bash"] + success_test.split(" "),
                     )
-                    logging.info("\033[92m PASSED\033[0m")
+                    logger.info("\033[92m PASSED\033[0m")
             except subprocess.CalledProcessError as e:
                 raise SystemError(f"Success Test '{success_test}' is failing right from the start") from e
 
@@ -63,10 +64,10 @@ class IssueSolver(ABC):
             try:
                 with set_directory(self.config_path):
                     subprocess.check_output(["bash"] + self.success_test.split(" "))
-                logging.info(f"\033[92m success test: {self.success_test} PASSED\033[0m")
+                logger.info(f"\033[92m success test: {self.success_test} PASSED\033[0m")
                 return True
             except subprocess.CalledProcessError:
-                logging.info(f"\033[91m success test: {self.success_test} FAILED\033[0m")
+                logger.info(f"\033[91m success test: {self.success_test} FAILED\033[0m")
                 return False
         else:
             new_issues = self.list_issues()
@@ -124,7 +125,7 @@ class IssueSolver(ABC):
                     self.target_issues = self.list_issues()
                 else:
                     issue_index += 1
-                logging.info(" \033[92m successfully fixed\033[0m")
+                logger.info(" \033[92m successfully fixed\033[0m")
             else:
                 issue_index += 1
-                logging.info(" \033[91m unable to fix\033[0m")
+                logger.info(" \033[91m unable to fix\033[0m")
