@@ -19,6 +19,7 @@ import yaml
 
 from hallux.auxilary import find_arg
 from hallux.backends.factory import BackendFactory, QueryBackend
+from hallux.logger import logger
 from hallux.targets.diff import DiffTarget
 from hallux.targets.filesystem import FilesystemTarget
 from hallux.targets.git_commit import GitCommitTarget
@@ -27,8 +28,6 @@ from hallux.tools.factory import IssueSolver, ProcessorFactory
 
 DEBUG: Final[bool] = False
 CONFIG_FILE: Final[str] = ".hallux"
-
-logging.basicConfig(level=logging.INFO)
 
 
 class Hallux:
@@ -106,7 +105,7 @@ class Hallux:
         print("--help      Print help section")
 
     @staticmethod
-    def init_target(argv: list[str], config: dict | str, verbose: bool = False) -> DiffTarget:
+    def init_target(argv: list[str], config: dict | str) -> DiffTarget:
         # Command-line arguments have highest priority:
         github_index = find_arg(argv, "--github")
         if github_index > 0:
@@ -149,7 +148,7 @@ def main(argv: list[str] | None = None, run_path: Path | None = None) -> int:
 
     verbose: bool = find_arg(argv, "--verbose") > 0 or find_arg(argv, "-v") > 0
     if verbose:
-        logging.basicConfig(level=logging.DEBUG)
+        logger.setLevel(logging.DEBUG)
 
     help_requested = len(argv) == 2 and (argv[1] == "--help" or argv[1] == "-h" or argv[1] == "-?")
     if len(argv) < 2 or help_requested:
@@ -163,7 +162,7 @@ def main(argv: list[str] | None = None, run_path: Path | None = None) -> int:
         # directory, which needs to be processed, as requested from the CLI. Relative to run_path. Could be "."
         command_dir: str = argv[-1]
     else:
-        logging.error(f"{argv[-1]} is not a valid DIR")
+        logger.error(f"{argv[-1]} is not a valid DIR")
         return 1
 
     config: dict[str, Any]
@@ -174,15 +173,15 @@ def main(argv: list[str] | None = None, run_path: Path | None = None) -> int:
     try:
         query_backend: QueryBackend = BackendFactory.init_backend(argv, config.get("backends", None), config_path)
     except Exception as e:
-        logging.error(f"Error during BACKEND initialization: {e}")
+        logger.error(f"Error during BACKEND initialization: {e}")
         if verbose:
             raise e
         return 2
 
     try:
-        target: DiffTarget = Hallux.init_target(argv, config.get("target", {}), verbose)
+        target: DiffTarget = Hallux.init_target(argv, config.get("target", {}))
     except Exception as e:
-        logging.error(f"Error during TARGET initialization: {e}")
+        logger.error(f"Error during TARGET initialization: {e}")
         if verbose:
             raise e
         return 3
@@ -197,7 +196,7 @@ def main(argv: list[str] | None = None, run_path: Path | None = None) -> int:
             command_dir=command_dir,
         )
     except Exception as e:
-        logging.error(f"Error during SOLVERS initialization: {e}")
+        logger.error(f"Error during SOLVERS initialization: {e}")
         if verbose:
             raise e
         return 4
@@ -209,7 +208,7 @@ def main(argv: list[str] | None = None, run_path: Path | None = None) -> int:
             config_path=config_path,
         )
     except Exception as e:
-        logging.error(f"Error during initialization: {e}")
+        logger.error(f"Error during initialization: {e}")
         if verbose:
             raise e
         return 5
@@ -217,7 +216,7 @@ def main(argv: list[str] | None = None, run_path: Path | None = None) -> int:
     try:
         hallux.process(query_backend=query_backend, diff_target=target)
     except Exception as e:
-        logging.error(f"Error during process: {e.args}")
+        logger.error(f"Error during process: {e.args}")
         if verbose:
             raise e
         return 6

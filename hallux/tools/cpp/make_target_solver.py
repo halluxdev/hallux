@@ -2,10 +2,11 @@
 
 from __future__ import annotations
 
-import logging
 import subprocess
 from pathlib import Path
 from typing import Final
+
+from hallux.logger import logger
 
 from ...auxilary import set_directory
 from ...backends.query_backend import QueryBackend
@@ -16,13 +17,13 @@ from ...tools.issue_solver import IssueSolver
 
 
 class MakeTargetSolver(IssueSolver):
-    def __init__(self, run_path: Path, make_target: str, verbose: bool = False, config_path: Path = Path()):
+    def __init__(self, run_path: Path, make_target: str, config_path: Path = Path()):
         super().__init__(config_path=config_path, run_path=run_path)
         # self.makefile_dir: Final[Path] = makefile_dir
         self.make_target: Final[str] = make_target
 
     def solve_issues(self, diff_target: DiffTarget, query_backend: QueryBackend):
-        logging.info(f"{self.run_path}/Makefile : '{self.make_target}'")
+        logger.info(f"{self.run_path}/Makefile : '{self.make_target}'")
         with set_directory(self.run_path):
             super().solve_issues(diff_target, query_backend)
 

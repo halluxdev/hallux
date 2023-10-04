@@ -21,7 +21,7 @@ class TestCpp_IssueSolver(unittest.TestCase):
             f.write("help:\n\techo help\n")
             f.close()
 
-        with patch("logging.info") as mock_print:
+        with patch("hallux.logger.logger.info") as mock_print:
             processor.solve_issues(self.query_backend, self.diff_target)
             mock_print.assert_called_with("0 Makefile targets found")
 
@@ -32,12 +32,12 @@ class TestCpp_IssueSolver(unittest.TestCase):
             f.write("cmake_minimum_required(VERSION 3.4)\nproject(test)\n")
             f.close()
 
-        with patch("logging.info") as mock_print:
+        with patch("hallux.logger.logger.info") as mock_print:
             processor.solve_issues(self.query_backend, self.diff_target)
             mock_print.assert_called_with("0 Makefile targets found")
 
     def test_process_without_make_nor_cmake(self):
         processor = Cpp_IssueSolver(self.base_path, self.base_path)
-        with patch("logging.error") as mock_print:
+        with patch("hallux.logger.logger.error") as mock_print:
             processor.solve_issues(self.query_backend, self.diff_target)
             mock_print.assert_called_with("Process C/C++: cannot find `Makefile` nor 'CMakeLists.txt'")
