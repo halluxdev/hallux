@@ -36,16 +36,18 @@ class OpenAiChatGPT(QueryBackend):
 
         # For Azure OpenAI
         if type == "openai.azure":
-            openai.api_key = self.get_env(
+            openai.api_key = self.validate_env(
                 "AZURE_OPENAI_API_KEY", "Environment variable {key} is required for OpenAI Azure Backend"
             )
-            openai.api_base = self.get_env(
+            openai.api_base = self.validate_env(
                 "AZURE_OPENAI_ENDPOINT", "Environment variable {key} is required for OpenAI Azure Backend"
             )
             openai.api_type = "azure"
             openai.api_version = "2023-05-15"
         else:
-            openai.api_key = self.get_env("OPENAI_API_KEY", "Environment variable {key} is required for OpenAI Backend")
+            openai.api_key = self.validate_env(
+                "OPENAI_API_KEY", "Environment variable {key} is required for OpenAI Backend"
+            )
 
     def query(self, request: str, issue: IssueDescriptor | None = None, issue_lines: list[str] = list) -> list[str]:
         if not self.valid:
@@ -66,7 +68,7 @@ class OpenAiChatGPT(QueryBackend):
 
         return answers
 
-    def get_env(self, key: str, message: str) -> None | str:
+    def validate_env(self, key: str, message: str) -> None | str:
         if os.getenv(key) is None:
             logging.warning(message.format(key=key))
             self.valid = False
