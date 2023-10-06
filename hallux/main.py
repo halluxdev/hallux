@@ -152,7 +152,8 @@ def main(argv: list[str] | None = None, run_path: Path | None = None) -> int:
     if verbose:
         logging.basicConfig(level=logging.DEBUG)
 
-    if len(argv) < 2 or len(argv) == 2 and argv[1] == "--help":
+    help_requested = len(argv) == 2 and (argv[1] == "--help" or argv[1] == "-h" or argv[1] == "-?")
+    if len(argv) < 2 or help_requested:
         Hallux.print_usage()
         return 0
 
