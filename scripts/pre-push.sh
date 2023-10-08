@@ -7,8 +7,8 @@ cd "${0%/*}/../.."
 echo "FORMATTING CHECK:"
 black . --check
 
-#echo "IMPORT SORT CHECK:"
-#isort . --check
+echo "IMPORT SORT CHECK:"
+isort . --check
 
 echo "LINTING CHECK:"
 ruff check .

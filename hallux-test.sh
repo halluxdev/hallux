@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 
 #source ./activate.sh
-#./scripts/set-version.sh
 
 python -m pytest -v $1 $2\
     --cov-branch \
