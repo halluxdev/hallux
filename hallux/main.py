@@ -10,12 +10,12 @@
 
 from __future__ import annotations
 
-import sys
-import yaml
 import logging
-
+import sys
 from pathlib import Path
 from typing import Any, Final
+
+import yaml
 
 from hallux.auxilary import find_arg
 from hallux.backends.factory import BackendFactory, QueryBackend
@@ -24,7 +24,6 @@ from hallux.targets.filesystem import FilesystemTarget
 from hallux.targets.git_commit import GitCommitTarget
 from hallux.targets.github_proposal import GithubProposalTraget
 from hallux.tools.factory import IssueSolver, ProcessorFactory
-
 
 DEBUG: Final[bool] = False
 CONFIG_FILE: Final[str] = ".hallux"

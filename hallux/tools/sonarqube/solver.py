@@ -1,8 +1,8 @@
 # Copyright: Hallux team, 2023
 
 from __future__ import annotations
-import logging
 
+import logging
 import os
 from pathlib import Path
 from typing import Final
