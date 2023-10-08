@@ -33,7 +33,7 @@ def test_compact_proposal():
     proposal._merge_lines(proposed_lines)
     assert proposal.proposed_lines == proposed_lines
 
-    GithubProposalTraget.compact_proposal(proposal)
-    assert proposal.proposed_lines == ["4AAA", "5AAA", "NEW LINE"]
-    assert proposal.start_line == 4
-    assert proposal.end_line == 5
+    compacted = GithubProposalTraget.compact_proposal(proposal)
+    assert compacted.proposed_lines == ["4AAA", "5AAA", "NEW LINE"]
+    assert compacted.start_line == 4
+    assert compacted.end_line == 5

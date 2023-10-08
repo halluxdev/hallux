@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import copy
 import os
 import subprocess
 
@@ -71,37 +72,40 @@ class GithubProposalTraget(FilesystemTarget):
         FilesystemTarget.revert_diff(self)
 
     @staticmethod
-    def compact_proposal(proposal: DiffProposal):
+    def compact_proposal(proposal: DiffProposal) -> DiffProposal:
         """
-        Tries compacting proposal by removing overlapping lines of code
+        Tries compacting proposed lines by removing overlapping lines of code
         """
 
+        compacted = copy.deepcopy(proposal)
+
         # try compacting from the beginning
-        prop_len = len(proposal.proposed_lines)
-        orig_len = len(proposal.issue_lines)
+        prop_len = len(compacted.proposed_lines)
+        orig_len = len(compacted.issue_lines)
         for i in range(min(prop_len, orig_len)):
-            if proposal.proposed_lines[0] == proposal.issue_lines[i]:
-                proposal.proposed_lines = proposal.proposed_lines[1:]
-                proposal.start_line += 1
+            if compacted.proposed_lines[0] == compacted.issue_lines[i]:
+                compacted.proposed_lines = compacted.proposed_lines[1:]
+                compacted.start_line += 1
             else:
                 break
 
         # now compacting from the end
-        prop_len = len(proposal.proposed_lines)
+        prop_len = len(compacted.proposed_lines)
         for i in range(min(prop_len, orig_len)):
-            if proposal.proposed_lines[-1] == proposal.issue_lines[-1 - i]:
-                proposal.proposed_lines = proposal.proposed_lines[:-1]
-                proposal.end_line -= 1
+            if compacted.proposed_lines[-1] == compacted.issue_lines[-1 - i]:
+                compacted.proposed_lines = compacted.proposed_lines[:-1]
+                compacted.end_line -= 1
             else:
                 break
+        return compacted
 
     def commit_diff(self) -> bool:
         commit = self.repo.get_commit(self.pull_request.head.sha)
         body = self.existing_proposal.description + "\n```suggestion\n"
 
-        self.compact_proposal(self.existing_proposal)
+        compacted = self.compact_proposal(self.existing_proposal)
 
-        for line in self.existing_proposal.proposed_lines:
+        for line in compacted.proposed_lines:
             body = body + line + "\n"
         body = body + "\n```"
 
@@ -111,9 +115,9 @@ class GithubProposalTraget(FilesystemTarget):
                 body=body,
                 commit=commit,
                 side="RIGHT",
-                path=str(self.existing_proposal.filename),
-                line=self.existing_proposal.end_line,
-                start_line=self.existing_proposal.start_line,
+                path=str(compacted.filename),
+                line=compacted.end_line,
+                start_line=compacted.start_line,
             )
         except GithubException:
             success = False
