@@ -133,8 +133,11 @@ class Hallux:
 
 
 def get_version():
-    with open(Path(__file__).parent / "VERSION") as version_file:
-        return version_file.read().strip()
+    try:
+        with open(Path(__file__).parent / "VERSION") as version_file:
+            return version_file.read().strip()
+    except FileNotFoundError:
+        return "DEVELOP"
 
 
 def main(argv: list[str] | None = None, run_path: Path | None = None) -> int:
