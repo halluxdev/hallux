@@ -8,8 +8,8 @@ from typing import Final
 
 from ..backends.query_backend import QueryBackend
 from ..issues.issue import IssueDescriptor
-from .diff_proposal import DiffProposal
 from ..targets.diff import DiffTarget
+from .diff_proposal import DiffProposal
 
 
 # Struct to keep all relevant info about found code fix in one place

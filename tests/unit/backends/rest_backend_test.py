@@ -1,8 +1,8 @@
-import os
-from unittest.mock import patch, MagicMock
+from unittest.mock import MagicMock, patch
 
 import pytest
 from unit.common.testing_issue import TestingIssue
+
 from hallux.backends.rest_backend import RestBackend
 
 

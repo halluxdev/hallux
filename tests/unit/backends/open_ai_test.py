@@ -3,6 +3,7 @@ from unittest.mock import patch
 
 import pytest
 from unit.common.testing_issue import TestingIssue
+
 from hallux.backends.openai_backend import OpenAiChatGPT
 
 
