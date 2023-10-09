@@ -23,7 +23,7 @@ tools:
     #    args: --ignore-missing-imports
     sonar:
         url: https://sonarqube.hallux.dev
-        validity_test: ./validity-test.sh -x
+        validity_test: ./run-validity-tests.sh -x
         project: halluxdev_hallux_AYpIk3Z__hwOMJbIE7XQ
         search_params: resolved=false&severities=MINOR,MAJOR,CRITICAL&statuses=OPEN,CONFIRMED,REOPENED
 
