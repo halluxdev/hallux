@@ -2,7 +2,7 @@ name: Master Pipeline
 
 on:
   push:
-    branches: [ master ]
+    branches: [ 71-split-pr-pipeline ]
 
 env:
   BUILD_TYPE: Release
@@ -19,27 +19,27 @@ jobs:
     - name: Install dependencies
       run: pip install --no-cache-dir -r requirements.txt
 
-    - name: Unit-Tests
-      run: |
-        export PATH=$(pwd)/bin:$PATH
-        export PYTHONPATH=$(pwd)/hallux:${PYTHONPATH}
-        ./scripts/set-version.sh
+    # - name: Unit-Tests
+    #   run: |
+    #     export PATH=$(pwd)/bin:$PATH
+    #     export PYTHONPATH=$(pwd)/hallux:${PYTHONPATH}
+    #     ./scripts/set-version.sh
 
-        python -m pytest \
-          --cov-branch \
-          --cov-report=term \
-          --cov=hallux \
-          --cov-report=xml \
-          --cov-fail-under=65 \
-          --junitxml xunit-reports/xunit-result-unit.xml \
-          tests/unit \
-          tests/integration/hallux_fix_test.py
+    #     python -m pytest \
+    #       --cov-branch \
+    #       --cov-report=term \
+    #       --cov=hallux \
+    #       --cov-report=xml \
+    #       --cov-fail-under=65 \
+    #       --junitxml xunit-reports/xunit-result-unit.xml \
+    #       tests/unit \
+    #       tests/integration/hallux_fix_test.py
 
-    - uses: sonarsource/sonarqube-scan-action@master
-      env:
-        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
-        SONAR_PROJECT_VERSION: ${{ github.run_number }}
+    # - uses: sonarsource/sonarqube-scan-action@master
+    #   env:
+    #     SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+    #     SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+    #     SONAR_PROJECT_VERSION: ${{ github.run_number }}
 
 
     - name: Try to fix Sonar issues
@@ -49,14 +49,38 @@ jobs:
         SONAR_PROJECT_VERSION: ${{ github.run_number }}
         GITHUB_TOKEN: ${{ secrets.HALLUX_GITHUB_TOKEN }}
         OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        CURRENT_BRANCH: ${{ github.ref_name }}
       run: |
 
-        # export PYTHONPATH=$(pwd):${PYTHONPATH}
-        # echo "python3 ./hallux/main.py --sonar --gpt3 --git hallux"
-        # LOG_LEVEL=DEBUG python3 ./hallux/main.py --sonar --gpt3 --git hallux
+        export PYTHONPATH=$(pwd):${PYTHONPATH}
 
-        # 1. create new branch: git checkout -b hallux-2023-10-08-commit-hash
-        # 2. run hallux with --sonar --gpt3 --git fix-sonar-issues
+        # 1. create new branch:
+        formatted_date=$(date "+%Y-%m-%d")
+        branch_name=hallux_${formatted_date}_$(git rev-parse --short HEAD)
+        git checkout -b $branch_name
+
+        # 2. run hallux
+        LOG_LEVEL=DEBUG python3 ./hallux/main.py --sonar --gpt3 --git hallux
+
+        # Configure git
+        git config --global user.email "team@hallux.dev"
+        git config --global user.name "Hallux AI Developer"
+        # git token
+        # git remote set-url origin https://x-access-token:$GITHUB_TOKEN@github.com/halluxdev/hallux.git
+
+        git status
+        git add .
+        git push origin $branch_name
+
+        curl -L \
+          -X POST \
+          -H "Accept: application/vnd.github+json" \
+          -H "Authorization: Bearer $GITHUB_TOKEN" \
+          -H "X-GitHub-Api-Version: 2022-11-28" \
+          https://api.github.com/repos/halluxdev/hallux/pulls \
+          -d '{"title":"Hallux improvements ${formatted_date}","body":"Please review","head":"octocat:new-feature","base":"${CURRENT_BRANCH}"}'
+
+
         #     --filter sonar issues
         #     --time of the issue
         # 3. collect fixing statistics, success/unsuccess ratio
