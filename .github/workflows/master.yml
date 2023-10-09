@@ -60,7 +60,7 @@ jobs:
         git checkout -b $branch_name
 
         # 2. run hallux
-        # LOG_LEVEL=DEBUG python3 ./hallux/main.py --sonar --gpt3 --git hallux
+        LOG_LEVEL=DEBUG python3 ./hallux/main.py --sonar --gpt3 --git hallux
 
         # Configure git
         git config --global user.email "team@hallux.dev"
