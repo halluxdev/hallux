@@ -1,8 +1,6 @@
-name:  Master Pipeline
+name: Pull Request Pipeline
 
 on:
-  push:
-    branches: [ master ]
   pull_request:
     branches: [ master ]
 

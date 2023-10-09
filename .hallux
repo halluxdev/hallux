@@ -30,5 +30,3 @@ groups:
     all: ["ruff", "mypy", "sonar", "cpp"]
     python: ["ruff", "mypy"]
 
-
-

@@ -1,0 +1,65 @@
+name: Master Pipeline
+
+on:
+  push:
+    branches: [ master ]
+
+env:
+  BUILD_TYPE: Release
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+
+    - uses: actions/checkout@v2
+      with:
+        fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
+    - name: Install dependencies
+      run: pip install --no-cache-dir -r requirements.txt
+
+    - name: Unit-Tests
+      run: |
+        export PATH=$(pwd)/bin:$PATH
+        export PYTHONPATH=$(pwd)/hallux:${PYTHONPATH}
+        ./scripts/set-version.sh
+
+        python -m pytest \
+          --cov-branch \
+          --cov-report=term \
+          --cov=hallux \
+          --cov-report=xml \
+          --cov-fail-under=65 \
+          --junitxml xunit-reports/xunit-result-unit.xml \
+          tests/unit \
+          tests/integration/hallux_fix_test.py
+
+    - uses: sonarsource/sonarqube-scan-action@master
+      env:
+        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+        SONAR_PROJECT_VERSION: ${{ github.run_number }}
+
+
+    - name: Try to fix Sonar issues
+      env:
+        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+        SONAR_PROJECT_VERSION: ${{ github.run_number }}
+        GITHUB_TOKEN: ${{ secrets.HALLUX_GITHUB_TOKEN }}
+        OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+      run: |
+
+        # export PYTHONPATH=$(pwd):${PYTHONPATH}
+        # echo "python3 ./hallux/main.py --sonar --gpt3 --git hallux"
+        # LOG_LEVEL=DEBUG python3 ./hallux/main.py --sonar --gpt3 --git hallux
+
+        # 1. create new branch: git checkout -b hallux-2023-10-08-commit-hash
+        # 2. run hallux with --sonar --gpt3 --git fix-sonar-issues
+        #     --filter sonar issues
+        #     --time of the issue
+        # 3. collect fixing statistics, success/unsuccess ratio
+        # 3. if any fixes push branch and create PR with possible fix
+
+
