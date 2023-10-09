@@ -60,16 +60,15 @@ jobs:
         git checkout -b $branch_name
 
         # 2. run hallux
-        LOG_LEVEL=DEBUG python3 ./hallux/main.py --sonar --gpt3 --git hallux
+        # LOG_LEVEL=DEBUG python3 ./hallux/main.py --sonar --gpt3 --git hallux
 
         # Configure git
         git config --global user.email "team@hallux.dev"
         git config --global user.name "Hallux AI Developer"
-        # git token
-        # git remote set-url origin https://x-access-token:$GITHUB_TOKEN@github.com/halluxdev/hallux.git
+        git remote set-url origin https://x-access-token:${GITHUB_TOKEN}@github.com/halluxdev/hallux.git
 
         git status
-        git add .
+
         git push origin $branch_name
 
         curl -L \
