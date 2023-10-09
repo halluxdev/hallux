@@ -14,7 +14,7 @@ echo "LINTING CHECK:"
 ruff check .
 
 
-./hallux-test.sh -x --cov-fail-under=70
+./run-tests.sh -x --cov-fail-under=70
 if [ $? -ne 0 ]; then
  echo "TESTS MUST PASS BEFORE PUSH!!"
  exit 1

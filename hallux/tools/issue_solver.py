@@ -83,8 +83,6 @@ class IssueSolver(ABC):
             proposals = issue.list_proposals()
             fixing_successful: bool = False
 
-            print(f"{issue.filename}:{issue.issue_line}: {issue.description}", end="")
-
             proposal: DiffProposal | None = None
             for proposal in proposals:
                 applying_successful: bool
@@ -126,7 +124,11 @@ class IssueSolver(ABC):
                     self.target_issues = self.list_issues()
                 else:
                     issue_index += 1
-                print(" \033[92m successfully fixed\033[0m")
+                logger.message(
+                    f"{issue.filename}:{issue.issue_line}: {issue.description}  \033[92m successfully fixed\033[0m"
+                )
             else:
                 issue_index += 1
-                print(" \033[91m unable to fix\033[0m")
+                logger.message(
+                    f"{issue.filename}:{issue.issue_line}: {issue.description}  \033[91m unable to fix\033[0m"
+                )

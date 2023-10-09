@@ -1,7 +1,7 @@
 backends:
-    # - cache: # short-name, used in command-line
-    #     type: dummy # type : dummy / openai / hallux
-    #     filename: dummy.json
+    - cache: # short-name, used in command-line
+        type: dummy # type : dummy / openai / hallux
+        filename: dummy.json
 
     # - rest:
     #     type: rest
@@ -23,7 +23,7 @@ tools:
     #    args: --ignore-missing-imports
     sonar:
         url: https://sonarqube.hallux.dev
-        success_test: ./hallux-test.sh -x
+        validity_test: ./validity-test.sh -x
         project: halluxdev_hallux_AYpIk3Z__hwOMJbIE7XQ
         search_params: resolved=false&severities=MINOR,MAJOR,CRITICAL&statuses=OPEN,CONFIRMED,REOPENED
 

@@ -8,6 +8,8 @@ from typing import Final
 
 import requests
 
+from hallux.logger import logger
+
 from ...backends.query_backend import QueryBackend
 from ...targets.diff import DiffTarget
 from ..issue_solver import IssueSolver
@@ -42,7 +44,7 @@ class Sonar_IssueSolver(IssueSolver):
         config_path: Path,
         run_path: Path,
         command_dir: str = ".",
-        success_test: str | None = None,
+        validity_test: str | None = None,
         url: str | None = None,
         token: str | None = None,
         project: str | None = None,
@@ -54,14 +56,14 @@ class Sonar_IssueSolver(IssueSolver):
         :param config_path: Directory with .hallux file
         :param run_path: Directory, where hallux was run
         :param command_dir: Directory, passed to hallux in CLI
-        :param success_test: script
+        :param validity_test: script
         :param url:
         :param token:
         :param project:
         :param search_params:
         :param extra_param:
         """
-        super().__init__(config_path, run_path, command_dir, validity_test=success_test)
+        super().__init__(config_path, run_path, command_dir, validity_test=validity_test)
 
         if token is None:
             if os.getenv(self.SONAR_TOKEN) is not None:
@@ -78,10 +80,10 @@ class Sonar_IssueSolver(IssueSolver):
 
     def solve_issues(self, diff_target: DiffTarget, query_backend: QueryBackend):
         if not self.token or not self.url or not self.project:
-            print("SonarQube: token, url or project not configured")
+            logger.error("SonarQube: token, url or project not configured")
 
         else:
-            print("Process SonarQube issues:")
+            logger.message("Process SonarQube issues:")
             new_query_backend = OverrideQueryBackend(query_backend, self.already_fixed_files)
             super().solve_issues(diff_target, new_query_backend)
 

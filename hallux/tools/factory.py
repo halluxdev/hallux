@@ -51,12 +51,7 @@ class ProcessorFactory:
         if len(requested_names) == 0:
             for name in mapping.keys():
                 if find_arg(argv, "--" + name) > 0:
-                    # if a particular tool was requested from CLI, extra_param can be provided
-                    argvalue = find_argvalue(argv, "--" + name)
-                    if argvalue is None:
-                        argvalue = True
-
-                    requested_names[name] = argvalue
+                    requested_names[name] = True
 
         # if nothing particular asked - just use all of them
         if len(requested_names) == 0:
@@ -66,8 +61,11 @@ class ProcessorFactory:
         for name in requested_names:
             classname = mapping[name]
             config_params = tools_config.get(name, {})
-            if isinstance(requested_names[name], str):
-                config_params["extra_param"] = requested_names[name]
+            if name == "sonar":
+                argvalue = find_argvalue(argv, "--" + name)
+                if argvalue is not None:
+                    config_params["extra_param"] = argvalue
+
             solver = classname(**config_params, config_path=config_path, run_path=run_path, command_dir=command_dir)
             solvers.append(solver)
 

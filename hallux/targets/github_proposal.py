@@ -6,8 +6,9 @@ import copy
 import os
 import subprocess
 
-from github import Github, GithubException, PullRequest, Repository
+from github import Github, GithubObject, PullRequest, Repository
 
+from ..logger import logger
 from ..proposals.diff_proposal import DiffProposal
 from .filesystem import FilesystemTarget
 
@@ -120,9 +121,10 @@ class GithubProposalTraget(FilesystemTarget):
                 side="RIGHT",
                 path=str(compacted.filename),
                 line=compacted.end_line,
-                start_line=compacted.start_line,
+                start_line=compacted.start_line if compacted.start_line > compacted.end_line else GithubObject.NotSet,
             )
-        except GithubException:
+        except BaseException as ex:
+            logger.debug(ex)
             success = False
 
         # clean local code

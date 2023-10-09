@@ -44,8 +44,9 @@ def find_argvalue(argv: list[str], name: str) -> str | None:
     """
     for i in range(len(argv)):
         arg = argv[i]
-        if arg == name and len(argv) > i + 1:  # --key value
-            return argv[i + 1]
+        if arg == name:  # --key value
+            if len(argv) > i + 1 and not argv[i + 1].startswith("-"):
+                return argv[i + 1]
         elif arg.startswith(name + "="):  # --key=value
             return arg[len(name) + 1 :]
 
