@@ -25,6 +25,7 @@ tools:
         url: https://sonarqube.hallux.dev
         success_test: ./hallux-test.sh -x
         project: halluxdev_hallux_AYpIk3Z__hwOMJbIE7XQ
+        search_params: resolved=false&severities=MINOR,MAJOR,CRITICAL&statuses=OPEN,CONFIRMED,REOPENED
 
 groups:
     all: ["ruff", "mypy", "sonar", "cpp"]

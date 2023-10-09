@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from ..auxilary import find_arg
+from ..auxilary import find_arg, find_argvalue
 from ..tools.cpp.cpp import Cpp_IssueSolver
 from ..tools.issue_solver import IssueSolver
 from ..tools.mypy.solver import Mypy_IssueSolver
@@ -51,7 +51,12 @@ class ProcessorFactory:
         if len(requested_names) == 0:
             for name in mapping.keys():
                 if find_arg(argv, "--" + name) > 0:
-                    requested_names[name] = True
+                    # if a particular tool was requested from CLI, extra_param can be provided
+                    argvalue = find_argvalue(argv, "--" + name)
+                    if argvalue is None:
+                        argvalue = True
+
+                    requested_names[name] = argvalue
 
         # if nothing particular asked - just use all of them
         if len(requested_names) == 0:
@@ -61,6 +66,8 @@ class ProcessorFactory:
         for name in requested_names:
             classname = mapping[name]
             config_params = tools_config.get(name, {})
+            if isinstance(requested_names[name], str):
+                config_params["extra_param"] = requested_names[name]
             solver = classname(**config_params, config_path=config_path, run_path=run_path, command_dir=command_dir)
             solvers.append(solver)
 

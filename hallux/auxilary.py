@@ -29,10 +29,24 @@ def set_directory(path: str | Path | TemporaryDirectory):
 
 def find_arg(argv: list[str], name: str) -> int:
     """
-    Finds argument index and list of following arguments
+    Finds argument index
     """
     for i in range(len(argv)):
         arg = argv[i]
         if arg == name or arg.startswith(name):
             return i
     return -1
+
+
+def find_argvalue(argv: list[str], name: str) -> str | None:
+    """
+    Finds argument index and following value
+    """
+    for i in range(len(argv)):
+        arg = argv[i]
+        if arg == name and len(argv) > i + 1:  # --key value
+            return argv[i + 1]
+        elif arg.startswith(name + "="):  # --key=value
+            return arg[len(name) + 1 :]
+
+    return None

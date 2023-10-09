@@ -50,6 +50,12 @@ cpp = Cpp_IssueSolver(Path(), Path())
         (["--mypy"], None, None, [mypy]),
         (["--cpp"], None, None, [cpp]),
         (["--sonar"], None, None, [sonar]),
+        (["--sonar", "extra_param"], None, None, [sonar]),
+        (["--sonar=extra_param"], None, None, [sonar]),
+        # combinations
+        (["--sonar", "--cpp"], None, None, [sonar, cpp]),
+        (["--sonar=extra_param", "--cpp"], None, None, [sonar, cpp]),
+        (["--sonar extra_param", "--cpp"], None, None, [sonar, cpp]),
         # default groups
         (["--python"], {}, None, [ruff, mypy]),
         (["--all"], {}, None, [ruff, mypy, sonar, cpp]),
