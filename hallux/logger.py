@@ -5,7 +5,7 @@ import colorlog
 
 logger = logging.getLogger("hallux_logger")
 
-log_level = os.environ.get("LOG_LEVEL", logging.INFO)
+log_level = os.environ.get("LOG_LEVEL", logging.WARNING)
 
 logger.setLevel(log_level)
 
@@ -23,6 +23,7 @@ formatter = colorlog.ColoredFormatter(
     log_colors={
         "DEBUG": "cyan",
         "INFO": "green",
+        "MESSAGE": "black",
         "WARNING": "yellow",
         "ERROR": "red",
         "CRITICAL": "red,bg_white",
@@ -36,6 +37,13 @@ handler.setFormatter(formatter)
 
 # Add the handler to the logger
 logger.addHandler(handler)
+
+
+def message(msg: str, *args, **kwargs):
+    print(msg, *args, **kwargs)
+
+
+logger.message = message
 
 # Now you can log messages with various severity levels like this:
 # logger.debug("debug message")

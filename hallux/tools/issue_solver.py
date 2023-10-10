@@ -29,24 +29,24 @@ class IssueSolver(ABC):
         config_path: Path,
         run_path: Path,
         command_dir: str = ".",
-        success_test: str | None = None,
+        validity_test: str | None = None,
     ):
         self.config_path: Final[Path] = config_path
         self.run_path: Final[Path] = run_path
         self.command_dir: Final[str] = command_dir
-        self.success_test: Final[str] = success_test
+        self.validity_test: Final[str] = validity_test
 
-        if success_test is not None:
+        if validity_test is not None:
             try:
-                logger.info(f"Try running success test: {success_test} ...")
+                logger.info(f"Try running validity test: {validity_test} ...")
 
                 with set_directory(self.config_path):
                     subprocess.check_output(
-                        ["bash"] + success_test.split(" "),
+                        ["bash"] + validity_test.split(" "),
                     )
                     logger.info("\033[92m PASSED\033[0m")
             except subprocess.CalledProcessError as e:
-                raise SystemError(f"Success Test '{success_test}' is failing right from the start") from e
+                raise SystemError(f"Validity Test '{validity_test}' is failing right from the start") from e
 
     @abstractmethod
     def list_issues(self) -> list[IssueDescriptor]:
@@ -60,14 +60,14 @@ class IssueSolver(ABC):
         """
         :returns: True, if latest fix was successful
         """
-        if self.success_test is not None:
+        if self.validity_test is not None:
             try:
                 with set_directory(self.config_path):
-                    subprocess.check_output(["bash"] + self.success_test.split(" "))
-                logger.info(f"\033[92m success test: {self.success_test} PASSED\033[0m")
+                    subprocess.check_output(["bash"] + self.validity_test.split(" "))
+                logger.info(f"validity test: {self.validity_test} PASSED")
                 return True
             except subprocess.CalledProcessError:
-                logger.info(f"\033[91m success test: {self.success_test} FAILED\033[0m")
+                logger.info(f"\033[91m validity test: {self.validity_test} FAILED\033[0m")
                 return False
         else:
             new_issues = self.list_issues()
@@ -82,7 +82,6 @@ class IssueSolver(ABC):
 
             proposals = issue.list_proposals()
             fixing_successful: bool = False
-            print(f"{issue.filename}:{issue.issue_line}: {issue.description} : ", end="")
 
             proposal: DiffProposal | None = None
             for proposal in proposals:
@@ -125,7 +124,11 @@ class IssueSolver(ABC):
                     self.target_issues = self.list_issues()
                 else:
                     issue_index += 1
-                logger.info(" \033[92m successfully fixed\033[0m")
+                logger.message(
+                    f"{issue.filename}:{issue.issue_line}: {issue.description}  \033[92m successfully fixed\033[0m"
+                )
             else:
                 issue_index += 1
-                logger.info(" \033[91m unable to fix\033[0m")
+                logger.message(
+                    f"{issue.filename}:{issue.issue_line}: {issue.description}  \033[91m unable to fix\033[0m"
+                )

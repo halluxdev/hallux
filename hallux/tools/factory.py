@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from ..auxilary import find_arg
+from ..auxilary import find_arg, find_argvalue
 from ..tools.cpp.cpp import Cpp_IssueSolver
 from ..tools.issue_solver import IssueSolver
 from ..tools.mypy.solver import Mypy_IssueSolver
@@ -61,6 +61,11 @@ class ProcessorFactory:
         for name in requested_names:
             classname = mapping[name]
             config_params = tools_config.get(name, {})
+            if name == "sonar":
+                argvalue = find_argvalue(argv, "--" + name)
+                if argvalue is not None:
+                    config_params["extra_param"] = argvalue
+
             solver = classname(**config_params, config_path=config_path, run_path=run_path, command_dir=command_dir)
             solvers.append(solver)
 

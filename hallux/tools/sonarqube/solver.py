@@ -44,12 +44,26 @@ class Sonar_IssueSolver(IssueSolver):
         config_path: Path,
         run_path: Path,
         command_dir: str = ".",
-        success_test: str | None = None,
+        validity_test: str | None = None,
         url: str | None = None,
         token: str | None = None,
         project: str | None = None,
+        search_params: str = "resolved=false&severities=MINOR,MAJOR,CRITICAL&statuses=OPEN,CONFIRMED,REOPENED",
+        extra_param: str | None = None,  # example: "branch=65-sonar-fixes"
     ):
-        super().__init__(config_path, run_path, command_dir, success_test=success_test)
+        """
+        IssueSolver implementation for SonarQube
+        :param config_path: Directory with .hallux file
+        :param run_path: Directory, where hallux was run
+        :param command_dir: Directory, passed to hallux in CLI
+        :param validity_test: script
+        :param url:
+        :param token:
+        :param project:
+        :param search_params:
+        :param extra_param:
+        """
+        super().__init__(config_path, run_path, command_dir, validity_test=validity_test)
 
         if token is None:
             if os.getenv(self.SONAR_TOKEN) is not None:
@@ -58,6 +72,8 @@ class Sonar_IssueSolver(IssueSolver):
         self.token: Final[str | None] = token
         self.url: Final[str | None] = url
         self.project: Final[str | None] = project
+        self.search_params: Final[str] = search_params
+        self.extra_param: Final[str | None] = extra_param
 
         # With SonarQube we only may solve 1 issue per file.
         self.already_fixed_files: Final[list[str]] = []
@@ -67,17 +83,16 @@ class Sonar_IssueSolver(IssueSolver):
             logger.error("SonarQube: token, url or project not configured")
 
         else:
-            logger.info("Process SonarQube:")
+            logger.message("Process SonarQube issues:")
             new_query_backend = OverrideQueryBackend(query_backend, self.already_fixed_files)
             super().solve_issues(diff_target, new_query_backend)
 
     def list_issues(self) -> list[IssueDescriptor]:
         issues: list[IssueDescriptor] = []
         try:
-            request: str = (
-                self.url
-                + "/api/issues/search?resolved=false&severities=MINOR,MAJOR,CRITICAL&statuses=OPEN,CONFIRMED,REOPENED"
-            )
+            request: str = self.url + "/api/issues/search?" + self.search_params
+            if self.extra_param is not None:
+                request += "&" + self.extra_param
             if self.project is not None:
                 request += "&componentKeys=" + self.project
             x = requests.get(url=request, headers={"Authorization": "Bearer " + self.token})

@@ -33,9 +33,9 @@ class Cpp_IssueSolver(IssueSolver):
         config_path: Path,
         run_path: Path,
         command_dir: str = ".",
-        success_test: str | None = None,
+        validity_test: str | None = None,
     ):
-        super().__init__(config_path, run_path, command_dir, success_test=success_test)
+        super().__init__(config_path, run_path, command_dir, validity_test=validity_test)
         self.tmp_dir: tempfile.TemporaryDirectory | None = None
 
     def list_issues(self) -> list[IssueDescriptor]:

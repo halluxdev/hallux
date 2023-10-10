@@ -17,7 +17,7 @@ from typing import Any, Final
 
 import yaml
 
-from hallux.auxilary import find_arg
+from hallux.auxilary import find_arg, find_argvalue
 from hallux.backends.factory import BackendFactory, QueryBackend
 from hallux.logger import logger
 from hallux.targets.diff import DiffTarget
@@ -109,8 +109,9 @@ class Hallux:
         # Command-line arguments have highest priority:
         github_index = find_arg(argv, "--github")
         if github_index > 0:
-            if len(argv) > github_index:
-                return GithubProposalTraget(argv[github_index + 1])
+            github_value = find_argvalue(argv, "--github")
+            if github_value is not None:
+                return GithubProposalTraget(github_value)
             else:
                 raise SystemError(
                     "--github must be followed by proper URL like"

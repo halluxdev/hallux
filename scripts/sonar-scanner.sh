@@ -1,8 +1,6 @@
 #!/usr/bin/env bash
 
-source ./activate.sh
-
-./hallux-test.sh -x
+# source ./activate.sh
 
 VERSION="$(git describe --long)"
 
