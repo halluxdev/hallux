@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+from typing import Final
 
 from ...issues.issue import IssueDescriptor
 from ...proposals.proposal_engine import ProposalEngine, ProposalList
@@ -18,7 +19,7 @@ class SonarIssue(IssueDescriptor):
         description: str = "",
         text_range: dict = dict,
         issue_type: str = "warning",
-        already_fixed_files=None,
+        already_fixed_files: list[str] | None = None,
     ):
         super().__init__(
             language=None,
@@ -31,7 +32,7 @@ class SonarIssue(IssueDescriptor):
         if already_fixed_files is None:
             already_fixed_files = list()
         self.text_range: dict = text_range
-        self.already_fixed_files = already_fixed_files
+        self.already_fixed_files: Final[list[str]] = already_fixed_files
 
     def list_proposals(self) -> ProposalEngine:
         start_line: int = self.text_range["startLine"]
