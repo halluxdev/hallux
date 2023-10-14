@@ -54,5 +54,5 @@ jobs:
 
         export PYTHONPATH=$(pwd):${PYTHONPATH}
         echo "python3 ./hallux/main.py --sonar --gpt3 --github https://github.com/halluxdev/hallux/pull/${{ github.event.pull_request.number }} hallux"
-        LOG_LEVEL=DEBUG python3 ./hallux/main.py --sonar --gpt3 --github https://github.com/halluxdev/hallux/pull/${{ github.event.pull_request.number }} hallux
+        LOG_LEVEL=DEBUG python3 ./hallux/main.py --sonar=pullRequest=${{ github.event.pull_request.number }} --gpt3 --github https://github.com/halluxdev/hallux/pull/${{ github.event.pull_request.number }} hallux
 
