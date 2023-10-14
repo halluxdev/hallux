@@ -1,10 +1,10 @@
-# hallux - Convenient Coding Assistant
+# Hallux - Convenient AI Code Quality Assistant
 
-`Hallux` is a smart utility to help you with routine coding tasks. 
-It may help you with compilation errors (in C/C++), linting or type-check issues (in Python) or even other problems found with SonarQube.
+`Hallux` is a smart console utility to help you with routine code quality tasks. 
+It may help you with fixing SonarQube issues, linting issues, compilation errors and other code quality problems.
 Any annoying issue, requiring a bit more intelligence than usual might be tackled. 
 
-In order to fix coding problems directly in your local filesystem, just type  
+In order to fix code issues directly in your local filesystem, just type  
 > hallux .
 
 If you want to fix issues in a orderly manner, where every fix has its own `git commit` run

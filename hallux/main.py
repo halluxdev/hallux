@@ -69,7 +69,7 @@ class Hallux:
 
     @staticmethod
     def print_usage():
-        print(f"Hallux v{get_version()} - Convenient Coding Assistant\n")
+        print(f"Hallux v{get_version()} - Convenient AI Code Quality Assistant\n")
         print("USAGE: ")
         print("hallux [TARGET] [BACKEND] [PLUGINS] [OTHER] DIR")
         print()
