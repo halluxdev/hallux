@@ -8,11 +8,11 @@ from pathlib import Path
 from unit.common.testing_issue import TestingIssue
 
 from hallux.proposals.simple_proposal import SimpleProposal
-from hallux.targets.github_proposal import GithubProposalTraget
+from hallux.targets.github_suggestion import GithubSuggestion
 
 
-def test_github_proposal_target():
-    (base_url, repo_name, PR_ID) = GithubProposalTraget.parse_pr_url("https://github.com/halluxai/hallux/pull/38")
+def test_github_suggestion():
+    (base_url, repo_name, PR_ID) = GithubSuggestion.parse_pr_url("https://github.com/halluxai/hallux/pull/38")
     assert base_url == "https://api.github.com"
     assert repo_name == "halluxai/hallux"
     assert PR_ID == 38
@@ -33,7 +33,7 @@ def test_compact_proposal():
     proposal._merge_lines(proposed_lines)
     assert proposal.proposed_lines == proposed_lines
 
-    compacted = GithubProposalTraget.compact_proposal(proposal)
+    compacted = GithubSuggestion.compact_proposal(proposal)
     assert compacted.proposed_lines == ["4AAA", "5AAA", "NEW LINE"]
     assert compacted.start_line == 4
     assert compacted.end_line == 5

@@ -16,7 +16,7 @@ from github import Github, PullRequest, Repository
 
 from hallux.auxilary import set_directory
 from hallux.main import main
-from hallux.targets.github_proposal import GithubProposalTraget
+from hallux.targets.github_suggestion import GithubSuggestion
 
 GITHUB_PULLREQUEST_URL = "https://github.com/halluxdev/hallux/pull/26"
 
@@ -37,7 +37,7 @@ def test_hallux_github(tmp_proj_dir: str | None = None):
     hallux_git_dir = Path(__file__).resolve().parent.parent.parent
     assert hallux_git_dir.joinpath(".git").exists()
 
-    base_url, repo_name, pr_id = GithubProposalTraget.parse_pr_url(GITHUB_PULLREQUEST_URL)
+    base_url, repo_name, pr_id = GithubSuggestion.parse_pr_url(GITHUB_PULLREQUEST_URL)
     assert base_url == "https://api.github.com"
     assert repo_name == "halluxdev/hallux"
     assert pr_id == 26

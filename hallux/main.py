@@ -23,7 +23,7 @@ from hallux.logger import logger
 from hallux.targets.diff import DiffTarget
 from hallux.targets.filesystem import FilesystemTarget
 from hallux.targets.git_commit import GitCommitTarget
-from hallux.targets.github_proposal import GithubProposalTraget
+from hallux.targets.github_suggestion import GithubSuggestion
 from hallux.tools.factory import IssueSolver, ProcessorFactory
 
 DEBUG: Final[bool] = False
@@ -114,7 +114,7 @@ class Hallux:
         if github_index > 0:
             github_value = find_argvalue(argv, "--github")
             if github_value is not None:
-                return GithubProposalTraget(github_value)
+                return GithubSuggestion(github_value)
             else:
                 raise SystemError(
                     "--github must be followed by proper URL like"
@@ -129,7 +129,7 @@ class Hallux:
 
         # Config settings has medium priority:
         if "github" in config:
-            return GithubProposalTraget(config["github"])
+            return GithubSuggestion(config["github"])
         elif config == "git" or "git" in config:
             return GitCommitTarget()
         # If no other targets were found - use default
