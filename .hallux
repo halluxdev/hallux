@@ -25,7 +25,7 @@ tools:
         url: https://sonarcloud.io
         validity_test: ./run-validity-tests.sh -x
         project: halluxdev_hallux
-        search_params: resolved=false&severities=MINOR,MAJOR,CRITICAL&statuses=OPEN,CONFIRMED,REOPENED
+        search_params: projects=halluxdev_hallux&resolved=false&severities=MINOR,MAJOR,CRITICAL&statuses=OPEN,CONFIRMED,REOPENED
 
 groups:
     all: ["ruff", "mypy", "sonar", "cpp"]
