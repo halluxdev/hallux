@@ -14,11 +14,11 @@ from .filesystem import FilesystemTarget
 
 
 # Saves Issue Fixes as Github proposals
-class GithubProposalTraget(FilesystemTarget):
+class GithubSuggestion(FilesystemTarget):
     def __init__(self, pr_url: str):
         FilesystemTarget.__init__(self)
 
-        (base_url, repo_name, PR_ID) = GithubProposalTraget.parse_pr_url(pr_url)
+        (base_url, repo_name, PR_ID) = GithubSuggestion.parse_pr_url(pr_url)
 
         if base_url is None:
             raise SystemError(f"Cannot parse github PR URL: {pr_url}")
