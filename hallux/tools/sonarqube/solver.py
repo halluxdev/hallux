@@ -101,5 +101,7 @@ class Sonar_IssueSolver(IssueSolver):
 
         if x.status_code == 200:
             issues.extend(SonarIssue.parseIssues(x.text, self.already_fixed_files))
+        else:
+            logger.error(f'SonarQube: error "{x.status_code}" while making request to {request}')
 
         return issues
