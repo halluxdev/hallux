@@ -115,6 +115,7 @@ class IssueSolver(ABC):
                 if fixing_successful:
                     break
 
+                # if whole loop passed, but there were no successful fix, revert the change
                 diff_target.revert_diff()
 
             if fixing_successful:

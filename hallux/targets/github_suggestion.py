@@ -15,15 +15,17 @@ from .filesystem import FilesystemTarget
 
 # Saves Issue Fixes as Github proposals
 class GithubSuggestion(FilesystemTarget):
-    def __init__(self, pr_url: str):
+    def __init__(self, pr_url: str | None):
         FilesystemTarget.__init__(self)
 
         (base_url, repo_name, PR_ID) = GithubSuggestion.parse_pr_url(pr_url)
 
         if base_url is None:
+            logger.warning(f"Cannot parse github PR URL: {pr_url}")
             raise SystemError(f"Cannot parse github PR URL: {pr_url}")
 
         if "GITHUB_TOKEN" not in os.environ.keys():
+            logger.warning("GITHUB_TOKEN is not provided")
             raise SystemError("GITHUB_TOKEN is not provided")
 
         self.github = Github(os.environ["GITHUB_TOKEN"], base_url=base_url)
