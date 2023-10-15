@@ -65,6 +65,8 @@ class Hallux:
         config_file = str(config_path.joinpath(CONFIG_FILE))
         with open(config_file) as file_stream:
             yaml_dict = yaml.load(file_stream, Loader=yaml.CLoader)
+            logger.debug(f"Loaded config from {config_file}")
+            logger.debug(f"Config: {yaml_dict}")
         return yaml_dict, config_path
 
     @staticmethod
