@@ -1,0 +1,167 @@
+{
+  "id": 256958361,
+  "iid": 2,
+  "project_id": 51232992,
+  "title": "Draft: Github suggestion improvement",
+  "description": "",
+  "state": "opened",
+  "created_at": "2023-10-14T14:24:25.989Z",
+  "updated_at": "2023-10-15T16:23:05.325Z",
+  "merged_by": null,
+  "merge_user": null,
+  "merged_at": null,
+  "closed_by": null,
+  "closed_at": null,
+  "target_branch": "master",
+  "source_branch": "github-suggestion-improvement",
+  "user_notes_count": 2,
+  "upvotes": 0,
+  "downvotes": 0,
+  "author": {
+    "id": 18352458,
+    "username": "sergei.smirnov2",
+    "name": "Sergey Smirnov",
+    "state": "active",
+    "locked": false,
+    "avatar_url": "https://secure.gravatar.com/avatar/c7ea7b374cdbc6e2294f53adf7554c69?s=80\u0026d=identicon",
+    "web_url": "https://gitlab.com/sergei.smirnov2"
+  },
+  "assignees": [
+    {
+      "id": 18352458,
+      "username": "sergei.smirnov2",
+      "name": "Sergey Smirnov",
+      "state": "active",
+      "locked": false,
+      "avatar_url": "https://secure.gravatar.com/avatar/c7ea7b374cdbc6e2294f53adf7554c69?s=80\u0026d=identicon",
+      "web_url": "https://gitlab.com/sergei.smirnov2"
+    }
+  ],
+  "assignee": {
+    "id": 18352458,
+    "username": "sergei.smirnov2",
+    "name": "Sergey Smirnov",
+    "state": "active",
+    "locked": false,
+    "avatar_url": "https://secure.gravatar.com/avatar/c7ea7b374cdbc6e2294f53adf7554c69?s=80\u0026d=identicon",
+    "web_url": "https://gitlab.com/sergei.smirnov2"
+  },
+  "reviewers": [],
+  "source_project_id": 51232992,
+  "target_project_id": 51232992,
+  "labels": [],
+  "draft": true,
+  "work_in_progress": true,
+  "milestone": null,
+  "merge_when_pipeline_succeeds": false,
+  "merge_status": "can_be_merged",
+  "detailed_merge_status": "draft_status",
+  "sha": "be17ffe7211e232aeaf3f142bf2e647786e551db",
+  "merge_commit_sha": null,
+  "squash_commit_sha": null,
+  "discussion_locked": null,
+  "should_remove_source_branch": null,
+  "force_remove_source_branch": true,
+  "prepared_at": "2023-10-14T14:24:27.852Z",
+  "reference": "!2",
+  "references": {
+    "short": "!2",
+    "relative": "!2",
+    "full": "hallux/hallux!2"
+  },
+  "web_url": "https://gitlab.com/hallux/hallux/-/merge_requests/2",
+  "time_stats": {
+    "time_estimate": 0,
+    "total_time_spent": 0,
+    "human_time_estimate": null,
+    "human_total_time_spent": null
+  },
+  "squash": false,
+  "squash_on_merge": false,
+  "task_completion_status": {
+    "count": 0,
+    "completed_count": 0
+  },
+  "has_conflicts": false,
+  "blocking_discussions_resolved": true,
+  "approvals_before_merge": null,
+  "subscribed": true,
+  "changes_count": "6",
+  "latest_build_started_at": null,
+  "latest_build_finished_at": null,
+  "first_deployed_to_production_at": null,
+  "pipeline": null,
+  "head_pipeline": null,
+  "diff_refs": {
+    "base_sha": "711e79030a933c60959daaea9850eb07f49e0a8f",
+    "head_sha": "be17ffe7211e232aeaf3f142bf2e647786e551db",
+    "start_sha": "711e79030a933c60959daaea9850eb07f49e0a8f"
+  },
+  "merge_error": null,
+  "user": {
+    "can_merge": true
+  },
+  "changes": [
+    {
+      "diff": "@@ -14,11 +14,11 @@ from .filesystem import FilesystemTarget\n \n \n # Saves Issue Fixes as Github proposals\n-class GithubProposalTraget(FilesystemTarget):\n+class GithubSuggestion(FilesystemTarget):\n     def __init__(self, pr_url: str):\n         FilesystemTarget.__init__(self)\n \n-        (base_url, repo_name, PR_ID) = GithubProposalTraget.parse_pr_url(pr_url)\n+        (base_url, repo_name, PR_ID) = GithubSuggestion.parse_pr_url(pr_url)\n \n         if base_url is None:\n             raise SystemError(f\"Cannot parse github PR URL: {pr_url}\")\n",
+      "new_path": "hallux/targets/github_suggestion.py",
+      "old_path": "hallux/targets/github_proposal.py",
+      "a_mode": "100644",
+      "b_mode": "100644",
+      "new_file": false,
+      "renamed_file": true,
+      "deleted_file": false
+    },
+    {
+      "diff": "@@ -0,0 +1,41 @@\n+# Copyright: Hallux team, 2023\n+\n+from __future__ import annotations\n+\n+import copy\n+import os\n+import subprocess\n+\n+import graphene\n+\n+from ..logger import logger\n+from ..proposals.diff_proposal import DiffProposal\n+from .filesystem import FilesystemTarget\n+\n+\n+# Saves Issue Fixes as Github proposals\n+class GitlabSuggestion(FilesystemTarget):\n+    def __init__(self, mr_url: str):\n+        FilesystemTarget.__init__(self)\n+\n+        (base_url, repo_name, PR_ID) = GitlabSuggestion.parse_mr_url(mr_url)\n+\n+    @staticmethod\n+    def parse_mr_url(pr_url: str) -\u003e tuple[str, str, int] | tuple[None, None, None]:\n+        \"\"\"\n+        Tries to parse Pull-Request URL to obtain base_url, repo_name and PR_ID\n+        :param pr_url: shall look like this: https://gitlab.com/YOUR_NAME/REPO_NAME/pull/ID\n+        :return: (base_url, base_url = \"https://api.\" + url_items[0], PR_ID) OR None\n+        \"\"\"\n+        if pr_url.startswith(\"https://\"):\n+            pr_url = pr_url[len(\"https://\") :]\n+            url_items = pr_url.split(\"/\")\n+            if len(url_items) == 5 and url_items[3] == \"pull\":\n+                if url_items[0] == \"github.com\":\n+                    base_url = \"https://api.\" + url_items[0]\n+                else:\n+                    base_url = \"https://api.\" + url_items[0] + \"/api/v3\"\n+                repo_name = url_items[1] + \"/\" + url_items[2]\n+                pr_id = int(url_items[4])\n+                return base_url, repo_name, pr_id\n+        return None, None, None\n",
+      "new_path": "hallux/targets/gitlab_suggestion.py",
+      "old_path": "hallux/targets/gitlab_suggestion.py",
+      "a_mode": "0",
+      "b_mode": "100644",
+      "new_file": true,
+      "renamed_file": false,
+      "deleted_file": false
+    },
+    {
+      "diff": "@@ -23,7 +23,7 @@ from hallux.logger import logger\n from hallux.targets.diff import DiffTarget\n from hallux.targets.filesystem import FilesystemTarget\n from hallux.targets.git_commit import GitCommitTarget\n-from hallux.targets.github_proposal import GithubProposalTraget\n+from hallux.targets.github_suggestion import GithubSuggestion\n from hallux.tools.factory import IssueSolver, ProcessorFactory\n \n DEBUG: Final[bool] = False\n@@ -111,7 +111,7 @@ class Hallux:\n         if github_index \u003e 0:\n             github_value = find_argvalue(argv, \"--github\")\n             if github_value is not None:\n-                return GithubProposalTraget(github_value)\n+                return GithubSuggestion(github_value)\n             else:\n                 raise SystemError(\n                     \"--github must be followed by proper URL like\"\n@@ -126,7 +126,7 @@ class Hallux:\n \n         # Config settings has medium priority:\n         if \"github\" in config:\n-            return GithubProposalTraget(config[\"github\"])\n+            return GithubSuggestion(config[\"github\"])\n         elif config == \"git\" or \"git\" in config:\n             return GitCommitTarget()\n         # If no other targets were found - use default\n",
+      "new_path": "hallux/main.py",
+      "old_path": "hallux/main.py",
+      "a_mode": "100644",
+      "b_mode": "100644",
+      "new_file": false,
+      "renamed_file": false,
+      "deleted_file": false
+    },
+    {
+      "diff": "@@ -16,7 +16,7 @@ from github import Github, PullRequest, Repository\n \n from hallux.auxilary import set_directory\n from hallux.main import main\n-from hallux.targets.github_proposal import GithubProposalTraget\n+from hallux.targets.github_suggestion import GithubSuggestion\n \n GITHUB_PULLREQUEST_URL = \"https://github.com/halluxdev/hallux/pull/26\"\n \n@@ -37,7 +37,7 @@ def test_hallux_github(tmp_proj_dir: str | None = None):\n     hallux_git_dir = Path(__file__).resolve().parent.parent.parent\n     assert hallux_git_dir.joinpath(\".git\").exists()\n \n-    base_url, repo_name, pr_id = GithubProposalTraget.parse_pr_url(GITHUB_PULLREQUEST_URL)\n+    base_url, repo_name, pr_id = GithubSuggestion.parse_pr_url(GITHUB_PULLREQUEST_URL)\n     assert base_url == \"https://api.github.com\"\n     assert repo_name == \"halluxdev/hallux\"\n     assert pr_id == 26\n",
+      "new_path": "tests/integration/hallux_github_test.py",
+      "old_path": "tests/integration/hallux_github_test.py",
+      "a_mode": "100644",
+      "b_mode": "100644",
+      "new_file": false,
+      "renamed_file": false,
+      "deleted_file": false
+    },
+    {
+      "diff": "@@ -8,11 +8,11 @@ from pathlib import Path\n from unit.common.testing_issue import TestingIssue\n \n from hallux.proposals.simple_proposal import SimpleProposal\n-from hallux.targets.github_proposal import GithubProposalTraget\n+from hallux.targets.github_suggestion import GithubSuggestion\n \n \n-def test_github_proposal_target():\n-    (base_url, repo_name, PR_ID) = GithubProposalTraget.parse_pr_url(\"https://github.com/halluxai/hallux/pull/38\")\n+def test_github_suggestion():\n+    (base_url, repo_name, PR_ID) = GithubSuggestion.parse_pr_url(\"https://github.com/halluxai/hallux/pull/38\")\n     assert base_url == \"https://api.github.com\"\n     assert repo_name == \"halluxai/hallux\"\n     assert PR_ID == 38\n@@ -33,7 +33,7 @@ def test_compact_proposal():\n     proposal._merge_lines(proposed_lines)\n     assert proposal.proposed_lines == proposed_lines\n \n-    compacted = GithubProposalTraget.compact_proposal(proposal)\n+    compacted = GithubSuggestion.compact_proposal(proposal)\n     assert compacted.proposed_lines == [\"4AAA\", \"5AAA\", \"NEW LINE\"]\n     assert compacted.start_line == 4\n     assert compacted.end_line == 5\n",
+      "new_path": "tests/unit/targets/github_suggestion_test.py",
+      "old_path": "tests/unit/targets/github_proposal_target_test.py",
+      "a_mode": "100644",
+      "b_mode": "100644",
+      "new_file": false,
+      "renamed_file": true,
+      "deleted_file": false
+    },
+    {
+      "diff": "@@ -10,4 +10,5 @@ PyGithub==2.1.1\n isort==5.12.0\n wheel==0.40.0\n pyinstaller==5.13.0\n-colorlog==6.7.0\n\\ No newline at end of file\n+colorlog==6.7.0\n+graphene\u003e=3.1\n",
+      "new_path": "requirements.txt",
+      "old_path": "requirements.txt",
+      "a_mode": "100644",
+      "b_mode": "100644",
+      "new_file": false,
+      "renamed_file": false,
+      "deleted_file": false
+    }
+  ],
+  "overflow": false
+}
