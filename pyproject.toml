@@ -8,7 +8,7 @@ dynamic = ["version"]
 authors = [
   { name="Hallux Team", email="team@hallux.dev" },
 ]
-description = "Fixing project issues automagically with AI."
+description = "Hallux - Convenient AI Code Quality Assistant"
 readme = "README.md"
 license = {file = "LICENSE.txt"}
 requires-python = ">=3.8, <4.0"
@@ -27,7 +27,7 @@ dependencies = [
   'openai==0.27.8',
   'pyyaml==6.0',
   'types-PyYAML==6.0.12.11',
-  'PyGithub==1.59',
+  'PyGithub==2.1.1',
   'colorlog==6.7.0',
   'requests==2.31.0',
   'unidiff==0.7.5'
