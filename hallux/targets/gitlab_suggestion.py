@@ -109,7 +109,7 @@ class GitlabSuggestion(FilesystemTarget):
                     if line.target_line_no == start_line:
                         return line.source_line_no
 
-        last_known_line = hunk[-1][-1]
+        last_known_line = hunk[-1]
         return last_known_line.source_line_no + start_line - last_known_line.target_line_no
 
     def write_suggestion(self, proposal: DiffProposal) -> bool:
@@ -125,11 +125,13 @@ class GitlabSuggestion(FilesystemTarget):
             data["position[old_path]"] = self.changed_files[proposal.filename]
             git_diff: str = self.changed_diffs[proposal.filename]
             old_line = self.find_old_code_line(git_diff, proposal.start_line)
-
             if old_line:
                 data["position[old_line]"] = old_line
 
-        body = proposal.description + "\n```suggestion\n"
+        body = proposal.description + "\n```suggestion"
+        if proposal.end_line > proposal.start_line:
+            body += f":-0+{proposal.end_line-proposal.start_line+1}"
+        body += "\n"
         for i in range(len(proposal.proposed_lines)):
             line = proposal.proposed_lines[i]
             body += line
