@@ -130,7 +130,7 @@ class GitlabSuggestion(FilesystemTarget):
 
         body = proposal.description + "\n```suggestion"
         if proposal.end_line > proposal.start_line:
-            body += f":-0+{proposal.end_line-proposal.start_line+1}"
+            body += f":-0+{proposal.end_line-proposal.start_line}"
         body += "\n"
         for i in range(len(proposal.proposed_lines)):
             line = proposal.proposed_lines[i]
