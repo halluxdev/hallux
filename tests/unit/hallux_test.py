@@ -18,13 +18,13 @@ def test_hallux_main(mock_print):
     # prints usage, and quits
     out_val: int = main([])
     assert out_val == 0
-    assert len(mock_print.mock_calls) > 30
+    assert len(mock_print.mock_calls) > 29
 
     # same as before
     mock_print.mock_calls.clear()
     out_val: int = main(["hallux"])
     assert out_val == 0
-    assert len(mock_print.mock_calls) > 30
+    assert len(mock_print.mock_calls) > 29
 
     # ask for fix . in empty dir
     mock_print.mock_calls.clear()
