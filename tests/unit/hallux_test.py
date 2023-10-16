@@ -3,13 +3,10 @@
 
 from __future__ import annotations
 
-import os
 from pathlib import Path
 from tempfile import TemporaryDirectory
 from unittest.mock import patch
 
-import github
-import pytest
 import yaml
 
 from hallux.auxilary import set_directory
