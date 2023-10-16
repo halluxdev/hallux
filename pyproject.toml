@@ -29,7 +29,8 @@ dependencies = [
   'types-PyYAML==6.0.12.11',
   'PyGithub==1.59',
   'colorlog==6.7.0',
-  'requests==2.31.0'
+  'requests==2.31.0',
+  'unidiff==0.7.5'
 ]
 
 [project.optional-dependencies]

@@ -6,6 +6,7 @@ import os
 from typing import Final
 
 import requests
+from unidiff import PatchSet
 
 from ..logger import logger
 from ..proposals.diff_proposal import DiffProposal
@@ -30,7 +31,7 @@ class GitlabSuggestion(FilesystemTarget):
         self.project_name: Final[str] = project_name
         self.mr_iid: Final[int] = mr_iid
 
-        request_url: str = f"{base_url}/projects/{project_name}/merge_requests/{mr_iid}/changes"
+        request_url: str = f"{base_url}/projects/{project_name}/merge_requests/{mr_iid}/changes?unidiff=true"
         headers = {"PRIVATE-TOKEN": f"{os.environ['GITLAB_TOKEN']}"}
         mr_response = requests.get(request_url, headers=headers)
 
@@ -43,20 +44,15 @@ class GitlabSuggestion(FilesystemTarget):
         self.head_sha: Final[str] = self.mr_json["diff_refs"]["head_sha"]
         self.start_sha: Final[str] = self.mr_json["diff_refs"]["start_sha"]
 
-        # self.mr_id : Final[int] = self.mr_json["id"]
-        # self.project_id : Final[int] = self.mr_json["project_id"]
+        # mapping from new_path to old_path (if file is changed)
         self.changed_files: Final[dict[str, str]] = {}
-        self.changed_diffs: Final[dict[str, list]] = {}
+        # mapping for diffs of changed files
+        self.changed_diffs: Final[dict[str, str]] = {}
         for change in self.mr_json["changes"]:
             new_path = change["new_path"]
-            if new_path is not None:
+            if new_path is not None:  # new_path is None when file is deleted
                 self.changed_files[new_path] = change["old_path"]
-                # save diffs, if file is not new
-                if change["diff"]:
-                    if new_path in self.changed_diffs:
-                        self.changed_diffs[new_path].append(change["diff"])
-                    else:
-                        self.changed_diffs[new_path] = [change["diff"]]
+                self.changed_diffs[new_path] = change["diff"]
 
         if self.mr_json["merged_at"] is not None or self.mr_json["closed_at"] is not None:
             raise SystemError(f"Merge Request {mr_iid} is either closed or merged already")
@@ -93,7 +89,7 @@ class GitlabSuggestion(FilesystemTarget):
 
     def apply_diff(self, diff: DiffProposal) -> bool:
         for file in self.changed_files:
-            if diff.filename == file.filename:
+            if diff.filename == file:
                 FilesystemTarget.apply_diff(self, diff)
                 return True
         return False
@@ -102,11 +98,19 @@ class GitlabSuggestion(FilesystemTarget):
         FilesystemTarget.revert_diff(self)
 
     @staticmethod
-    def diff_line_parser(diff_lines):  # diff_lines is smth like " -14,11 +14,12 "
-        diff_lines = diff_lines.split("+")
-        old_lines = list(map(int, diff_lines[0].split("-")[1].split(",")))
-        new_lines = list(map(int, diff_lines[1].split(",")))
-        return old_lines, new_lines
+    def find_old_code_line(diff: str, start_line) -> int | None:
+        patch_set = PatchSet(diff)
+        for hunk in patch_set[0]:
+            if start_line < hunk.target_start:
+                return hunk.source_start + start_line - hunk.target_start
+
+            if hunk.target_start <= start_line and start_line <= hunk.target_start + hunk.target_length:
+                for line in hunk:
+                    if line.target_line_no == start_line:
+                        return line.source_line_no
+
+        last_known_line = hunk[-1][-1]
+        return last_known_line.source_line_no + start_line - last_known_line.target_line_no
 
     def write_suggestion(self, proposal: DiffProposal) -> bool:
         data = {}
@@ -119,19 +123,12 @@ class GitlabSuggestion(FilesystemTarget):
 
         if self.changed_files[proposal.filename] is not None:
             data["position[old_path]"] = self.changed_files[proposal.filename]
-            diffs = self.changed_diffs[proposal.filename]
-            line_found = False
-            diff: str
-            for diff in diffs:  # "@@ -14,11 +14,11 @@ some code goes here ....
-                diff_lines = diff.split("@@")[1]  # -14,11 +14,11
-                old_lines, new_lines = self.diff_line_parser(diff_lines)
-                if new_lines[0] <= proposal.start_line and proposal.start_line <= new_lines[0] + new_lines[1]:
-                    # data["position[old_line]"] = old_lines[0] + proposal.start_line - new_lines[0]
-                    line_found = True
-            if not line_found:
-                data["position[old_line]"] = proposal.start_line
+            git_diff: str = self.changed_diffs[proposal.filename]
+            old_line = self.find_old_code_line(git_diff, proposal.start_line)
 
-        # data["body"] = "Suka Blya!\n```suggestion:-0+0\n"
+            if old_line:
+                data["position[old_line]"] = old_line
+
         body = proposal.description + "\n```suggestion\n"
         for i in range(len(proposal.proposed_lines)):
             line = proposal.proposed_lines[i]

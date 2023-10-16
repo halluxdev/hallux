@@ -12,3 +12,4 @@ wheel==0.40.0
 pyinstaller==5.13.0
 colorlog==6.7.0
 requests==2.31.0
+unidiff==0.7.5

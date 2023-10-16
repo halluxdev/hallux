@@ -24,6 +24,7 @@ from hallux.targets.diff import DiffTarget
 from hallux.targets.filesystem import FilesystemTarget
 from hallux.targets.git_commit import GitCommitTarget
 from hallux.targets.github_suggestion import GithubSuggestion
+from hallux.targets.gitlab_suggestion import GitlabSuggestion
 from hallux.tools.factory import IssueSolver, ProcessorFactory
 
 DEBUG: Final[bool] = False
@@ -84,24 +85,19 @@ class Hallux:
 
         print("\nOptions for [BACKEND]: If specified, Hallux will not try other, less prioritized backends")
         print("Here is list of BACKENDS, sorted by their priority (may be changed in config file):")
-        print("--cache     (highest priority) Reads solutions from JSON file, specified in the config")
-        print("            If upper-level backend successfully solves an issue, solution stored for future use")
-        print("            If JSON file is not specified in the config, 'dummy.json' is used")
-        # print("--free      Uses free Hallux.dev backend for solving issues (limited capacity)")
+        print("--cache     (highest priority) Reads solutions from local JSON file, specified in the config")
         print("--gpt3      Uses OpenAI ChatGPT v3.5 for solving issues")
-        print("            Requires valid ${OPENAI_API_KEY} env variable.")
         print("--gpt4      (lowest priority) Uses OpenAI ChatGPT v4 for solving issues")
-        print("            Requires valid ${OPENAI_API_KEY} env variable.")
+        print("More details on [BACKEND] options: https://hallux.dev/docs/user-guide/backends")
 
         print("\nOptions for [TARGET]:")
         print("--files     (DEFAULT) Writes fixes directly into local files")
         print("--git       Adds separate git commit for every fix,")
-        print("            must be in GIT repository with no uncommitted changes to enable this")
-        print("--github https://BUSINESS.github.com/YOUR_NAME/REPO_NAME/pull/ID")
-        print("            Submits proposals into Github Pull-Request,")
-        print("            must be in GIT repository with no uncommitted changes to enable this")
-        print("            head SHA in local git and on Github must be same,")
-        print("            env variable ${GITHUB_TOKEN} must be properly set,")
+        print("--github https://github.com/ORG_NAME/REPO_NAME/pull/ID")
+        print("            Submit issue fixes as suggestions into Github Pull-Request,")
+        print("--gitlab https://gitlab.com/GROUP_NAME/REPO_NAME/-/merge_requests/ID")
+        print("            Submit issue fixes as suggestions into Gitlab Merge-Request,")
+        print("More details on [TARGET] options: https://hallux.dev/docs/user-guide/targets")
 
         print("\nOptions for [OTHER]:")
         print("--verbose   Print debug tracebacks on errors")
@@ -117,8 +113,17 @@ class Hallux:
                 return GithubSuggestion(github_value)
             else:
                 raise SystemError(
-                    "--github must be followed by proper URL like"
-                    " https://BUSINESS.github.com/YOUR_NAME/REPO_NAME/pull/ID"
+                    "--github must be followed by valid PR URL, like this https://github.com/ORG_NAME/REPO_NAME/pull/ID"
+                )
+        gitlab_index = find_arg(argv, "--gitlab")
+        if gitlab_index > 0:
+            gitlab_value = find_argvalue(argv, "--gitlab")
+            if gitlab_value is not None:
+                return GitlabSuggestion(gitlab_value)
+            else:
+                raise SystemError(
+                    "--gitlab must be followed by valid MR URL, like this"
+                    " https://gitlab.com/GROUP_NAME/REPO_NAME/-/merge_requests/ID"
                 )
 
         if find_arg(argv, "--git") > 0:
