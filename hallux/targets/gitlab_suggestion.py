@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import os
+import subprocess
 from typing import Final
 
 import requests
@@ -57,17 +58,18 @@ class GitlabSuggestion(FilesystemTarget):
         if self.mr_json["merged_at"] is not None or self.mr_json["closed_at"] is not None:
             raise SystemError(f"Merge Request {mr_iid} is either closed or merged already")
 
-        # merge_commit_sha: str = self.mr_json["merge_commit_sha"]
-        # latest_sha: str = self.mr_json["sha"]
-        # git_log = subprocess.check_output(["git", "log", "--pretty=oneline"]).decode("utf8")
-        # local_git_sha = git_log.split("\n")[0].split(" ")[0]
-        #
-        # if not (local_git_sha == latest_sha or local_git_sha == merge_commit_sha):
-        #     raise SystemError(
-        #         f"Local git commit: `{local_git_sha}` "
-        #         f"do not coinside with the head from pull-request: `{latest_sha}` "
-        #         f"nor with the merge commit: `{merge_commit_sha}`"
-        #     )
+        local_git_sha: str
+        try:
+            git_log: str = subprocess.check_output(["git", "log", "--pretty=oneline"]).decode("utf8")
+            local_git_sha = git_log.split("\n")[0].split(" ")[0]
+        except Exception:
+            SystemError(f"Local git commit is not available: {git_log}")
+
+        if not local_git_sha == self.head_sha:
+            raise SystemError(
+                f"Local git commit: `{local_git_sha}` "
+                f"do not coinside with the head from pull-request: `{self.head_sha}` "
+            )
 
     @staticmethod
     def parse_mr_url(mr_url: str) -> tuple[str, str, int] | None:
@@ -109,7 +111,7 @@ class GitlabSuggestion(FilesystemTarget):
                     if line.target_line_no == start_line:
                         return line.source_line_no
 
-        last_known_line = hunk[-1]
+        last_known_line = patch_set[0][-1][-1]
         return last_known_line.source_line_no + start_line - last_known_line.target_line_no
 
     def write_suggestion(self, proposal: DiffProposal) -> bool:
@@ -140,11 +142,11 @@ class GitlabSuggestion(FilesystemTarget):
         data["body"] = body
 
         request_url: str = f"{self.base_url}/projects/{self.project_name}/merge_requests/{self.mr_iid}/discussions"
-
         headers = {"PRIVATE-TOKEN": f"{os.environ['GITLAB_TOKEN']}"}  # , "Content-Type": "text"
         mr_response = requests.post(request_url, headers=headers, data=data)
-        print(mr_response.status_code)
-        print(mr_response.text)
+
+        logger.debug(mr_response.status_code)
+        logger.debug(mr_response.text)
         if mr_response.status_code != 200 and mr_response.status_code != 201:
             logger.error(mr_response.text)
             return False
