@@ -3,10 +3,13 @@
 
 from __future__ import annotations
 
+import os
 from pathlib import Path
 from tempfile import TemporaryDirectory
 from unittest.mock import patch
 
+import github
+import pytest
 import yaml
 
 from hallux.auxilary import set_directory
@@ -78,33 +81,33 @@ def test_find_config():
         assert output_path == empty_dir
 
 
-# @pytest.mark.skipif("GITLAB_TOKEN" not in os.environ.keys(), reason="GITLAB_TOKEN is not provided")
-# @pytest.mark.skipif("GITHUB_TOKEN" not in os.environ.keys(), reason="GITHUB_TOKEN is not provided")
-# def test_init_target():
-#     with pytest.raises(SystemError):
-#         argv = ["hallux", "--cache", "--python", "--github=https://wrong.addr.com/no", "."]
-#         Hallux.init_target(argv, {})
-#
-#     with pytest.raises(github.GithubException):
-#         argv = [
-#             "hallux",
-#             "--cache",
-#             "--python",
-#             "--github=https://github.com/sdasdfsadasdas/dgdgdfgdfg/pull/5655545",
-#             ".",
-#         ]
-#         Hallux.init_target(argv, {})
-#
-#     with pytest.raises(SystemError):
-#         argv = ["hallux", "--cache", "--python", "--gitlab=https://wrong.addr.com/no", "."]
-#         Hallux.init_target(argv, {})
-#
-#     with pytest.raises(SystemError):
-#         argv = [
-#             "hallux",
-#             "--cache",
-#             "--python",
-#             "--gitlab=https://github.com/sdasdfsadasdas/dgdgdfgdfg/pull/5655545",
-#             ".",
-#         ]
-#         Hallux.init_target(argv, {})
+@pytest.mark.skipif("GITLAB_TOKEN" not in os.environ.keys(), reason="GITLAB_TOKEN is not provided")
+@pytest.mark.skipif("GITHUB_TOKEN" not in os.environ.keys(), reason="GITHUB_TOKEN is not provided")
+def test_init_target():
+    with pytest.raises(SystemError):
+        argv = ["hallux", "--cache", "--python", "--github=https://wrong.addr.com/no", "."]
+        Hallux.init_target(argv, {})
+
+    with pytest.raises(github.GithubException):
+        argv = [
+            "hallux",
+            "--cache",
+            "--python",
+            "--github=https://github.com/sdasdfsadasdas/dgdgdfgdfg/pull/5655545",
+            ".",
+        ]
+        Hallux.init_target(argv, {})
+
+    with pytest.raises(SystemError):
+        argv = ["hallux", "--cache", "--python", "--gitlab=https://wrong.addr.com/no", "."]
+        Hallux.init_target(argv, {})
+
+    with pytest.raises(SystemError):
+        argv = [
+            "hallux",
+            "--cache",
+            "--python",
+            "--gitlab=https://github.com/sdasdfsadasdas/dgdgdfgdfg/pull/5655545",
+            ".",
+        ]
+        Hallux.init_target(argv, {})
