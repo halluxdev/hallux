@@ -65,7 +65,7 @@ class GitlabSuggestion(FilesystemTarget):
         except Exception as e:
             raise SystemError(f"Local git commit is not available: {e}")
 
-        if not local_git_sha == self.head_sha:
+        if local_git_sha != self.head_sha:
             raise SystemError(
                 f"Local git commit: `{local_git_sha}` "
                 f"do not coinside with the head from pull-request: `{self.head_sha}` "
