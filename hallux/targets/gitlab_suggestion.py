@@ -62,8 +62,8 @@ class GitlabSuggestion(FilesystemTarget):
         try:
             git_log: str = subprocess.check_output(["git", "log", "--pretty=oneline"]).decode("utf8")
             local_git_sha = git_log.split("\n")[0].split(" ")[0]
-        except Exception:
-            SystemError(f"Local git commit is not available: {git_log}")
+        except Exception as e:
+            raise SystemError(f"Local git commit is not available: {e}")
 
         if not local_git_sha == self.head_sha:
             raise SystemError(
