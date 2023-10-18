@@ -25,15 +25,18 @@ class RestBackend(QueryBackend):
         type="rest",
         base_path: Path = Path(),
         previous_backend: QueryBackend | None = None,
+        headers: dict | None = None,
+        verify: bool = False,
     ):
         super().__init__(base_path, previous_backend)
         assert type == "rest"
         self.url = url
         self.token = token
         self.method = "POST"
-        self.headers = {}
+        self.headers = headers or {}
         self.request_body = request_body
         self.response_body = response_body
+        self.verify = verify
 
     def _is_string(self, obj):
         if isinstance(obj, str):
@@ -49,7 +52,7 @@ class RestBackend(QueryBackend):
 
     def _make_request(self, request: str):
         try:
-            response = requests.post(self.url, json={"message": request})
+            response = requests.post(self.url, json={"message": request}, headers=self.headers, verify=self.verify)
 
             # Successful response
             if response.status_code == 200:

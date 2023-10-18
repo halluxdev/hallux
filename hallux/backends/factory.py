@@ -15,9 +15,7 @@ class BackendFactory:
     def init_backend(argv: list[str], backends_list: list[dict] | None, config_path: Path) -> QueryBackend:
         default_list = [
             {"cache": {"type": "dummy", "filename": "dummy.json"}},
-            {"rest": {"type": "rest", "url": "http://localhost:8000/generate"}},
             {"gpt3": {"type": "openai", "model": "gpt-3.5-turbo", "max_tokens": 4096}},
-            # Gonna be enabled soon {"gpt4": {"type": "openai", "model": "gpt-4", "max_tokens": 8192}},
         ]
 
         backends_list: list[dict] = backends_list if backends_list is not None else default_list
