@@ -13,6 +13,21 @@ SONAR_PROJECT: Final[str] = "test_project"
 
 
 # Tests for Sonar_IssueSolver
+def test_sonar_with_json_file():
+    sonar_solver = Sonar_IssueSolver(
+        config_path=Path(__file__).resolve().parent,
+        run_path=Path(__file__).resolve().parent,
+        extra_param=str(Path(__file__).resolve().parent.joinpath("sonar_example.json")),
+    )
+
+    issues = sonar_solver.list_issues()
+    assert len(issues) == 13
+    assert isinstance(issues[0], SonarIssue)
+    issues[0].issue_type == "CODE SMELL"
+    issues[0].filename == "hallux/auxilary.py"
+
+
+# Tests for Sonar_IssueSolver
 def test_list_issues():
     print(os.getcwd())
 
@@ -21,7 +36,7 @@ def test_list_issues():
         mocked_get.return_value.text = '{"issues": []}'
 
         sonar_solver = Sonar_IssueSolver(
-            Path(), Path(), True, url="http://localhost", token=SONAR_SAMPLE_TOKEN, project=SONAR_PROJECT
+            Path(), Path(), url="http://localhost", token=SONAR_SAMPLE_TOKEN, project=SONAR_PROJECT
         )
         issues = sonar_solver.list_issues()
 
@@ -39,7 +54,7 @@ def test_list_issues_bad_response():
         mocked_get.return_value.status_code = 404
 
         sonar_solver = Sonar_IssueSolver(
-            Path(), Path(), False, url="http://localhost", token=SONAR_SAMPLE_TOKEN, project="test_project"
+            Path(), Path(), url="http://localhost", token=SONAR_SAMPLE_TOKEN, project="test_project"
         )
         issues = sonar_solver.list_issues()
 
