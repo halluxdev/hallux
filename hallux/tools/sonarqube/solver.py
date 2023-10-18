@@ -61,7 +61,7 @@ class Sonar_IssueSolver(IssueSolver):
         :param token:
         :param project:
         :param search_params:
-        :param extra_param:
+        :param extra_param: It could be a path to a .json file, or a string with params
         """
         super().__init__(config_path, run_path, command_dir, validity_test=validity_test)
 
@@ -89,19 +89,29 @@ class Sonar_IssueSolver(IssueSolver):
 
     def list_issues(self) -> list[IssueDescriptor]:
         issues: list[IssueDescriptor] = []
-        try:
-            request: str = self.url + "/api/issues/search?" + self.search_params
-            if self.extra_param is not None:
-                request += "&" + self.extra_param
-            if self.project is not None:
-                request += "&componentKeys=" + self.project
-            x = requests.get(url=request, headers={"Authorization": "Bearer " + self.token})
-        except Exception:
-            return []
 
-        if x.status_code == 200:
-            issues.extend(SonarIssue.parseIssues(x.text, self.already_fixed_files))
+        response_json: str
+        if self.extra_param and self.extra_param.endswith(".json") and Path(self.extra_param).exists():
+            logger.info("SONAR extra_params is a json file: " + self.extra_param)
+            with open(self.extra_param, "r") as f:
+                response_json = f.read()
         else:
-            logger.error(f'SonarQube: error "{x.status_code}" while making request to {request}')
+            try:
+                request: str = self.url + "/api/issues/search?" + self.search_params
+                if self.extra_param is not None:
+                    request += "&" + self.extra_param
+                if self.project is not None:
+                    request += "&componentKeys=" + self.project
+                x = requests.get(url=request, headers={"Authorization": "Bearer " + self.token})
+            except Exception:
+                return []
+
+            if x.status_code == 200:
+                response_json = x.text
+            else:
+                logger.error(f'SonarQube: error "{x.status_code}" while making request to {request}')
+                return []
+
+        issues.extend(SonarIssue.parseIssues(response_json, self.already_fixed_files))
 
         return issues
