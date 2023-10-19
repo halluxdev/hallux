@@ -50,9 +50,9 @@ class RestBackend(QueryBackend):
             return True
         return False
 
-    def _make_request(self, request: str):
+    def _make_request(self, request: str | dict):
         try:
-            response = requests.post(self.url, json={"message": request}, headers=self.headers, verify=self.verify)
+            response = requests.post(url=self.url, json=request, headers=self.headers, verify=self.verify)
 
             # Successful response
             if response.status_code == 200:
@@ -109,10 +109,17 @@ class RestBackend(QueryBackend):
         else:
             return []
 
+    def _replace_item(self, obj, value, replace_value) -> dict:
+        for k, v in obj.items():
+            if isinstance(v, dict):
+                obj[k] = self._replace_item(v, value, replace_value)
+            elif v == value:
+                obj[k] = replace_value
+        return obj
+
     def query(self, request: str, issue: IssueDescriptor | None = None, issue_lines: list[str] = list) -> list[str]:
         if self._is_object(self.request_body):
-            json_data = json.dumps(self.request_body)
-            parsed_request = json_data.replace(self.PROMPT_STRING, request)
+            parsed_request = self._replace_item(self.request_body, self.PROMPT_STRING, request)
             self.headers.update({"Content-Type": "application/json"})
 
         elif self._is_string(self.request_body):
