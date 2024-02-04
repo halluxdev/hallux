@@ -17,7 +17,7 @@ from .github_suggestion import GithubSuggestion
 
 # Saves Issue Fixes as Github proposals
 class GitlabSuggestion(FilesystemTarget):
-    def __init__(self, mr_url: str | None):
+    def __init__(self, mr_url: str | None, verify: bool = False):
         FilesystemTarget.__init__(self)
 
         if "GITLAB_TOKEN" not in os.environ.keys():
@@ -31,10 +31,11 @@ class GitlabSuggestion(FilesystemTarget):
         self.base_url: Final[str] = base_url
         self.project_name: Final[str] = project_name
         self.mr_iid: Final[int] = mr_iid
+        self.verify = verify
 
         request_url: str = f"{base_url}/projects/{project_name}/merge_requests/{mr_iid}/changes?unidiff=true"
         headers = {"PRIVATE-TOKEN": f"{os.environ['GITLAB_TOKEN']}"}
-        mr_response = requests.get(request_url, headers=headers, verify=False)
+        mr_response = requests.get(request_url, headers=headers, verify=self.verify)
 
         if mr_response.status_code != 200:
             logger.error(mr_response.text)
@@ -161,7 +162,7 @@ class GitlabSuggestion(FilesystemTarget):
 
         request_url: str = f"{self.base_url}/projects/{self.project_name}/merge_requests/{self.mr_iid}/discussions"
         headers = {"PRIVATE-TOKEN": f"{os.environ['GITLAB_TOKEN']}"}  # , "Content-Type": "text"
-        mr_response = requests.post(request_url, headers=headers, data=data)
+        mr_response = requests.post(request_url, headers=headers, data=data, verify=self.verify)
 
         logger.debug(mr_response.status_code)
         logger.debug(mr_response.text)
