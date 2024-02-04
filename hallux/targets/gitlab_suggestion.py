@@ -34,7 +34,7 @@ class GitlabSuggestion(FilesystemTarget):
 
         request_url: str = f"{base_url}/projects/{project_name}/merge_requests/{mr_iid}/changes?unidiff=true"
         headers = {"PRIVATE-TOKEN": f"{os.environ['GITLAB_TOKEN']}"}
-        mr_response = requests.get(request_url, headers=headers)
+        mr_response = requests.get(request_url, headers=headers, verify=False)
 
         if mr_response.status_code != 200:
             logger.error(mr_response.text)
@@ -75,18 +75,35 @@ class GitlabSuggestion(FilesystemTarget):
     def parse_mr_url(mr_url: str) -> tuple[str, str, int] | None:
         """
         Tries to parse Pull-Request URL to obtain base_url, repo_name and PR_ID
-        :param mr_url: shall look like this: https://gitlab.com/hallux/hallux/-/merge_requests/2
-        :return: (base_url, project_name, mr_iid) OR (None, None, None)
+        :param mr_url:
+            shall a gitlab merge request URL: https://gitlab.com/hallux/hallux/-/merge_requests/2
+            or a gitlab API URL: https://gitlab.com/api/v4/hallux%2Fhallux/merge_requests/2
+
+        :return: (base_url, project_name, mr_iid) OR None
         """
-        if mr_url.startswith("https://"):
-            mr_url = mr_url[len("https://") :]
-            url_items = mr_url.split("/")
-            if len(url_items) == 6 and url_items[0].count("gitlab") > 0:
-                if url_items[3] == "-" and url_items[4] == "merge_requests":
-                    base_url = "https://" + url_items[0] + "/api/v4"
-                    project_name = url_items[1] + "%2F" + url_items[2]
-                    mr_iid = int(url_items[5])
-                    return base_url, project_name, mr_iid
+        if not (mr_url.startswith("http://")) and not (mr_url.startswith("https://")):
+            return None
+
+        # if mr_url includes api/v4 - then it is an API URL
+        api_prefix = "/api/v4"
+
+        if mr_url.count(api_prefix) > 0:
+            base_url = mr_url[: mr_url.find(api_prefix) + len(api_prefix)]
+            project_name = mr_url[mr_url.find(api_prefix) + len(api_prefix) + 1 : mr_url.find("/merge_requests") - 2]
+            mr_iid = int(mr_url[mr_url.rfind("/") + 1 :])
+            return base_url, project_name, mr_iid
+
+        url_protocol = mr_url[: mr_url.find("://") + 3]
+        mr_url = mr_url[len(url_protocol) :]
+
+        url_items = mr_url.split("/")
+        if len(url_items) == 6:
+            if url_items[3] == "-" and url_items[4] == "merge_requests":
+                base_url = url_protocol + url_items[0] + api_prefix
+                project_name = url_items[1] + "%2F" + url_items[2]
+                mr_iid = int(url_items[5])
+                return base_url, project_name, mr_iid
+
         return None
 
     def apply_diff(self, diff: DiffProposal) -> bool:
