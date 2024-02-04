@@ -37,22 +37,41 @@ jobs:
           tests/integration/hallux_fix_test.py
 
 
-    - name: SonarCloud Scan
-      uses: SonarSource/sonarcloud-github-action@master
+    - name: SonarQube Scan
+      uses: sonarsource/sonarqube-scan-action@master
       env:
-        GITHUB_TOKEN: ${{ secrets.HALLUX_GITHUB_TOKEN }}  # Needed to get PR information, if any
-        SONAR_TOKEN: ${{ secrets.SONAR_CLOUD_TOKEN }}
+        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+        SONAR_PROJECT_VERSION: ${{ github.run_number }}
 
-    - name: Try to fix Sonar issues
+    - name: Try to fix issues found by SonarQube
       env:
-        SONAR_TOKEN: ${{ secrets.SONAR_CLOUD_TOKEN }}
-        SONAR_HOST_URL: https://sonarcloud.io
+        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
         SONAR_PROJECT_VERSION: ${{ github.run_number }}
         GITHUB_TOKEN: ${{ secrets.HALLUX_GITHUB_TOKEN }}
         OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
       run: |
-
         export PYTHONPATH=$(pwd):${PYTHONPATH}
         echo "python3 ./hallux/main.py --sonar --gpt3 --github https://github.com/halluxdev/hallux/pull/${{ github.event.pull_request.number }} hallux"
-        LOG_LEVEL=DEBUG python3 ./hallux/main.py --sonar=pullRequest=${{ github.event.pull_request.number }} --gpt3 --github https://github.com/halluxdev/hallux/pull/${{ github.event.pull_request.number }} hallux
+        LOG_LEVEL=DEBUG python3 ./hallux/main.py --sonar --gpt3 --github https://github.com/halluxdev/hallux/pull/${{ github.event.pull_request.number }} hallux
+
+
+    # - name: SonarCloud Scan
+    #   uses: SonarSource/sonarcloud-github-action@master
+    #   env:
+    #     GITHUB_TOKEN: ${{ secrets.HALLUX_GITHUB_TOKEN }}  # Needed to get PR information, if any
+    #     SONAR_TOKEN: ${{ secrets.SONAR_CLOUD_TOKEN }}
+
+    # - name: Try to fix issues found by SonarCloud
+    #   env:
+    #     SONAR_TOKEN: ${{ secrets.SONAR_CLOUD_TOKEN }}
+    #     SONAR_HOST_URL: https://sonarcloud.io
+    #     SONAR_PROJECT_VERSION: ${{ github.run_number }}
+    #     GITHUB_TOKEN: ${{ secrets.HALLUX_GITHUB_TOKEN }}
+    #     OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+    #   run: |
+    #     export PYTHONPATH=$(pwd):${PYTHONPATH}
+    #     echo "python3 ./hallux/main.py --sonar --gpt3 --github https://github.com/halluxdev/hallux/pull/${{ github.event.pull_request.number }} hallux"
+    #     LOG_LEVEL=DEBUG python3 ./hallux/main.py --sonar=pullRequest=${{ github.event.pull_request.number }} --gpt3 --github https://github.com/halluxdev/hallux/pull/${{ github.event.pull_request.number }} hallux
 
