@@ -81,10 +81,12 @@ class GitlabSuggestion(FilesystemTarget):
 
         :return: (base_url, project_name, mr_iid) OR None
         """
-        if not (mr_url.startswith("http://")) and not (mr_url.startswith("https://")):
+
+        url_protocol = "https://"
+        if not (mr_url.startswith(url_protocol)):
             return None
 
-        # if mr_url includes api/v4 - then it is an API URL
+        # if mr_url includes /api/v4 - then it is an API URL
         api_prefix = "/api/v4"
 
         if mr_url.count(api_prefix) > 0:
@@ -93,7 +95,6 @@ class GitlabSuggestion(FilesystemTarget):
             mr_iid = int(mr_url[mr_url.rfind("/") + 1 :])
             return base_url, project_name, mr_iid
 
-        url_protocol = mr_url[: mr_url.find("://") + 3]
         mr_url = mr_url[len(url_protocol) :]
 
         url_items = mr_url.split("/")
@@ -108,7 +109,7 @@ class GitlabSuggestion(FilesystemTarget):
 
     def apply_diff(self, diff: DiffProposal) -> bool:
         for file in self.changed_files:
-            if diff.filename == file:
+            if diff.filename == file or file.endswith(diff.filename):
                 FilesystemTarget.apply_diff(self, diff)
                 return True
         return False
