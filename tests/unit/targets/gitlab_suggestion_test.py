@@ -61,11 +61,27 @@ class TestGitlabSuggestion(unittest.TestCase):
         self.addCleanup(self.check_output_patch.stop)
 
     def test_parse_mr_url(self):
-        # Test the parse_mr_url method
+        # Shall support gitlab.com URLs
         url = "https://gitlab.com/hallux/hallux/-/merge_requests/2"
-        result = GitlabSuggestion.parse_mr_url(url)
-        self.assertEqual(result, ("https://gitlab.com/api/v4", "hallux%2Fhallux", 2))
-        assert GitlabSuggestion.parse_mr_url("https://github.com/hallux/hallux/-/merge_requests/2") is None
+        assert GitlabSuggestion.parse_mr_url(url) == ("https://gitlab.com/api/v4", "hallux%2Fhallux", 2)
+
+        # Shall support custom domains
+        url = "https://BUSINESS.com/hallux/hallux/-/merge_requests/2"
+        assert GitlabSuggestion.parse_mr_url(url) == ("https://BUSINESS.com/api/v4", "hallux%2Fhallux", 2)
+
+        # Shall support http
+        url = "http://BUSINESS.com/hallux/hallux/-/merge_requests/2"
+        assert GitlabSuggestion.parse_mr_url(url) == ("http://BUSINESS.com/api/v4", "hallux%2Fhallux", 2)
+
+        # Shall support API URLs
+        url = "https://BUSINESS.com/api/v4/POJECT_NAME/-/merge_requests/17"
+        assert GitlabSuggestion.parse_mr_url(url) == ("https://BUSINESS.com/api/v4", "POJECT_NAME", 17)
+
+        # Shall support custom domains and custom routes
+        url = "https://SUBDOMAIN.BUSINESS.com/ROUTE/api/v4/PROJECT_ID/-/merge_requests/17"
+        assert GitlabSuggestion.parse_mr_url(url) == ("https://SUBDOMAIN.BUSINESS.com/ROUTE/api/v4", "PROJECT_ID", 17)
+
+        assert GitlabSuggestion.parse_mr_url("github.com/hallux/hallux/-/merge_requests/2") is None
         assert GitlabSuggestion.parse_mr_url("https://gitlab.com/halluxhallux/-/merge_requests/2") is None
         assert GitlabSuggestion.parse_mr_url("https://gitlab.com/hallux/hallux-/merge_requests/2") is None
         assert GitlabSuggestion.parse_mr_url("https://gitlab.com/hallux/hallux/-merge_requests/2") is None
