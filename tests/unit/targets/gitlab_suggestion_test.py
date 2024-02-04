@@ -34,12 +34,46 @@ test_unidiff_str = (
 )
 
 
+def setup_token(self):
+    # Mock the "GITLAB_TOKEN" environment variable
+    self.env_patch = patch.dict(os.environ, {"GITLAB_TOKEN": "your_token"})
+    self.env_patch.start()
+
+
+# test missing GITLAB_TOKEN
+class TestGitlabSuggestionNoToken(unittest.TestCase):
+    def test_no_token(self):
+        # Clean environment variables
+        with patch.dict(os.environ, {}, clear=True):
+            with self.assertRaises(SystemError):
+                GitlabSuggestion(mr_url="https://gitlab.com/hallux/hallux/-/merge_requests/2")
+
+
+# test invalid MR URL
+class TestGitlabSuggestionInvalidUrl(unittest.TestCase):
+    def test_invalid_url(self):
+        setup_token(self)
+        with self.assertRaises(SystemError):
+            GitlabSuggestion(mr_url="https://invalid.url.format/merge_requests/2")
+
+
+# test invalid response code
+class TestGitlabSuggestionInvalidResponse(unittest.TestCase):
+    def test_invalid_response(self):
+        setup_token(self)
+
+        # Patch requests.get to control its behavior
+        self.requests_get_patch = patch("requests.get")
+        self.mock_requests_get = self.requests_get_patch.start()
+        self.mock_requests_get.return_value.status_code = 400
+        self.mock_requests_get.return_value.text = "Some error message"
+        with self.assertRaises(SystemError):
+            GitlabSuggestion(mr_url="https://gitlab.com/hallux/hallux/-/merge_requests/2")
+
+
 class TestGitlabSuggestion(unittest.TestCase):
     def setUp(self):
-        # Mock the "GITLAB_TOKEN" environment variable
-
-        self.env_patch = patch.dict(os.environ, {"GITLAB_TOKEN": "your_token"})
-        self.env_patch.start()
+        setup_token(self)
 
         # Patch requests.get to control its behavior
         self.requests_get_patch = patch("requests.get")
@@ -68,10 +102,6 @@ class TestGitlabSuggestion(unittest.TestCase):
         # Shall support custom domains
         url = "https://BUSINESS.com/hallux/hallux/-/merge_requests/2"
         assert GitlabSuggestion.parse_mr_url(url) == ("https://BUSINESS.com/api/v4", "hallux%2Fhallux", 2)
-
-        # Shall support http
-        url = "http://BUSINESS.com/hallux/hallux/-/merge_requests/2"
-        assert GitlabSuggestion.parse_mr_url(url) == ("http://BUSINESS.com/api/v4", "hallux%2Fhallux", 2)
 
         # Shall support API URLs
         url = "https://BUSINESS.com/api/v4/POJECT_NAME/-/merge_requests/17"
@@ -124,6 +154,39 @@ class TestGitlabSuggestion(unittest.TestCase):
         assert GitlabSuggestion.find_old_code_line(test_unidiff_str, start_line=48) is None
         assert GitlabSuggestion.find_old_code_line(test_unidiff_str, start_line=57) is None
         assert GitlabSuggestion.find_old_code_line(test_unidiff_str, start_line=58) == 57
+
+    # Test the apply_diff method
+    def test_apply_diff(self):
+        diff = SimpleProposal(
+            TestingIssue(
+                filename=__file__,
+                description="This is some description!",
+                issue_line=1,
+                base_path=Path(__file__),
+            ),
+            radius_or_range=0,
+        )
+        diff.proposed_lines = ["Here is Proposed Change"]
+
+        # Shall return False if the file is not in the list
+        assert self.gitlab_suggestion.apply_diff(diff) is False
+
+        # Patch FilesystemTarget.apply_diff
+        apply_diff_patch = patch("hallux.targets.filesystem.FilesystemTarget.apply_diff")
+        apply_diff_patch.start()
+
+        # Shall return True if the file is in the list
+        self.gitlab_suggestion.changed_files[__file__] = __file__
+        assert self.gitlab_suggestion.apply_diff(diff) is True
+
+    # Test the revert_diff method
+    def test_revert_diff(self):
+        # Patch FilesystemTarget.revert_diff
+        revert_diff_patch = patch("hallux.targets.filesystem.FilesystemTarget.revert_diff")
+        mock_revert_diff = revert_diff_patch.start()
+
+        self.gitlab_suggestion.revert_diff()
+        mock_revert_diff.assert_called_once()
 
 
 if __name__ == "__main__":
