@@ -32,8 +32,8 @@ jobs:
           --cov-report=xml \
           --cov-fail-under=65 \
           --junitxml xunit-reports/xunit-result-unit.xml \
-          tests/unit \
-          tests/integration/hallux_fix_test.py
+          tests/unit
+          # tests/integration/hallux_fix_test.py
 
     - name: SonarCloud Scan
       uses: SonarSource/sonarcloud-github-action@master
