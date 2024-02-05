@@ -35,32 +35,9 @@ jobs:
           tests/unit
           # tests/integration/hallux_fix_test.py
 
-    - name: SonarCloud Scan
-      uses: SonarSource/sonarcloud-github-action@master
+    - name: SonarQube Scan
+      uses: sonarsource/sonarqube-scan-action@master
       env:
-        GITHUB_TOKEN: ${{ secrets.HALLUX_GITHUB_TOKEN }}  # Needed to get PR information, if any
-        SONAR_TOKEN: ${{ secrets.SONAR_CLOUD_TOKEN }}
+        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
         SONAR_PROJECT_VERSION: ${{ github.run_number }}
-
-
-    # - name: Try to fix Sonar issues
-    #   env:
-    #     SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-    #     SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
-    #     SONAR_PROJECT_VERSION: ${{ github.run_number }}
-    #     GITHUB_TOKEN: ${{ secrets.HALLUX_GITHUB_TOKEN }}
-    #     OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-    #   run: |
-
-        # export PYTHONPATH=$(pwd):${PYTHONPATH}
-        # echo "python3 ./hallux/main.py --sonar --gpt3 --git hallux"
-        # LOG_LEVEL=DEBUG python3 ./hallux/main.py --sonar --gpt3 --git hallux
-
-        # 1. create new branch: git checkout -b hallux-2023-10-08-commit-hash
-        # 2. run hallux with --sonar --gpt3 --git fix-sonar-issues
-        #     --filter sonar issues
-        #     --time of the issue
-        # 3. collect fixing statistics, success/unsuccess ratio
-        # 3. if any fixes push branch and create PR with possible fix
-
-
