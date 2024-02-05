@@ -1,17 +1,7 @@
 #!/usr/bin/env bash
 
-# source ./activate.sh
+# ./scripts/sonar-scanner.sh || exit 1
 
-#python -m pytest -v $1 $2\
-#    --cov-branch \
-#    --cov-report=term \
-#    --cov=hallux \
-#    --cov-report=xml \
-#    --cov-report=html \
-#    --junitxml xunit-reports/xunit-result-unit.xml \
-#    tests/unit \
-#    tests/integration || exit 1
+export PYTHONPATH=$(pwd):${PYTHONPATH}
 
-./scripts/sonar-scanner.sh || exit 1
-
-python hallux/main.py --gpt3 --sonar --git hallux || exit 1
+LOG_LEVEL=DEBUG python3 ./hallux/main.py --gpt3 --sonar --git hallux || exit 1
