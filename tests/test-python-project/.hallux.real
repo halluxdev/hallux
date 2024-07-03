@@ -1,8 +1,12 @@
 backends:
-    - gpt3:
-        type: openai
-        model: gpt-3.5-turbo
-        tokens: 4097
+    - litellm:
+        model: gpt-4o
+
+    - rest:
+        type: rest
+        url: http://localhost:8181/generate
+        request_body: { message: Think in step by step manner. $PROMPT } Defaults to: $PROMPT
+        response_body: $RESPONSE.answer.0.value # Defaults to $RESPONSE
 
 python:
     ruff: python
