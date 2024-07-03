@@ -13,3 +13,4 @@ pyinstaller>=5.13.1
 colorlog==6.7.0
 requests==2.31.0
 unidiff==0.7.5
+litellm==1.41.2
