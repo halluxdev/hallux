@@ -24,20 +24,19 @@ classifiers = [
 ]
 
 dependencies = [
-  'openai==0.27.8',
   'pyyaml==6.0',
   'types-PyYAML==6.0.12.11',
   'PyGithub==2.1.1',
   'colorlog==6.7.0',
-  'requests==2.31.0',
-  'unidiff==0.7.5'
+  'requests==2.32.0',
+  'unidiff==0.7.5',
   'litellm==1.41.2'
 ]
 
 [project.optional-dependencies]
 test = [
   'mypy==1.4.1',
-  'black==23.3.0',
+  'black==24.3.0',
   'ruff==0.0.272',
   'pytest >= 7.3.1',
   'pytest-cov==4.1.0',
