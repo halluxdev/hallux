@@ -16,7 +16,7 @@ backends:
 
     - gpt3:
         type: litellm
-        model: gpt-4o
+        model: gpt-3.5-turbo
 
 tools:
     #ruff:

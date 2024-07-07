@@ -38,7 +38,7 @@ jobs:
 
 
     - name: SonarQube Scan
-      uses: sonarsource/sonarqube-scan-action@v2.3.0
+      uses: sonarsource/sonarqube-scan-action@master
       env:
         SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
@@ -53,7 +53,7 @@ jobs:
         OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
       run: |
         export PYTHONPATH=$(pwd):${PYTHONPATH}
-        echo "python3 ./hallux/main.py --sonar --litellm --github https://github.com/halluxdev/hallux/pull/${{ github.event.pull_request.number }} hallux"
+        echo "python3 ./hallux/main.py --sonar --gpt3 --github https://github.com/halluxdev/hallux/pull/${{ github.event.pull_request.number }} hallux"
         LOG_LEVEL=DEBUG python3 ./hallux/main.py --sonar --gpt3 --github https://github.com/halluxdev/hallux/pull/${{ github.event.pull_request.number }} hallux
 
 
