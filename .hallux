@@ -14,11 +14,9 @@ backends:
     #        API-KEY: <KEY>
 
 
-
     - gpt3:
-        type: openai
-        model: gpt-3.5-turbo
-        max_tokens: 4096
+        type: litellm
+        model: gpt-4o
 
 tools:
     #ruff:

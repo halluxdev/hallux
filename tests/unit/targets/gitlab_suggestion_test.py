@@ -16,7 +16,7 @@ test_unidiff_str = (
     "--- a/.github/workflows/pull_request.yml\n+++ b/.github/workflows/pull_request.yml\n@@ -3,6 +3,7 @@ name: Pull"
     " Request Pipeline\n on:\n   pull_request:\n     branches: [ master ]\n+    types: [opened, synchronize,"
     " reopened]\n \n env:\n   BUILD_TYPE: Release\n@@ -35,17 +36,17 @@ jobs:\n           tests/unit \\\n          "
-    " tests/integration/hallux_fix_test.py\n \n-    - uses: sonarsource/sonarqube-scan-action@master\n-     "
+    " tests/integration/hallux_fix_test.py\n \n-    - uses: sonarsource/sonarqube-scan-action@v2.3.0\n-     "
     " env:\n-        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}\n-        SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL"
     " }}\n-        SONAR_PROJECT_VERSION: ${{ github.run_number }}\n \n+    - name: SonarCloud Scan\n+      uses:"
     " SonarSource/sonarcloud-github-action@master\n+      env:\n+        GITHUB_TOKEN: ${{"
