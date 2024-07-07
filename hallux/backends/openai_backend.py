@@ -7,7 +7,7 @@ from pathlib import Path
 from typing import Final
 
 import openai
-from openai.api_resources import ChatCompletion
+from openai import ChatCompletion
 
 from hallux.logger import logger
 
