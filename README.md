@@ -32,7 +32,7 @@ hallux
 
 In order to setup Python virtual environment run `./scripts/setup-venv.sh`
 
-For activating environment run `cd /path/to/hallux && source activate.sh` 
+For activating environment run `source ./activate.sh` 
 
 
 ## Folder structure

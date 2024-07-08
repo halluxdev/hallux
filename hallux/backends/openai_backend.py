@@ -7,7 +7,7 @@ from pathlib import Path
 from typing import Final
 
 import openai
-from openai.api_resources import ChatCompletion
+from openai import ChatCompletion
 
 from hallux.logger import logger
 
@@ -21,6 +21,7 @@ class OpenAiChatGPT(QueryBackend):
         model: str = "",
         max_tokens: int = 4097,
         type="openai",
+        api_version="2021-05-15",
         base_path: Path = Path(),
         previous_backend: QueryBackend | None = None,
     ):
@@ -34,6 +35,7 @@ class OpenAiChatGPT(QueryBackend):
 
         self.model: Final[str] = model
         self.max_tokens: Final[int] = max_tokens
+        self.api_version: Final[int] = api_version
 
         # For Azure OpenAI
         if type == "openai.azure":
@@ -56,7 +58,9 @@ class OpenAiChatGPT(QueryBackend):
 
         logger.debug("[OpenAI REQUEST]:")
         logger.debug(request)
-        result = ChatCompletion.create(messages=[{"role": "user", "content": request}], model=self.model)
+        result = ChatCompletion.create(messages=[
+            {"role": "user", "content": request}
+        ], model=self.model, engine=self.model)
         answers = []
         if len(result["choices"]) > 0:
             for variant in result["choices"]:
