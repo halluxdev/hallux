@@ -1,10 +1,10 @@
+from shutil import which
 import tempfile
 import unittest
 from pathlib import Path
 from unittest.mock import Mock, patch
-
+import pytest
 from hallux.tools.cpp.cpp import Cpp_IssueSolver
-
 
 class TestCpp_IssueSolver(unittest.TestCase):
     def setUp(self):
@@ -25,6 +25,7 @@ class TestCpp_IssueSolver(unittest.TestCase):
             processor.solve_issues(self.query_backend, self.diff_target)
             mock_print.assert_called_with("0 Makefile targets found")
 
+    @pytest.mark.skipif(not which('cmake'), reason='CMake is not installed')
     def test_process_with_cmakelists(self):
         processor = Cpp_IssueSolver(self.base_path, self.base_path)
         cmakelists = self.base_path / "CMakeLists.txt"

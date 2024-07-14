@@ -18,6 +18,9 @@ backends:
         type: litellm
         model: gpt-3.5-turbo
 
+    - llama3:
+        model: ollama/llama3
+
 tools:
     #ruff:
     #    # command-line arguments for ruff
