@@ -37,8 +37,8 @@ class DummyBackend(QueryBackend):
             self.save_on_exit = True
 
     def issue_hash(self, description: str, issue_lines: list[str]) -> str:
-        bytes = str(description + "\n" + "\n".join(issue_lines)).encode("utf8")
-        return str(hashlib.md5(bytes).hexdigest())
+        encoded_data = str(description + "\n" + "\n".join(issue_lines)).encode("utf8") 
+        return str(hashlib.md5(encoded_data).hexdigest())
 
     def __del__(self):
         if self.was_modified:

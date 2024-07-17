@@ -65,11 +65,7 @@ class Sonar_IssueSolver(IssueSolver):
         """
         super().__init__(config_path, run_path, command_dir, validity_test=validity_test)
 
-        if token is None:
-            if os.getenv(self.SONAR_TOKEN) is not None:
-                token = os.getenv(self.SONAR_TOKEN)
-
-        self.token: Final[str | None] = token
+        self.token: Final[str | None] = token if token is not None else os.getenv(self.SONAR_TOKEN)
         self.url: Final[str | None] = url
         self.project: Final[str | None] = project
         self.search_params: Final[str] = search_params

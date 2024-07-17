@@ -3,13 +3,28 @@ from pathlib import Path
 from typing import Final
 from unittest.mock import Mock, patch
 
+import pytest
 import requests
 
+from hallux.backends.query_backend import QueryBackend
 from hallux.issues.issue import IssueDescriptor
-from hallux.tools.sonarqube.solver import Sonar_IssueSolver, SonarIssue
+from hallux.tools.sonarqube.solver import Sonar_IssueSolver, SonarIssue, OverrideQueryBackend
+from hallux.targets.diff import DiffTarget
 
 SONAR_SAMPLE_TOKEN: Final[str] = "sqt-deadbeefdeadbeefdeadbeefdeadbeef"
 SONAR_PROJECT: Final[str] = "test_project"
+
+@pytest.fixture
+def solver_instance():
+    # Mock the __init__ method to avoid any side effects during instantiation
+    with patch.object(Sonar_IssueSolver, "__init__", lambda x, *args, **kwargs: None):
+        # Instantiate the object without calling the actual __init__
+        instance = Sonar_IssueSolver.__new__(Sonar_IssueSolver)
+        
+        instance.search_params = "mock_search_params"
+        instance.extra_param = "mock_extra_param"
+        instance.already_fixed_files = []
+        return instance
 
 
 # Tests for Sonar_IssueSolver
@@ -97,3 +112,37 @@ def test_parse_issues():
     assert issues[0].issue_line == 1
     assert issues[0].description == "message"
     assert issues[0].issue_type == "type"
+
+
+def test_solve_issues_with_missing_configuration(solver_instance, caplog):
+    solver_instance.token = None  # Simulate missing token
+    solver_instance.url = "http://example.com"
+    solver_instance.project = "example_project"
+    
+    with caplog.at_level("ERROR"):
+        solver_instance.solve_issues(None, None)
+        assert any("SonarQube: token, url or project not configured" in message for message in caplog.text.splitlines())
+
+
+def test_solve_issues_with_full_configuration(solver_instance, caplog):
+    solver_instance.token = "mock_token"
+    solver_instance.url = "mock_url"
+    solver_instance.project = "mock_project"
+
+    diff_target = Mock(spec=DiffTarget)
+    query_backend = Mock(spec=QueryBackend)
+
+    # with patch('hallux.tools.sonarqube.solver.OverrideQueryBackend', autospec=True) as mock_override_backend:
+    # with patch.object(Sonar_IssueSolver, 'solve_issues', autospec=True) as mock_super_solve_issues:
+    with caplog.at_level("INFO"):
+        solver_instance.solve_issues(diff_target, query_backend)
+        
+        # Assert log message
+        # assert any("2222" in message for message in caplog.text.splitlines())
+        # assert any("Process SonarQube issues:" in message for message in caplog.text.splitlines())
+        
+        # Assert OverrideQueryBackend was called with the right parameters
+        # mock_override_backend.assert_called_once_with(query_backend, solver_instance.already_fixed_files)
+        
+        # Assert the super solve_issues method was called
+        # mock_super_solve_issues.assert_called_once_with(solver_instance, diff_target, mock_override_backend.return_value)
