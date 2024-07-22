@@ -25,7 +25,7 @@ class TestCpp_IssueSolver(unittest.TestCase):
             processor.solve_issues(self.query_backend, self.diff_target)
             mock_print.assert_called_with("0 Makefile targets found")
 
-    @pytest.mark.skipif(not which('cmake'), reason='CMake is not installed')
+    @pytest.mark.skipif(not which('cmake') or not which('make'), reason='CMake and/or Make is not installed')
     def test_process_with_cmakelists(self):
         processor = Cpp_IssueSolver(self.base_path, self.base_path)
         cmakelists = self.base_path / "CMakeLists.txt"
