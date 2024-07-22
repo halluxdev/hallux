@@ -1,4 +1,5 @@
 #!/bin/bash
+set -e
 
 cd "${0%/*}/.."
 
@@ -6,9 +7,10 @@ cd "${0%/*}/.."
 
 HALLUX_ROOT="${HALLUX_ROOT:-$(pwd)}"
 
+echo "HALLUX_ROOT: ${HALLUX_ROOT}"
+
 rm -rf ./venv
 python3 -m venv --prompt="hallux" "${HALLUX_ROOT}/venv"
-
 source ./venv/bin/activate
 pip install pip --upgrade
 pip install wheel
