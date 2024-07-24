@@ -3,6 +3,7 @@ name: Master Pipeline
 on:
   push:
     branches: [ master ]
+  workflow_dispatch:  # Allows manual triggering of the workflow
 
 env:
   BUILD_TYPE: Release
@@ -12,10 +13,10 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-
     - uses: actions/checkout@v2
       with:
         fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
+
     - name: Install dependencies
       run: pip install --no-cache-dir -r requirements.txt
 
