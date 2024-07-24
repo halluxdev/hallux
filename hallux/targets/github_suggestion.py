@@ -127,7 +127,7 @@ class GithubSuggestion(FilesystemTarget):
                 start_line=compacted.start_line if compacted.start_line < compacted.end_line else GithubObject.NotSet,
                 start_side="RIGHT" if compacted.start_line < compacted.end_line else GithubObject.NotSet,
             )
-        except BaseException as ex:
+        except Exception as ex: 
             logger.debug(ex)
             success = False
 
