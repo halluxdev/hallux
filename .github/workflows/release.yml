@@ -3,7 +3,7 @@ name: Release Pipeline
 on:
   workflow_dispatch:
   push:
-    branches: [ 91-publish-from-pipeline ]
+    branches: [ master ]
 
 jobs:
   pypi-publish:

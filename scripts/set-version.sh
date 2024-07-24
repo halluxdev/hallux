@@ -4,8 +4,6 @@ set -e
 
 cd "${0%/*}/.."
 
-pwd
-ls -la
 git describe --long
 
 # Relies on the git tag
