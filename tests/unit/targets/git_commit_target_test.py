@@ -64,9 +64,12 @@ def test_requires_refresh(git_target_factory):
 
 
 def test_commit_diff(git_target_factory, diff_proposal):
-    with patch("subprocess.check_output") as mock_subprocess, patch.object(
-        FilesystemTarget, "revert_diff", return_value=None
-    ), patch("os.getcwd", return_value=TEST_PROJECT_PATH), patch("os.chdir") as mock_chdir:
+    with (
+        patch("subprocess.check_output") as mock_subprocess,
+        patch.object(FilesystemTarget, "revert_diff", return_value=None),
+        patch("os.getcwd", return_value=TEST_PROJECT_PATH),
+        patch("os.chdir") as mock_chdir,
+    ):
         git_target = git_target_factory()
         git_target.existing_proposal = diff_proposal
 
@@ -86,9 +89,12 @@ def test_commit_diff(git_target_factory, diff_proposal):
 
 # Coverage with verbose = True
 def test_commit_diff_verbose(git_target_factory, diff_proposal):
-    with patch("subprocess.check_output"), patch.object(FilesystemTarget, "revert_diff", return_value=None), patch(
-        "os.getcwd", return_value=TEST_PROJECT_PATH
-    ), patch("os.chdir"):
+    with (
+        patch("subprocess.check_output"),
+        patch.object(FilesystemTarget, "revert_diff", return_value=None),
+        patch("os.getcwd", return_value=TEST_PROJECT_PATH),
+        patch("os.chdir"),
+    ):
         git_target = git_target_factory()
         git_target.existing_proposal = diff_proposal
         git_target.verbose = True
@@ -96,9 +102,11 @@ def test_commit_diff_verbose(git_target_factory, diff_proposal):
 
 
 def test_commit_diff_failure(git_target_factory, diff_proposal):
-    with patch.object(FilesystemTarget, "revert_diff", return_value=None) as mock_fs_revert_diff, patch(
-        "os.getcwd", return_value=TEST_PROJECT_PATH
-    ), patch("os.chdir"):
+    with (
+        patch.object(FilesystemTarget, "revert_diff", return_value=None) as mock_fs_revert_diff,
+        patch("os.getcwd", return_value=TEST_PROJECT_PATH),
+        patch("os.chdir"),
+    ):
         git_target = git_target_factory()
         git_target.existing_proposal = diff_proposal
 
@@ -110,9 +118,11 @@ def test_commit_diff_failure(git_target_factory, diff_proposal):
 
 
 def test_commit_diff_failure_verbose(git_target_factory, diff_proposal):
-    with patch.object(FilesystemTarget, "revert_diff", return_value=None), patch(
-        "os.getcwd", return_value=TEST_PROJECT_PATH
-    ), patch("os.chdir"):
+    with (
+        patch.object(FilesystemTarget, "revert_diff", return_value=None),
+        patch("os.getcwd", return_value=TEST_PROJECT_PATH),
+        patch("os.chdir"),
+    ):
         git_target = git_target_factory()
         git_target.existing_proposal = diff_proposal
         git_target.verbose = True

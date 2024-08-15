@@ -33,7 +33,7 @@ def test_find_arg(args: list[str], look_for: str, expect_index):
         (["hallux", "--model", "."], "--model", "."),
         (["hallux", "--model", "gpt4o", "."], "--model", "gpt4o"),
         (["hallux", "--model=gpt4o", "."], "--model", "gpt4o"),
-        (["hallux", "--model=\"gpt4o\"", "."], "--model", "gpt4o"),
+        (["hallux", '--model="gpt4o"', "."], "--model", "gpt4o"),
     ],
 )
 def test_find_argvalue(args: list[str], look_for: str, expect_value: str | None):
