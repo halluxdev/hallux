@@ -6,7 +6,11 @@ from __future__ import annotations
 import os
 from pathlib import Path
 from tempfile import TemporaryDirectory
-from unittest.mock import patch
+from unittest.mock import patch, mock_open, MagicMock
+
+from hallux.backends.factory import QueryBackend
+from hallux.targets.filesystem import FilesystemTarget
+from hallux.tools.factory import IssueSolver
 
 import github
 import pytest
@@ -47,7 +51,7 @@ def test_hallux_main(mock_print):
     # asked to fix python, but no path
     mock_print.mock_calls.clear()
     out_val = main(["hallux", "--cache", "--python"])
-    assert 10 > out_val > 0  #
+    assert 10 > out_val > 0
 
 
 def test_find_config():
@@ -111,3 +115,53 @@ def test_init_target():
             ".",
         ]
         Hallux.init_target(argv, {})
+
+
+# Test for the get_version function
+@patch("builtins.open", new_callable=mock_open, read_data="1.0.0")
+def test_get_version(mock_file):
+    from hallux.main import get_version
+    assert get_version() == "1.0.0"
+
+# Test for the main function with help argument
+@patch("hallux.main.Hallux.print_usage")
+def test_main_help(mock_print_usage):
+    argv = ["hallux", "--help"]
+    assert main(argv) == 0
+    mock_print_usage.assert_called_once()
+
+# Test for the main function with invalid directory
+@patch("hallux.main.logger")
+def test_main_invalid_directory(mock_logger):
+    argv = ["hallux", "invalid_dir"]
+    assert main(argv) == 1
+    mock_logger.error.assert_called_once_with("invalid_dir is not a valid DIR")
+
+# Test for the main function with valid input
+@patch("hallux.main.Hallux.process")
+@patch("hallux.main.Hallux.find_config", return_value=({}, Path("/path/to/config")))
+@patch("hallux.main.BackendFactory.init_backend", return_value=MagicMock(spec=QueryBackend))
+@patch("hallux.main.ProcessorFactory.init_solvers", return_value=[MagicMock(spec=IssueSolver)])
+@patch("hallux.main.Hallux.init_target", return_value=MagicMock(spec=FilesystemTarget))
+def test_main_valid_input(mock_init_target, mock_init_solvers, mock_init_backend, mock_find_config, mock_process):
+
+    with patch("pathlib.Path.exists", return_value=True):
+        assert main(["hallux", "."]) == 0
+
+        mock_process.assert_called_once()
+
+        # test --model flag
+        assert main(["hallux", "--model", "gpt-4o", "."]) == 0
+        assert mock_init_backend.call_args[0][1] == [{"model": {"type": "litellm", "model": "gpt-4o"}}]
+
+        assert main(["hallux", "--model=gpt-4o", "."]) == 0
+        assert mock_init_backend.call_args[0][1] == [{"model": {"type": "litellm", "model": "gpt-4o"}}]
+
+        assert main(["hallux", "--model=\"gpt-4o\"", "."]) == 0
+        assert mock_init_backend.call_args[0][1] == [{"model": {"type": "litellm", "model": "gpt-4o"}}]
+
+        # Error cases
+        assert main(["hallux", "--model", "gpt4o"]) == 1
+        assert main(["hallux", "--model", "."]) == 1
+        assert main(["hallux", "--model=\"\"", "."]) == 1
+
