@@ -5,7 +5,7 @@ from __future__ import annotations
 from pathlib import Path
 
 from hallux.logger import logger
-
+from hallux.models import PromptConfig
 from ..auxilary import find_arg
 from ..backends.dummy_backend import DummyBackend
 from ..backends.litellm import LiteLLMBackend
@@ -15,7 +15,10 @@ from ..backends.rest_backend import RestBackend
 
 class BackendFactory:
     @staticmethod
-    def init_backend(argv: list[str], backends_list: list[dict] | None, config_path: Path) -> QueryBackend:
+    def init_backend(argv: list[str], config: list[dict] | None, config_path: Path) -> QueryBackend:
+        backends_list = config.get("backends", None)
+        prompt = BackendFactory._get_prompt(config)
+
         default_list = [
             {"cache": {"type": "dummy", "filename": "dummy.json"}},
             {"gpt3": {"type": "litellm", "model": "gpt-3.5-turbo"}},
@@ -28,7 +31,7 @@ class BackendFactory:
 
         for name_dict in backends_list:
             name, settings = BackendFactory._validate_settings(name_dict)
-            backend = BackendFactory._create_backend(settings, config_path, backend)
+            backend = BackendFactory._create_backend(settings, config_path, backend, prompt)
             if find_arg(argv, "--" + name) > 0:
                 return backend  # stop early if required by CLI
         return backend
@@ -48,7 +51,9 @@ class BackendFactory:
         return name, settings
 
     @staticmethod
-    def _create_backend(settings: dict, config_path: Path, previous_backend: QueryBackend) -> QueryBackend:
+    def _create_backend(
+        settings: dict, config_path: Path, previous_backend: QueryBackend, prompt: PromptConfig
+    ) -> QueryBackend:
         type_to_class = {
             "dummy": DummyBackend,
             "rest": RestBackend,
@@ -76,4 +81,18 @@ class BackendFactory:
         backend_class = type_to_class.get(backend_type)
         if backend_class is None:
             raise SystemError(f"Unknown BACKEND type: {backend_type}. Supported types: {type_to_class.keys()}")
-        return backend_class(**settings, base_path=config_path, previous_backend=previous_backend)
+        return backend_class(**settings, base_path=config_path, previous_backend=previous_backend, prompt=prompt)
+
+    @staticmethod
+    def _get_prompt(config: dict) -> PromptConfig:
+        default_system_message = """You are a senior developer who makes code reviews.
+You will be given a code snippet and a description of an issue.
+Fix the issue and return ONLY the fixed code, without explanations.
+Keep formatting and indentation as in the original code."""
+
+        default_user_message = """Fix "{ISSUE_LANGUAGE}" "{ISSUE_TYPE}" issue: "{ISSUE_DESCRIPTION}",
+from corresponding code:\n```\n{ISSUE_LINES}\n```"""
+
+        system_message = config.get("prompt.system", default_system_message)
+        user_message = config.get("prompt.user", default_user_message)
+        return {"system": system_message, "user": user_message}

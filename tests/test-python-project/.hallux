@@ -5,3 +5,16 @@ backends:
 
 python:
     ruff: .
+
+prompt:
+    system: |
+        You are a senior developer. You will be given a code snippet and a description of an issue.
+        Fix the issue and return ONLY the code, without explanations. Keep formatting and indentation as in the original code.
+
+    user: |
+        Fix "{ISSUE_LANGUAGE}" "{ISSUE_TYPE}" issue: "{ISSUE_DESCRIPTION}",
+        from corresponding code:
+        ```
+        {ISSUE_LINES}
+        ```
+

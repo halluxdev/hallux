@@ -155,13 +155,13 @@ def test_main_valid_input(mock_init_target, mock_init_solvers, mock_init_backend
 
         # test --model flag
         assert main(["hallux", "--model", "gpt-4o", "."]) == 0
-        assert mock_init_backend.call_args[0][1] == [{"model": {"type": "litellm", "model": "gpt-4o"}}]
+        assert mock_init_backend.call_args[0][1] == {"backends": [{"model": {"type": "litellm", "model": "gpt-4o"}}]}
 
         assert main(["hallux", "--model=gpt-4o", "."]) == 0
-        assert mock_init_backend.call_args[0][1] == [{"model": {"type": "litellm", "model": "gpt-4o"}}]
+        assert mock_init_backend.call_args[0][1] == {"backends": [{"model": {"type": "litellm", "model": "gpt-4o"}}]}
 
         assert main(["hallux", '--model="gpt-4o"', "."]) == 0
-        assert mock_init_backend.call_args[0][1] == [{"model": {"type": "litellm", "model": "gpt-4o"}}]
+        assert mock_init_backend.call_args[0][1] == {"backends": [{"model": {"type": "litellm", "model": "gpt-4o"}}]}
 
         # Error cases
         assert main(["hallux", "--model", "gpt4o"]) == 1

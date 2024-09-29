@@ -6,6 +6,8 @@ import hashlib
 import json
 from pathlib import Path
 
+from hallux.models import PromptConfig
+
 from ..backends.query_backend import QueryBackend
 from ..issues.issue import IssueDescriptor
 from ..proposals.diff_proposal import DiffProposal
@@ -18,10 +20,12 @@ class DummyBackend(QueryBackend):
         base_path: Path,
         type="dummy",
         previous_backend: QueryBackend | None = None,
+        prompt: PromptConfig = PromptConfig(),
     ):
         assert type == "dummy"
         super().__init__(base_path, previous_backend)
 
+        self.prompt = prompt
         self.filename: str
         self.was_modified: bool = False
         if Path(filename).is_absolute():
