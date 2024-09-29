@@ -148,6 +148,33 @@ def get_version():
     except FileNotFoundError:
         return "DEVELOP"
 
+def validate_model_args(argv, model_index: int) -> str | None:
+    model_value = find_argvalue(argv, "--model")
+    if model_value and model_value != "":
+        # Ensure the last argument is a valid path
+
+        has_delimeter = "=" in argv[model_index]
+        max_args = model_index + (1 if has_delimeter else 2)
+        is_extra_arg_present = len(argv) > max_args
+        is_last_arg_not_option = not argv[-1].startswith("--")
+
+        if is_extra_arg_present and is_last_arg_not_option:
+            path_value = argv[-1]
+            if path_value:
+                return model_value
+            else:
+                logger.error("Missing last path argument. Please provide a valid path.")
+                return None
+        else:
+            logger.error("Missing or invalid last path argument. Please provide a valid path.")
+            return None
+    else:
+        logger.error(
+            "The '--model' argument must be followed by a valid model name, like '--model=gpt4o'.\n"
+            "More details on model options: https://hallux.dev/docs/user-guide/backends"
+        )
+        return None
+
 
 def main(argv: list[str] | None = None, run_path: Path | None = None) -> int:
     """
@@ -182,8 +209,19 @@ def main(argv: list[str] | None = None, run_path: Path | None = None) -> int:
     config_path: Path
     config, config_path = Hallux.find_config(run_path)
 
+    backends_list = config.get("backends", None)
+
+    model_index = find_arg(argv, "--model")
+
+    if model_index > 0:
+        model_value = validate_model_args(argv, model_index)
+        print(f"model_value: {model_value}")
+        if model_value == None:
+            return 1
+        backends_list = [{"model": {"type": "litellm", "model": model_value}}]
+
     try:
-        query_backend: QueryBackend = BackendFactory.init_backend(argv, config.get("backends", None), config_path)
+        query_backend: QueryBackend = BackendFactory.init_backend(argv, backends_list, config_path)
     except Exception as e:
         logger.error(f"Error during BACKEND initialization: {e}")
         if verbose:
