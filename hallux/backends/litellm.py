@@ -32,7 +32,6 @@ class LiteLLMBackend(QueryBackend):
 
         self.model: Final[str] = model
 
-
     def query(self, request: str, issue: IssueDescriptor | None = None, issue_lines: list[str] = list) -> list[str]:
         if not self.valid:
             return []
@@ -42,12 +41,7 @@ class LiteLLMBackend(QueryBackend):
         for line in request.split("\n"):
             logger.debug(line)
 
-
-        result = completion(
-            model=self.model,
-            messages=[{ "content": request, "role": "user"}]
-        )
-
+        result = completion(model=self.model, messages=[{"content": request, "role": "user"}])
 
         answers = []
 

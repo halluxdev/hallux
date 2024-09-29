@@ -14,9 +14,10 @@ from hallux.targets.filesystem import FilesystemTarget
 
 
 def test_filesystem_target():
-    with patch("builtins.open", mock_open(read_data="1\n2\n3\n4\n5")) as mock_file, patch(
-        "pathlib.Path.exists"
-    ) as exists:
+    with (
+        patch("builtins.open", mock_open(read_data="1\n2\n3\n4\n5")) as mock_file,
+        patch("pathlib.Path.exists") as exists,
+    ):
         exists.return_value = True
         filename: Final[str] = "/tmp/hallux_mocked_test_file.txt"
         # create FileDiff

@@ -121,7 +121,9 @@ def test_init_target():
 @patch("builtins.open", new_callable=mock_open, read_data="1.0.0")
 def test_get_version(mock_file):
     from hallux.main import get_version
+
     assert get_version() == "1.0.0"
+
 
 # Test for the main function with help argument
 @patch("hallux.main.Hallux.print_usage")
@@ -130,12 +132,14 @@ def test_main_help(mock_print_usage):
     assert main(argv) == 0
     mock_print_usage.assert_called_once()
 
+
 # Test for the main function with invalid directory
 @patch("hallux.main.logger")
 def test_main_invalid_directory(mock_logger):
     argv = ["hallux", "invalid_dir"]
     assert main(argv) == 1
     mock_logger.error.assert_called_once_with("invalid_dir is not a valid DIR")
+
 
 # Test for the main function with valid input
 @patch("hallux.main.Hallux.process")
@@ -157,11 +161,10 @@ def test_main_valid_input(mock_init_target, mock_init_solvers, mock_init_backend
         assert main(["hallux", "--model=gpt-4o", "."]) == 0
         assert mock_init_backend.call_args[0][1] == [{"model": {"type": "litellm", "model": "gpt-4o"}}]
 
-        assert main(["hallux", "--model=\"gpt-4o\"", "."]) == 0
+        assert main(["hallux", '--model="gpt-4o"', "."]) == 0
         assert mock_init_backend.call_args[0][1] == [{"model": {"type": "litellm", "model": "gpt-4o"}}]
 
         # Error cases
         assert main(["hallux", "--model", "gpt4o"]) == 1
         assert main(["hallux", "--model", "."]) == 1
-        assert main(["hallux", "--model=\"\"", "."]) == 1
-
+        assert main(["hallux", '--model=""', "."]) == 1

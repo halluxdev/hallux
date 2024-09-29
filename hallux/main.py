@@ -148,6 +148,7 @@ def get_version():
     except FileNotFoundError:
         return "DEVELOP"
 
+
 def validate_model_args(argv, model_index: int) -> str | None:
     model_value = find_argvalue(argv, "--model")
     if model_value and model_value != "":

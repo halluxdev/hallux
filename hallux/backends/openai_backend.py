@@ -58,9 +58,9 @@ class OpenAiChatGPT(QueryBackend):
 
         logger.debug("[OpenAI REQUEST]:")
         logger.debug(request)
-        result = ChatCompletion.create(messages=[
-            {"role": "user", "content": request}
-        ], model=self.model, engine=self.model)
+        result = ChatCompletion.create(
+            messages=[{"role": "user", "content": request}], model=self.model, engine=self.model
+        )
         answers = []
         if len(result["choices"]) > 0:
             for variant in result["choices"]:

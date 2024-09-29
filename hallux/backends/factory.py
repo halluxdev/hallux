@@ -10,6 +10,7 @@ from ..backends.query_backend import QueryBackend
 from ..backends.rest_backend import RestBackend
 from ..backends.litellm import LiteLLMBackend
 
+
 class BackendFactory:
     @staticmethod
     def init_backend(argv: list[str], backends_list: list[dict] | None, config_path: Path) -> QueryBackend:
@@ -39,7 +40,9 @@ class BackendFactory:
         settings = name_dict[name]
 
         if not isinstance(settings, dict) or ("type" not in settings.keys() and not settings["model"]):
-            raise SystemError(f"Each BACKEND setting must have at least 'type' or a 'model' setting. Error in: {settings}")
+            raise SystemError(
+                f"Each BACKEND setting must have at least 'type' or a 'model' setting. Error in: {settings}"
+            )
         return name, settings
 
     @staticmethod
@@ -57,7 +60,6 @@ class BackendFactory:
             backend_type = "litellm"
             logger.info("No backend type specified. Using 'litellm' as a default backend type.")
 
-
         # Add backward compatibility for openai and openai.azure types
         # TODO: remove this in the future versions
         if backend_type in ["openai", "openai.azure"]:
@@ -68,7 +70,6 @@ class BackendFactory:
         if backend_type in ["openai.azure"]:
             settings["model"] = "azure/" + settings["model"]
             logger.warning(f"Model name for 'openai.azure' updated to 'azure/{settings['model']}'.")
-            
 
         backend_class = type_to_class.get(backend_type)
         if backend_class is None:
