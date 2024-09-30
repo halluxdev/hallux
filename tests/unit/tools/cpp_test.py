@@ -1,9 +1,11 @@
-from shutil import which
 import tempfile
 import unittest
 from pathlib import Path
+from shutil import which
 from unittest.mock import Mock, patch
+
 import pytest
+
 from hallux.tools.cpp.cpp import Cpp_IssueSolver
 
 

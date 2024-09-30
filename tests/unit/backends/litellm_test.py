@@ -1,12 +1,11 @@
 import os
-import pytest
 from pathlib import Path
-from hallux.backends.litellm import LiteLLMBackend
+from unittest.mock import MagicMock, patch
 
-from unittest.mock import patch, MagicMock
-from pathlib import Path
+import pytest
+
+from hallux.backends.litellm import LiteLLMBackend
 from hallux.issues.issue import IssueDescriptor
-from unittest.mock import patch
 
 
 @pytest.fixture

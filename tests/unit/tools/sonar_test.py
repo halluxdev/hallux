@@ -8,8 +8,8 @@ import requests
 
 from hallux.backends.query_backend import QueryBackend
 from hallux.issues.issue import IssueDescriptor
-from hallux.tools.sonarqube.solver import Sonar_IssueSolver, SonarIssue, OverrideQueryBackend
 from hallux.targets.diff import DiffTarget
+from hallux.tools.sonarqube.solver import OverrideQueryBackend, Sonar_IssueSolver, SonarIssue
 
 SONAR_SAMPLE_TOKEN: Final[str] = "sqt-deadbeefdeadbeefdeadbeefdeadbeef"
 SONAR_PROJECT: Final[str] = "test_project"

@@ -6,18 +6,17 @@ from __future__ import annotations
 import os
 from pathlib import Path
 from tempfile import TemporaryDirectory
-from unittest.mock import patch, mock_open, MagicMock
-
-from hallux.backends.factory import QueryBackend
-from hallux.targets.filesystem import FilesystemTarget
-from hallux.tools.factory import IssueSolver
+from unittest.mock import MagicMock, mock_open, patch
 
 import github
 import pytest
 import yaml
 
 from hallux.auxilary import set_directory
+from hallux.backends.factory import QueryBackend
 from hallux.main import CONFIG_FILE, Hallux, main
+from hallux.targets.filesystem import FilesystemTarget
+from hallux.tools.factory import IssueSolver
 
 
 @patch("builtins.print")

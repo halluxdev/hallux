@@ -1,14 +1,16 @@
 # Copyright: Hallux team, 2023
 
 from __future__ import annotations
+
 from pathlib import Path
+
 from hallux.logger import logger
 
 from ..auxilary import find_arg
 from ..backends.dummy_backend import DummyBackend
+from ..backends.litellm import LiteLLMBackend
 from ..backends.query_backend import QueryBackend
 from ..backends.rest_backend import RestBackend
-from ..backends.litellm import LiteLLMBackend
 
 
 class BackendFactory:
