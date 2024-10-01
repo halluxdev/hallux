@@ -10,8 +10,8 @@ from litellm import completion
 
 from hallux.logger import logger
 
-from .query_backend import QueryBackend
 from ..issues.issue import IssueDescriptor
+from .query_backend import QueryBackend
 
 
 class LiteLLMBackend(QueryBackend):
