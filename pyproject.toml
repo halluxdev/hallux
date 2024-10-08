@@ -24,7 +24,7 @@ classifiers = [
 ]
 
 dependencies = [
-  'pyyaml==5.3.1',
+  'pyyaml==5.4.1',
   'types-PyYAML==6.0.12.11',
   'PyGithub==2.1.1',
   'colorlog==6.7.0',
