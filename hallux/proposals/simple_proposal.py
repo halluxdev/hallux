@@ -66,17 +66,24 @@ class SimpleProposal(DiffProposal):
         1. We know that real change which needs to be done is in the middle of issue_lines
         2. GPT might hallucinate some starting and/or ending codes, but usually keeps provided code too
         3. We need to clear off hallucinated starting- and ending- codes, that's why we have "safety radius" around
-        :return True if merge was successfull
+        :return True if merge was successful
         """
 
-        request_lines = [
-            "Fix " + self.issue.language + " " + self.issue.issue_type + " issue: " + self.issue.description,
-            "from corresponding code:\n```",
-            *self.issue_lines,
-            "```\nWrite ONLY fixed code, without explanations. Keep formatting.",
-        ]
-        request = "\n".join(request_lines)
-        query_results: list[str] = query_backend.query(request, self.issue, issue_lines=self.issue_lines)
+        user_message_template = (
+            query_backend.prompt.get("user")
+            if query_backend.prompt.get("user") is not None
+            else query_backend.backend.prompt.get("user")
+        )
+
+        issue_data = {
+            "ISSUE_LANGUAGE": self.issue.language,
+            "ISSUE_TYPE": self.issue.issue_type,
+            "ISSUE_DESCRIPTION": self.issue.description,
+            "ISSUE_LINES": "\n".join(self.issue_lines),
+        }
+
+        user_message = user_message_template.format(**issue_data)
+        query_results: list[str] = query_backend.query(user_message, self.issue, issue_lines=self.issue_lines)
         if len(query_results) == 0:
             return False
 
@@ -96,7 +103,7 @@ class SimpleProposal(DiffProposal):
                 # remove last line once again
                 proposed_lines = proposed_lines[:-1]
 
-            # remove issue_line_comment if it was added
+        # remove issue_line_comment if it was added
         issue_line_found: int | None = None
         if self.issue_line_comment is not None:
             for i in range(len(proposed_lines)):

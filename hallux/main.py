@@ -210,19 +210,16 @@ def main(argv: list[str] | None = None, run_path: Path | None = None) -> int:
     config_path: Path
     config, config_path = Hallux.find_config(run_path)
 
-    backends_list = config.get("backends", None)
-
     model_index = find_arg(argv, "--model")
 
     if model_index > 0:
         model_value = validate_model_args(argv, model_index)
-        print(f"model_value: {model_value}")
         if model_value == None:
             return 1
-        backends_list = [{"model": {"type": "litellm", "model": model_value}}]
+        config["backends"] = [{"model": {"type": "litellm", "model": model_value}}]
 
     try:
-        query_backend: QueryBackend = BackendFactory.init_backend(argv, backends_list, config_path)
+        query_backend: QueryBackend = BackendFactory.init_backend(argv, config, config_path)
     except Exception as e:
         logger.error(f"Error during BACKEND initialization: {e}")
         if verbose:

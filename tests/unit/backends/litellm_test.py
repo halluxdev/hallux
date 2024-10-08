@@ -21,7 +21,7 @@ def invalid_model():
 @pytest.fixture
 def setup_litellm_backend(valid_model):
     with patch.dict(os.environ, {"OPENAI_API_KEY": "test_key"}):
-        return LiteLLMBackend(model=valid_model)
+        return LiteLLMBackend(model=valid_model, prompt={"user": "test_prompt", "system": "test_system"})
 
 
 def test_initialization_valid_model(setup_litellm_backend, valid_model):

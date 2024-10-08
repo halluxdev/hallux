@@ -21,6 +21,7 @@ class LiteLLMBackend(QueryBackend):
         type="litellm",
         base_path: Path = Path(),
         previous_backend: QueryBackend | None = None,
+        prompt: object = None,
     ):
         assert type == "litellm"
         super().__init__(base_path, previous_backend)
@@ -31,6 +32,7 @@ class LiteLLMBackend(QueryBackend):
             self.valid = False
 
         self.model: Final[str] = model
+        self.prompt = prompt
 
     def query(self, request: str, issue: IssueDescriptor | None = None, issue_lines: list[str] = list) -> list[str]:
         if not self.valid:
@@ -41,7 +43,10 @@ class LiteLLMBackend(QueryBackend):
         for line in request.split("\n"):
             logger.debug(line)
 
-        result = completion(model=self.model, messages=[{"content": request, "role": "user"}])
+        system_message = {"content": self.prompt["system"], "role": "system"}
+        user_message = {"content": request, "role": "user"}
+
+        result = completion(model=self.model, messages=[system_message, user_message])
 
         answers = []
 
