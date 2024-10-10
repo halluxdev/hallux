@@ -14,6 +14,14 @@ backends:
     #        API-KEY: <KEY>
 
 
+    # local Ollama
+    - rest:
+        type: rest
+        url: http://localhost:11434/api/generate
+        request_body: { model: "llama3.2", prompt: $PROMPT, stream: False } # Defaults to: $PROMPT
+        response_body: $RESPONSE.response # Defaults to $RESPONSE
+
+
     - gpt3:
         type: litellm
         model: gpt-3.5-turbo
