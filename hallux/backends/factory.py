@@ -72,7 +72,7 @@ class BackendFactory:
         if backend_type.lower() in ["openai", "openai.azure"]:
             backend_type = "litellm"
             settings["type"] = "litellm"
-            logger.warning(f"'openai' and 'openai.azure' backends are deprecated. Please use 'litellm' instead.")
+            logger.warning("'openai' and 'openai.azure' backends are deprecated. Please use 'litellm' instead.") 
         if backend_type.lower() == "openai.azure":
             settings["model"] = f"azure/{settings['model']}"
             logger.warning(f"Model name for 'openai.azure' updated to 'azure/{settings['model']}'.")
