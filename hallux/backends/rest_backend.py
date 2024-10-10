@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import json
+import logging
 from pathlib import Path
 
 import requests
@@ -26,6 +28,7 @@ class RestBackend(QueryBackend):
         previous_backend: QueryBackend | None = None,
         headers: dict | None = None,
         verify: bool = False,
+        prompt: object = None,
     ):
         super().__init__(base_path, previous_backend)
         assert type == "rest"
@@ -36,6 +39,7 @@ class RestBackend(QueryBackend):
         self.request_body = request_body
         self.response_body = response_body
         self.verify = verify
+        self.prompt = prompt
 
     def _is_string(self, obj):
         if isinstance(obj, str):
@@ -103,6 +107,12 @@ class RestBackend(QueryBackend):
             return [response]
 
         elif self.response_body.startswith("$RESPONSE."):
+            if isinstance(response, str):
+                try:
+                    response = json.loads(response)
+                except json.JSONDecodeError:
+                    logger.warning("Failed to parse response as JSON")
+                    return []
             return self._get_by_path(response)
 
         else:
@@ -130,12 +140,20 @@ class RestBackend(QueryBackend):
             return []
 
         logger.debug("RestBackend REQUEST")
-        logger.debug(parsed_request)
+        if logger.isEnabledFor(logging.DEBUG):
+            for line in request.split('\n'):
+                print(line)
 
         response = self._make_request(parsed_request)
         parsed_response = self._parse_response(response)
 
         logger.debug("RestBackend ANSWERS")
-        logger.debug(parsed_response)
+        if not parsed_response:
+            logger.warning("Parsed response is empty")
+            return []
+
+        if logger.isEnabledFor(logging.DEBUG):
+            for line in parsed_response[0].split('\n'):
+                print(line)
 
         return parsed_response

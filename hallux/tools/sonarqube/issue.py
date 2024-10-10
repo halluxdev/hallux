@@ -72,7 +72,7 @@ class SonarIssue(IssueDescriptor):
             # ToDo: do we need any extra-filter here?
             # if comp_arr != self.project:
             #     continue
-            filename = ":".join(comp_arr[1:])
+            filename = comp_arr[-1]
 
             issue = SonarIssue(
                 filename=filename,

@@ -24,6 +24,7 @@ class OpenAiChatGPT(QueryBackend):
         api_version="2021-05-15",
         base_path: Path = Path(),
         previous_backend: QueryBackend | None = None,
+        prompt: object = None,
     ):
         assert type == "openai" or type == "openai.azure"
         super().__init__(base_path, previous_backend)
@@ -36,6 +37,7 @@ class OpenAiChatGPT(QueryBackend):
         self.model: Final[str] = model
         self.max_tokens: Final[int] = max_tokens
         self.api_version: Final[int] = api_version
+        self.prompt = prompt
 
         # For Azure OpenAI
         if type == "openai.azure":

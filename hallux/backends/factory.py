@@ -69,13 +69,12 @@ class BackendFactory:
 
         # Add backward compatibility for openai and openai.azure types
         # TODO: remove this in the future versions
-        if backend_type in ["openai", "openai.azure"]:
+        if backend_type.lower() in ["openai", "openai.azure"]:
             backend_type = "litellm"
             settings["type"] = "litellm"
-            logger.warning(f"'openai' and 'openai.azure' backends are deprecated. Please use 'litellm' instead.")
-
-        if backend_type in ["openai.azure"]:
-            settings["model"] = "azure/" + settings["model"]
+            logger.warning("'openai' and 'openai.azure' backends are deprecated. Please use 'litellm' instead.") 
+        if backend_type.lower() == "openai.azure":
+            settings["model"] = f"azure/{settings['model']}"
             logger.warning(f"Model name for 'openai.azure' updated to 'azure/{settings['model']}'.")
 
         backend_class = type_to_class.get(backend_type)
