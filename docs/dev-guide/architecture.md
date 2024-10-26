@@ -22,7 +22,7 @@ The key classes are:
 
  * **IssueSolver**: Solves issues for a given language/linter.
 
- * **ProcessorFactory**: Creates IssueSolvers based on config.
+ * **ToolsFactory**: Creates IssueSolvers based on config.
 
  * **Hallux**: Orchestrates the whole process, has IssueSolvers and calls process().
 

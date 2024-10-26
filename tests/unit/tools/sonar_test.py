@@ -23,7 +23,7 @@ def solver_instance():
         instance = Sonar_IssueSolver.__new__(Sonar_IssueSolver)
 
         instance.search_params = "mock_search_params"
-        instance.extra_param = "mock_extra_param"
+        instance.argvalue = "mock_extra_param"
         instance.already_fixed_files = []
         return instance
 
@@ -33,7 +33,7 @@ def test_sonar_with_json_file():
     sonar_solver = Sonar_IssueSolver(
         config_path=Path(__file__).resolve().parent,
         run_path=Path(__file__).resolve().parent,
-        extra_param=str(Path(__file__).resolve().parent.joinpath("sonar_example.json")),
+        argvalue=str(Path(__file__).resolve().parent.joinpath("sonar_example.json")),
     )
 
     issues = sonar_solver.list_issues()

@@ -12,7 +12,7 @@ from ..tools.ruff.solver import Ruff_IssueSolver
 from ..tools.sonarqube.solver import Sonar_IssueSolver
 
 
-class ProcessorFactory:
+class ToolsFactory:
     @staticmethod
     def init_solvers(
         argv: list[str],
@@ -61,10 +61,16 @@ class ProcessorFactory:
         for name in requested_names:
             classname = mapping[name]
             config_params = tools_config.get(name, {})
-            if name == "sonar":
-                argvalue = find_argvalue(argv, "--" + name)
-                if argvalue is not None:
-                    config_params["extra_param"] = argvalue
+            argvalue = find_argvalue(argv, "--" + name)
+            if argvalue is not None:
+                config_params["argvalue"] = argvalue
+            # process "composite params", such as --sonar.validity_test="./run-validity-tests.sh -x"
+            for param in argv:
+                if param.startswith("--" + name + ".") and len(param[3 + len(name) :].split("=")) > 0:
+                    composite_name = param[3 + len(name) :].split("=")[0]
+                    composite_value = find_argvalue(argv, "--" + composite_name)
+                    if composite_value is not None:
+                        config_params[composite_name] = composite_value
 
             solver = classname(**config_params, config_path=config_path, run_path=run_path, command_dir=command_dir)
             solvers.append(solver)

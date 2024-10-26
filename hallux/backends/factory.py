@@ -3,10 +3,11 @@
 from __future__ import annotations
 
 from pathlib import Path
+from typing import Any
 
 from hallux.logger import logger
 from hallux.models import PromptConfig
-from ..auxilary import find_arg
+from ..auxilary import find_arg, find_argvalue
 from ..backends.dummy_backend import DummyBackend
 from ..backends.litellm import LiteLLMBackend
 from ..backends.query_backend import QueryBackend
@@ -15,9 +16,16 @@ from ..backends.rest_backend import RestBackend
 
 class BackendFactory:
     @staticmethod
-    def init_backend(argv: list[str], config: list[dict] | None, config_path: Path) -> QueryBackend:
-        backends_list = config.get("backends", None)
+    def init_backend(argv: list[str], config: dict[str, Any], config_path: Path) -> QueryBackend:
+
         prompt = BackendFactory._get_prompt(config)
+        model_index = find_arg(argv, "--model")
+        if model_index > 0:
+            model_value = BackendFactory.validate_model_args(argv, model_index)
+            if model_value is not None:
+                config["backends"] = [{"model": {"type": "litellm", "model": model_value}}]
+
+        backends_list: list[dict] | None = config.get("backends", None)
 
         default_list = [
             {"cache": {"type": "dummy", "filename": "dummy.json"}},
@@ -35,6 +43,40 @@ class BackendFactory:
             if find_arg(argv, "--" + name) > 0:
                 return backend  # stop early if required by CLI
         return backend
+
+    @staticmethod
+    def validate_model_args(argv, model_index: int) -> str | None:
+        model_value = find_argvalue(argv, "--model")
+        if model_value and model_value != "":
+            # Ensure the last argument is a valid path
+
+            has_delimeter = "=" in argv[model_index]
+            max_args = model_index + (1 if has_delimeter else 2)
+            is_extra_arg_present = len(argv) > max_args
+            is_last_arg_not_option = not argv[-1].startswith("--")
+
+            if is_extra_arg_present and is_last_arg_not_option:
+                path_value = argv[-1]
+                if path_value:
+                    return model_value
+                else:
+                    raise SystemError("Missing last path argument. Please provide a valid path")
+                    # logger.error("Missing last path argument. Please provide a valid path.")
+                    # return None
+            else:
+                raise SystemError("Missing or invalid last path argument. Please provide a valid path.")
+                # logger.error("Missing or invalid last path argument. Please provide a valid path.")
+                # return None
+        else:
+            raise SystemError(
+                "The '--model' argument must be followed by a valid model name, like '--model=gpt4o'.\n"
+                "More details on model options: https://hallux.dev/docs/user-guide/backends"
+            )
+            # logger.error(
+            #     "The '--model' argument must be followed by a valid model name, like '--model=gpt4o'.\n"
+            #     "More details on model options: https://hallux.dev/docs/user-guide/backends"
+            # )
+            # return None
 
     @staticmethod
     def _validate_settings(name_dict: dict) -> tuple[str, dict[str, str]]:
@@ -72,7 +114,7 @@ class BackendFactory:
         if backend_type.lower() in ["openai", "openai.azure"]:
             backend_type = "litellm"
             settings["type"] = "litellm"
-            logger.warning("'openai' and 'openai.azure' backends are deprecated. Please use 'litellm' instead.") 
+            logger.warning("'openai' and 'openai.azure' backends are deprecated. Please use 'litellm' instead.")
         if backend_type.lower() == "openai.azure":
             settings["model"] = f"azure/{settings['model']}"
             logger.warning(f"Model name for 'openai.azure' updated to 'azure/{settings['model']}'.")
