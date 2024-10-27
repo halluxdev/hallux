@@ -58,7 +58,7 @@ class IssueSolver{
   +solve_issues()
 }
 
-class ProcessorFactory{
+class ToolsFactory{
   +init_solvers()
 }
 
@@ -85,7 +85,7 @@ BackendFactory ..> QueryBackend
 IssueSolver ..> DiffTarget
 IssueSolver ..> QueryBackend
 
-ProcessorFactory ..> IssueSolver
+ToolsFactory ..> IssueSolver
 
 Hallux o-- IssueSolver
 Hallux ..> DiffTarget

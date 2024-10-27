@@ -138,32 +138,3 @@ def test_main_invalid_directory(mock_logger):
     argv = ["hallux", "invalid_dir"]
     assert main(argv) == 1
     mock_logger.error.assert_called_once_with("invalid_dir is not a valid DIR")
-
-
-# Test for the main function with valid input
-@patch("hallux.main.Hallux.process")
-@patch("hallux.main.Hallux.find_config", return_value=({}, Path("/path/to/config")))
-@patch("hallux.main.BackendFactory.init_backend", return_value=MagicMock(spec=QueryBackend))
-@patch("hallux.main.ProcessorFactory.init_solvers", return_value=[MagicMock(spec=IssueSolver)])
-@patch("hallux.main.Hallux.init_target", return_value=MagicMock(spec=FilesystemTarget))
-def test_main_valid_input(mock_init_target, mock_init_solvers, mock_init_backend, mock_find_config, mock_process):
-
-    with patch("pathlib.Path.exists", return_value=True):
-        assert main(["hallux", "."]) == 0
-
-        mock_process.assert_called_once()
-
-        # test --model flag
-        assert main(["hallux", "--model", "gpt-4o", "."]) == 0
-        assert mock_init_backend.call_args[0][1] == {"backends": [{"model": {"type": "litellm", "model": "gpt-4o"}}]}
-
-        assert main(["hallux", "--model=gpt-4o", "."]) == 0
-        assert mock_init_backend.call_args[0][1] == {"backends": [{"model": {"type": "litellm", "model": "gpt-4o"}}]}
-
-        assert main(["hallux", '--model="gpt-4o"', "."]) == 0
-        assert mock_init_backend.call_args[0][1] == {"backends": [{"model": {"type": "litellm", "model": "gpt-4o"}}]}
-
-        # Error cases
-        assert main(["hallux", "--model", "gpt4o"]) == 1
-        assert main(["hallux", "--model", "."]) == 1
-        assert main(["hallux", '--model=""', "."]) == 1

@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# Copyright: Hallux team, 2023
+# Copyright: Hallux team, 2023-2024
 
 # MAIN COMMAND-LINE EXECUTABLE
 # - Runs checks in the current folder (linting / unit-tests / docstrings / compilation errors)
@@ -25,7 +25,7 @@ from hallux.targets.filesystem import FilesystemTarget
 from hallux.targets.git_commit import GitCommitTarget
 from hallux.targets.github_suggestion import GithubSuggestion
 from hallux.targets.gitlab_suggestion import GitlabSuggestion
-from hallux.tools.factory import IssueSolver, ProcessorFactory
+from hallux.tools.factory import IssueSolver, ToolsFactory
 
 DEBUG: Final[bool] = False
 CONFIG_FILE: Final[str] = ".hallux"
@@ -101,7 +101,7 @@ class Hallux:
 
         print("\nOptions for [OTHER]:")
         print("--verbose   Print debug tracebacks on errors")
-        print("--help      Print help section")
+        print("--help      Print this help section")
 
     @staticmethod
     def init_target(argv: list[str], config: dict | str) -> DiffTarget:
@@ -149,34 +149,6 @@ def get_version():
         return "DEVELOP"
 
 
-def validate_model_args(argv, model_index: int) -> str | None:
-    model_value = find_argvalue(argv, "--model")
-    if model_value and model_value != "":
-        # Ensure the last argument is a valid path
-
-        has_delimeter = "=" in argv[model_index]
-        max_args = model_index + (1 if has_delimeter else 2)
-        is_extra_arg_present = len(argv) > max_args
-        is_last_arg_not_option = not argv[-1].startswith("--")
-
-        if is_extra_arg_present and is_last_arg_not_option:
-            path_value = argv[-1]
-            if path_value:
-                return model_value
-            else:
-                logger.error("Missing last path argument. Please provide a valid path.")
-                return None
-        else:
-            logger.error("Missing or invalid last path argument. Please provide a valid path.")
-            return None
-    else:
-        logger.error(
-            "The '--model' argument must be followed by a valid model name, like '--model=gpt4o'.\n"
-            "More details on model options: https://hallux.dev/docs/user-guide/backends"
-        )
-        return None
-
-
 def main(argv: list[str] | None = None, run_path: Path | None = None) -> int:
     """
     :param argv: list of command-line arguments
@@ -206,17 +178,9 @@ def main(argv: list[str] | None = None, run_path: Path | None = None) -> int:
         return 1
 
     config: dict[str, Any]
-    # Path, where config file is found. Shall be only used for filename/paths, defined in the config itself
+    # Path, where config file is found. Shall be relative for all filename/paths, defined in the config itself (if any)
     config_path: Path
     config, config_path = Hallux.find_config(run_path)
-
-    model_index = find_arg(argv, "--model")
-
-    if model_index > 0:
-        model_value = validate_model_args(argv, model_index)
-        if model_value == None:
-            return 1
-        config["backends"] = [{"model": {"type": "litellm", "model": model_value}}]
 
     try:
         query_backend: QueryBackend = BackendFactory.init_backend(argv, config, config_path)
@@ -235,7 +199,7 @@ def main(argv: list[str] | None = None, run_path: Path | None = None) -> int:
         return 3
 
     try:
-        solvers: list[IssueSolver] = ProcessorFactory.init_solvers(
+        solvers: list[IssueSolver] = ToolsFactory.init_solvers(
             argv,
             config.get("tools"),
             config.get("groups"),

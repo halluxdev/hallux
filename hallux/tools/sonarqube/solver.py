@@ -1,4 +1,4 @@
-# Copyright: Hallux team, 2023
+# Copyright: Hallux team, 2023-2024
 
 from __future__ import annotations
 
@@ -49,7 +49,7 @@ class Sonar_IssueSolver(IssueSolver):
         token: str | None = None,
         project: str | None = None,
         search_params: str = "resolved=false&severities=MINOR,MAJOR,CRITICAL&statuses=OPEN,CONFIRMED,REOPENED",
-        extra_param: str | None = None,  # example: "branch=65-sonar-fixes"
+        argvalue: str | None = None,  # example: "branch=65-sonar-fixes"
     ):
         """
         IssueSolver implementation for SonarQube
@@ -61,7 +61,7 @@ class Sonar_IssueSolver(IssueSolver):
         :param token:
         :param project:
         :param search_params:
-        :param extra_param: It could be a path to a .json file, or a string with params
+        :param argvalue: It could be a path to a .json file, or a string with extra params
         """
         super().__init__(config_path, run_path, command_dir, validity_test=validity_test)
 
@@ -69,7 +69,7 @@ class Sonar_IssueSolver(IssueSolver):
         self.url: Final[str | None] = url
         self.project: Final[str | None] = project
         self.search_params: Final[str] = search_params
-        self.extra_param: Final[str | None] = extra_param
+        self.argvalue: Final[str | None] = argvalue
 
         # With SonarQube we only may solve 1 issue per file.
         self.already_fixed_files: Final[list[str]] = []
@@ -87,15 +87,15 @@ class Sonar_IssueSolver(IssueSolver):
         issues: list[IssueDescriptor] = []
 
         response_json: str
-        if self.extra_param and self.extra_param.endswith(".json") and Path(self.extra_param).exists():
-            logger.info("SONAR extra_params is a json file: " + self.extra_param)
-            with open(self.extra_param, "r") as f:
+        if self.argvalue and self.argvalue.endswith(".json") and Path(self.argvalue).exists():
+            logger.info("SONAR extra_params is a json file: " + self.argvalue)
+            with open(self.argvalue, "r") as f:
                 response_json = f.read()
         else:
             try:
                 request: str = self.url + "/api/issues/search?" + self.search_params
-                if self.extra_param is not None:
-                    request += "&" + self.extra_param
+                if self.argvalue is not None:
+                    request += "&" + self.argvalue
                 if self.project is not None:
                     request += "&componentKeys=" + self.project
                 x = requests.get(url=request, headers={"Authorization": "Bearer " + self.token})

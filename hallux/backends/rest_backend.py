@@ -141,7 +141,7 @@ class RestBackend(QueryBackend):
 
         logger.debug("RestBackend REQUEST")
         if logger.isEnabledFor(logging.DEBUG):
-            for line in request.split('\n'):
+            for line in request.split("\n"):
                 print(line)
 
         response = self._make_request(parsed_request)
@@ -153,7 +153,7 @@ class RestBackend(QueryBackend):
             return []
 
         if logger.isEnabledFor(logging.DEBUG):
-            for line in parsed_response[0].split('\n'):
+            for line in parsed_response[0].split("\n"):
                 print(line)
 
         return parsed_response
