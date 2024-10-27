@@ -61,12 +61,8 @@ class BackendFactory:
                     return model_value
                 else:
                     raise SystemError("Missing last path argument. Please provide a valid path")
-                    # logger.error("Missing last path argument. Please provide a valid path.")
-                    # return None
             else:
                 raise SystemError("Missing or invalid last path argument. Please provide a valid path.")
-                # logger.error("Missing or invalid last path argument. Please provide a valid path.")
-                # return None
         else:
             raise SystemError(
                 "The '--model' argument must be followed by a valid model name, like '--model=gpt4o'.\n"
