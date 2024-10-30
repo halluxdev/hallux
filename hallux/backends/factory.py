@@ -34,8 +34,11 @@ class BackendFactory:
 
         backends_list: list[dict] = backends_list if backends_list is not None else default_list
         backend = None
+
         if not isinstance(backends_list, list) or len(backends_list) == 0:
             raise SystemError(f"BACKENDS config setting must contain non-empty list. Error in: {backends_list}")
+
+        logger.log_multiline("[System prompt]", prompt.get("system"), "debug")
 
         for name_dict in backends_list:
             name, settings = BackendFactory._validate_settings(name_dict)
@@ -68,11 +71,6 @@ class BackendFactory:
                 "The '--model' argument must be followed by a valid model name, like '--model=gpt4o'.\n"
                 "More details on model options: https://hallux.dev/docs/user-guide/backends"
             )
-            # logger.error(
-            #     "The '--model' argument must be followed by a valid model name, like '--model=gpt4o'.\n"
-            #     "More details on model options: https://hallux.dev/docs/user-guide/backends"
-            # )
-            # return None
 
     @staticmethod
     def _validate_settings(name_dict: dict) -> tuple[str, dict[str, str]]:

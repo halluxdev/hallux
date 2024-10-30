@@ -13,8 +13,6 @@ logger.setLevel(log_level)
 handler = logging.StreamHandler()
 handler.setLevel(log_level)
 
-stupid_var = "unused"
-
 # Create a formatter
 formatter = colorlog.ColoredFormatter(
     "%(log_color)s%(levelname)-8s%(reset)s %(message)s",
@@ -44,6 +42,29 @@ def message(msg: str, *args, **kwargs):
 
 
 logger.message = message
+
+
+def draw_line(char: str, len: int):
+    return char.join([char for _ in range(len)])
+
+
+def log_multiline(header: str, content: any, level: str = "debug"):
+    getattr(logger, level)("")
+    getattr(logger, level)(header)
+    getattr(logger, level)(draw_line("=", 40))
+    getattr(logger, level)("")
+
+    if content is None:
+        return
+
+    if isinstance(content, str):
+        for line in content.split("\n"):
+            getattr(logger, level)(line)
+    else:
+        getattr(logger, level)(str(content))
+
+
+logger.log_multiline = log_multiline
 
 # Now you can log messages with various severity levels like this:
 # logger.debug("debug message")

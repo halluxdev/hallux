@@ -139,21 +139,15 @@ class RestBackend(QueryBackend):
             logger.warning("Invalid request body")
             return []
 
-        logger.debug("RestBackend REQUEST")
-        if logger.isEnabledFor(logging.DEBUG):
-            for line in request.split("\n"):
-                print(line)
+        logger.log_multiline("[RestBackend REQUEST]:", request, "debug")
 
         response = self._make_request(parsed_request)
         parsed_response = self._parse_response(response)
 
-        logger.debug("RestBackend ANSWERS")
         if not parsed_response:
             logger.warning("Parsed response is empty")
             return []
 
-        if logger.isEnabledFor(logging.DEBUG):
-            for line in parsed_response[0].split("\n"):
-                print(line)
+        logger.log_multiline("[RestBackend ANSWERS]:", parsed_response[0], "debug")
 
         return parsed_response
