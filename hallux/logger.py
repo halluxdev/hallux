@@ -44,14 +44,11 @@ def message(msg: str, *args, **kwargs):
 logger.message = message
 
 
-def draw_line(char: str, len: int):
-    return char.join([char for _ in range(len)])
-
 
 def log_multiline(header: str, content: any, level: str = "debug"):
     getattr(logger, level)("")
     getattr(logger, level)(header)
-    getattr(logger, level)(draw_line("=", 40))
+    getattr(logger, level)("=" * 40)
     getattr(logger, level)("")
 
     if content is None:

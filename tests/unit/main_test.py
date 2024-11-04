@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import os
+import requests
 from pathlib import Path
 from tempfile import TemporaryDirectory
 from unittest.mock import MagicMock, mock_open, patch
@@ -87,6 +88,12 @@ def test_find_config():
 @pytest.mark.skipif("GITLAB_TOKEN" not in os.environ.keys(), reason="GITLAB_TOKEN is not provided")
 @pytest.mark.skipif("GITHUB_TOKEN" not in os.environ.keys(), reason="GITHUB_TOKEN is not provided")
 def test_init_target():
+
+    try:
+        requests.head('https://api.github.com')
+    except requests.ConnectionError:
+        pytest.skip(reason='No internet connectivity')
+
     with pytest.raises(SystemError):
         argv = ["hallux", "--cache", "--python", "--github=https://wrong.addr.com/no", "."]
         Hallux.init_target(argv, {})

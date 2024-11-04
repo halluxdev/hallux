@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 import os
 from pathlib import Path
 from typing import Final
@@ -98,6 +99,7 @@ class Sonar_IssueSolver(IssueSolver):
                     request += "&" + self.argvalue
                 if self.project is not None:
                     request += "&componentKeys=" + self.project
+                logger.debug("Sonar URL: " + request)
                 x = requests.get(url=request, headers={"Authorization": "Bearer " + self.token})
             except Exception:
                 return []
@@ -107,7 +109,23 @@ class Sonar_IssueSolver(IssueSolver):
             else:
                 logger.error(f'SonarQube: error "{x.status_code}" while making request to {request}')
                 return []
+        
+        logger.log_multiline("SonarQube Issues:", self._format_issues(response_json))
 
         issues.extend(SonarIssue.parseIssues(response_json, self.already_fixed_files))
 
         return issues
+
+    def _format_issues(self, issues):
+        issues_data = json.loads(issues)
+        table_format = "{:<60} {:<10} {:<60}"
+        response = table_format.format("Message", "Severity", "Component")
+        response += "\n" + ("-" * 130)
+        for issue in issues_data.get("issues", []):
+            response += "\n"
+            response += table_format.format(
+                issue["message"][:60],
+                issue["severity"],
+                issue["component"].split(":")[-1][:60]
+            )
+        return response
