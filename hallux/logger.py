@@ -44,7 +44,6 @@ def message(msg: str, *args, **kwargs):
 logger.message = message
 
 
-
 def log_multiline(header: str, content: any, level: str = "debug"):
     getattr(logger, level)("")
     getattr(logger, level)(header)

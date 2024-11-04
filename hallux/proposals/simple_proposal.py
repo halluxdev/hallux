@@ -11,6 +11,7 @@ from ..issues.issue import IssueDescriptor
 from ..targets.diff import DiffTarget
 from .diff_proposal import DiffProposal
 
+
 # Struct to keep all relevant info about found code fix in one place
 class SimpleProposal(DiffProposal):
     def __init__(
@@ -120,7 +121,6 @@ class SimpleProposal(DiffProposal):
             merge_result = self._merge_from_both_ends(proposed_lines)
 
         return merge_result
-
 
     def _merge_from_both_ends(self, proposed_lines: list[str]) -> bool:
         # merge starting code

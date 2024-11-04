@@ -90,9 +90,9 @@ def test_find_config():
 def test_init_target():
 
     try:
-        requests.head('https://api.github.com')
+        requests.head("https://api.github.com")
     except requests.ConnectionError:
-        pytest.skip(reason='No internet connectivity')
+        pytest.skip(reason="No internet connectivity")
 
     with pytest.raises(SystemError):
         argv = ["hallux", "--cache", "--python", "--github=https://wrong.addr.com/no", "."]

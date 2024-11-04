@@ -109,7 +109,7 @@ class Sonar_IssueSolver(IssueSolver):
             else:
                 logger.error(f'SonarQube: error "{x.status_code}" while making request to {request}')
                 return []
-        
+
         logger.log_multiline("SonarQube Issues:", self._format_issues(response_json))
 
         issues.extend(SonarIssue.parseIssues(response_json, self.already_fixed_files))
@@ -124,8 +124,6 @@ class Sonar_IssueSolver(IssueSolver):
         for issue in issues_data.get("issues", []):
             response += "\n"
             response += table_format.format(
-                issue["message"][:60],
-                issue["severity"],
-                issue["component"].split(":")[-1][:60]
+                issue["message"][:60], issue["severity"], issue["component"].split(":")[-1][:60]
             )
         return response
