@@ -79,6 +79,7 @@ class SimpleProposal(DiffProposal):
             "ISSUE_LANGUAGE": self.issue.language,
             "ISSUE_TYPE": self.issue.issue_type,
             "ISSUE_DESCRIPTION": self.issue.description,
+            "ISSUE_FILEPATH": self.issue.filename,
             "ISSUE_LINES": "\n".join(self.issue_lines),
         }
 
@@ -165,6 +166,7 @@ class SimpleProposal(DiffProposal):
             return False
 
         self.proposed_lines = proposed_lines
+        self.print_diff(self.issue_lines, proposed_lines)
         return True
 
     def _merge_from_issue_line(self, proposed_lines: list[str], found_issue_line_index: int) -> bool:

@@ -88,6 +88,7 @@ class IssueSolver(ABC):
                 applying_successful: bool
                 used_backend = None
 
+                # TODO: parametrize
                 iters = 10
                 while used_backend != query_backend and iters > 0:
                     iters -= 1

@@ -34,8 +34,11 @@ class BackendFactory:
 
         backends_list: list[dict] = backends_list if backends_list is not None else default_list
         backend = None
+
         if not isinstance(backends_list, list) or len(backends_list) == 0:
             raise SystemError(f"BACKENDS config setting must contain non-empty list. Error in: {backends_list}")
+
+        logger.log_multiline("[System prompt]", prompt.get("system"), "debug")
 
         for name_dict in backends_list:
             name, settings = BackendFactory._validate_settings(name_dict)
@@ -68,11 +71,6 @@ class BackendFactory:
                 "The '--model' argument must be followed by a valid model name, like '--model=gpt4o'.\n"
                 "More details on model options: https://hallux.dev/docs/user-guide/backends"
             )
-            # logger.error(
-            #     "The '--model' argument must be followed by a valid model name, like '--model=gpt4o'.\n"
-            #     "More details on model options: https://hallux.dev/docs/user-guide/backends"
-            # )
-            # return None
 
     @staticmethod
     def _validate_settings(name_dict: dict) -> tuple[str, dict[str, str]]:
@@ -122,12 +120,12 @@ class BackendFactory:
 
     @staticmethod
     def _get_prompt(config: dict) -> PromptConfig:
-        default_system_message = """You are a senior developer who makes code reviews.
+        default_system_message = """You are an experienced software engineer who makes code reviews.
 You will be given a code snippet and a description of an issue.
 Fix the issue and return ONLY the fixed code, without explanations.
 Keep formatting and indentation as in the original code."""
 
-        default_user_message = """Fix "{ISSUE_LANGUAGE}" "{ISSUE_TYPE}" issue: "{ISSUE_DESCRIPTION}",
+        default_user_message = """Fix the following "{ISSUE_LANGUAGE}" "{ISSUE_TYPE}" issue: "{ISSUE_DESCRIPTION}" in "{ISSUE_FILEPATH}",
 from corresponding code:\n```\n{ISSUE_LINES}\n```"""
 
         system_message = config.get("prompt.system", default_system_message)

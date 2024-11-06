@@ -38,10 +38,7 @@ class LiteLLMBackend(QueryBackend):
         if not self.valid:
             return []
 
-        logger.debug("")
-        logger.debug("[LiteLLM REQUEST]:")
-        for line in request.split("\n"):
-            logger.debug(line)
+        logger.log_multiline("[LiteLLM REQUEST]:", request, "debug")
 
         system_message = {"content": self.prompt["system"], "role": "system"}
         user_message = {"content": request, "role": "user"}
@@ -54,11 +51,7 @@ class LiteLLMBackend(QueryBackend):
             for variant in result["choices"]:
                 answers.append(variant["message"]["content"])
 
-        logger.debug("")
-        logger.debug("[LiteLLM ANSWERS]:")
-        for ans in answers:
-            for line in ans.split("\n"):
-                logger.debug(line)
+        logger.log_multiline("[LiteLLM ANSWERS]:", answers[0], "debug")
 
         return answers
 
