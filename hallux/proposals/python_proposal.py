@@ -1,4 +1,4 @@
-# Copyright: Hallux team, 2023
+# Copyright: Hallux team, 2023 - 2024
 
 from __future__ import annotations
 
@@ -15,10 +15,9 @@ class PythonProposal(SimpleProposal):
         issue: IssueDescriptor,
         # radius or tuple with [start_line, end_line]
         radius_or_range: int | tuple[int, int] = 4,
-        issue_line_comment: str | None = None,
         extract_function: bool = False,
     ):
-        super().__init__(issue, radius_or_range, issue_line_comment)
+        super().__init__(issue, radius_or_range)
         if extract_function:
             self.extract_function(issue)
         self.code_offset = 50000

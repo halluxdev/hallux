@@ -1,4 +1,4 @@
-# Copyright: Hallux team, 2023
+# Copyright: Hallux team, 2023 - 2024
 
 from __future__ import annotations
 
@@ -44,13 +44,12 @@ class SonarIssue(IssueDescriptor):
             return ProposalList([])
 
         if self.language == "python":
-            line_comment: str = f" # line {str(self.issue_line)}"
             proposal_list = [
-                PythonProposal(self, extract_function=True, issue_line_comment=line_comment),
-                PythonProposal(self, radius_or_range=4, issue_line_comment=line_comment),
+                PythonProposal(self, extract_function=True),
+                PythonProposal(self, radius_or_range=4),
             ]
             if end_line - start_line > 4:
-                proposal_list.append(PythonProposal(self, radius_or_range=code_range, issue_line_comment=line_comment))
+                proposal_list.append(PythonProposal(self, radius_or_range=code_range))
 
         else:
             proposal_list = [
@@ -67,19 +66,19 @@ class SonarIssue(IssueDescriptor):
         js = json.loads(request_output)
 
         issues: list[SonarIssue] = []
-        for js_issue in js["issues"]:
-            comp_arr = js_issue["component"].split(":")
-            # ToDo: do we need any extra-filter here?
+        for json_issue in js["issues"]:
+            comp_arr = json_issue["component"].split(":")
+            # TODO: do we need any extra-filter here?
             # if comp_arr != self.project:
             #     continue
             filename = comp_arr[-1]
 
             issue = SonarIssue(
                 filename=filename,
-                issue_line=js_issue["line"],
-                description=js_issue["message"],
-                text_range=js_issue["textRange"],
-                issue_type=str(js_issue["type"]).replace("_", " "),
+                issue_line=json_issue["line"],
+                description=json_issue["message"],
+                text_range=json_issue["textRange"],
+                issue_type=str(json_issue["type"]).replace("_", " "),
                 already_fixed_files=already_fixed_files,
             )
 

@@ -1,5 +1,5 @@
 #!/bin/env python
-# Copyright: Hallux team, 2023
+# Copyright: Hallux team, 2023 - 2024
 
 from __future__ import annotations
 
@@ -14,10 +14,15 @@ from hallux.proposals.python_proposal import PythonProposal
 def test_python_proposal():
     line = getframeinfo(currentframe()).lineno
     print("A")
-    print("B")  # This is THE line
+    print("B")
     print("C")
 
-    issue = TestingIssue(filename=str(Path(__file__).resolve()), language="python", issue_line=line + 2)
+    issue = TestingIssue(
+        filename=str(Path(__file__).resolve()),
+        language="python",
+        issue_line=line + 2,
+        line_comment="  # This is THE line",
+    )
     proposal = PythonProposal(issue, radius_or_range=1)
     assert proposal.code_offset == 4
     assert proposal.issue_lines == ['print("A")', 'print("B")  # This is THE line', 'print("C")']

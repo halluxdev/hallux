@@ -1,4 +1,4 @@
-# Copyright: Hallux team, 2023
+# Copyright: Hallux team, 2023 - 2024
 
 from __future__ import annotations
 
@@ -14,12 +14,11 @@ class PythonIssue(IssueDescriptor):
         )
 
     def list_proposals(self) -> ProposalEngine:
-        line_comment: str = f" # line {str(self.issue_line)}"
         return ProposalList(
             [
-                PythonProposal(self, extract_function=True, issue_line_comment=line_comment),
-                PythonProposal(self, radius_or_range=4, issue_line_comment=line_comment),
-                PythonProposal(self, radius_or_range=6, issue_line_comment=line_comment),
+                PythonProposal(self, extract_function=True),
+                PythonProposal(self, radius_or_range=4),
+                PythonProposal(self, radius_or_range=6),
             ]
         )
 

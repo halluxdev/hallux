@@ -1,4 +1,4 @@
-# Copyright: Hallux team, 2023
+# Copyright: Hallux team, 2023 - 2024
 
 from __future__ import annotations
 
@@ -60,19 +60,19 @@ class IssueSolver(ABC):
         """
         :returns: True, if latest fix was successful
         """
-        if self.validity_test is not None:
-            try:
-                with set_directory(self.config_path):
-                    subprocess.check_output(["bash"] + self.validity_test.split(" "))
-                logger.info(f"validity test: {self.validity_test} PASSED")
-                return True
-            except subprocess.CalledProcessError:
-                logger.info(f"\033[91m validity test: {self.validity_test} FAILED\033[0m")
-                return False
-        else:
+        if self.validity_test is None:
             new_issues = self.list_issues()
             # Number of issues decreased => FIX SUCCESFULL
             return len(new_issues) < len(self.target_issues)
+
+        try:
+            with set_directory(self.config_path):
+                subprocess.check_output(["bash"] + self.validity_test.split(" "))
+            logger.info(f"validity test: {self.validity_test} PASSED")
+            return True
+        except subprocess.CalledProcessError:
+            logger.info(f"\033[91m validity test: {self.validity_test} FAILED\033[0m")
+            return False
 
     def solve_issues(self, diff_target: DiffTarget, query_backend: QueryBackend):
         issue_index: int = 0

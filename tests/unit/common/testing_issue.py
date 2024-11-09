@@ -19,6 +19,7 @@ class TestingIssue(IssueDescriptor):
         issue_type: str = "warning",
         language: str | None = None,
         base_path: Path | None = None,
+        line_comment: str | None = None,
     ):
         self.base_path: Final[Path] = base_path if base_path is not None else Path(__file__).resolve().parent
         test_file = self.base_path.joinpath(filename)
@@ -33,6 +34,7 @@ class TestingIssue(IssueDescriptor):
             description=description,
             issue_type=issue_type,
             language=language,
+            line_comment=line_comment,
         )
 
     def list_proposals(self):
