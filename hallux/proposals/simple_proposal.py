@@ -154,6 +154,7 @@ class SimpleProposal(DiffProposal):
         issue_index = 0
         prop_index = 0
 
+
         for i in range(len(line_diff)):  # loop until we find matching line
             if line_diff[-i - 1].startswith("+ "):
                 prop_index += 1
