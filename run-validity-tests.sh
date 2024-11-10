@@ -3,7 +3,7 @@
 # -s flag is for printing the output of the tests to the console
 # -vv flag is for printing full output in tests
 
-python -m pytest -v $1 $2\
+python -m pytest -v -vv $1 $2\
     --cov-branch \
     --cov-report=term \
     --cov=hallux \

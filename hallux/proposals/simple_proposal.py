@@ -1,4 +1,4 @@
-# Copyright: Hallux team, 2023
+# Copyright: Hallux team, 2023 - 2024
 
 from __future__ import annotations
 
@@ -6,6 +6,7 @@ import copy
 import difflib
 from typing import Final
 
+from hallux.logger import logger
 from ..backends.query_backend import QueryBackend
 from ..issues.issue import IssueDescriptor
 from ..targets.diff import DiffTarget
@@ -19,15 +20,12 @@ class SimpleProposal(DiffProposal):
         issue: IssueDescriptor,
         # radius or tuple with [start_line, end_line]
         radius_or_range: int | tuple[int, int] | None = None,
-        issue_line_comment: str | None = None,
     ):
         """
         :param radius_or_range: "safety buffer" to read around the issue_line
-        :param issue_line_comment: add comment into one line from issue_lines,
         """
         super().__init__(filename=issue.filename, description=issue.description, issue_line=issue.issue_line)
         self.issue: Final[IssueDescriptor] = issue
-        self.issue_line_comment = issue_line_comment
         with open(issue.filename, "rt") as file:
             self.all_lines: Final[list[str]] = file.read().split("\n")
 
@@ -57,8 +55,8 @@ class SimpleProposal(DiffProposal):
     def _set_issue_lines(self):
         self.issue_lines: list[str] = copy.deepcopy(self.all_lines[self.start_line - 1 : self.end_line])
         self.proposed_lines: list[str] = copy.deepcopy(self.issue_lines)
-        if self.issue_line_comment is not None:
-            self.issue_lines[self.issue.issue_line - self.start_line] += self.issue_line_comment
+        if self.issue.line_comment is not None:
+            self.issue_lines[self.issue.issue_line - self.start_line] += self.issue.line_comment
 
     def try_fixing(self, query_backend: QueryBackend, diff_target: DiffTarget) -> bool:
         """
@@ -104,15 +102,20 @@ class SimpleProposal(DiffProposal):
                 # remove last line once again
                 proposed_lines = proposed_lines[:-1]
 
-        # remove issue_line_comment if it was added
+        # remove issue.line_comment if it was added
         issue_line_found: int | None = None
-        if self.issue_line_comment is not None:
-            for i in range(len(proposed_lines)):
-                line: str = proposed_lines[i]
-                if line.endswith(self.issue_line_comment):
-                    proposed_lines[i] = line[: -len(self.issue_line_comment)]
+        if self.issue.line_comment:
+            # Remove from proposed_lines
+            for i, line in enumerate(proposed_lines):
+                if line.endswith(self.issue.line_comment):
+                    proposed_lines[i] = line[: -len(self.issue.line_comment)]
                     issue_line_found = i
                     break
+
+            # Remove from issue_lines
+            issue_line_idx = self.issue.issue_line - self.start_line
+            if self.issue_lines[issue_line_idx].endswith(self.issue.line_comment):
+                self.issue_lines[issue_line_idx] = self.issue_lines[issue_line_idx][: -len(self.issue.line_comment)]
 
         merge_result: bool
         if issue_line_found is not None:
@@ -142,12 +145,15 @@ class SimpleProposal(DiffProposal):
 
         if issue_index > self.safety_radius:
             # unsuccessful merge
+            logger.debug("Unable to merge from the top")
+            self.print_diff(self.issue_lines, proposed_lines)
             return False
 
         # merge ending code
         line_diff = list(difflib.ndiff(self.issue_lines, proposed_lines))
         issue_index = 0
         prop_index = 0
+
 
         for i in range(len(line_diff)):  # loop until we find matching line
             if line_diff[-i - 1].startswith("+ "):
@@ -163,6 +169,8 @@ class SimpleProposal(DiffProposal):
 
         if issue_index > self.safety_radius:
             # unsuccessful merge
+            logger.debug("Unable to merge from the bottom")
+            self.print_diff(self.issue_lines, proposed_lines)
             return False
 
         self.proposed_lines = proposed_lines

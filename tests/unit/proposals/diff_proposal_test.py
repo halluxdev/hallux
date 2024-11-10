@@ -17,13 +17,13 @@ def custom_proposal():
 @patch("sys.stdout", new_callable=StringIO)
 def test_print_diff(mock_stdout, custom_proposal):
     # Set up input lines
-    lines1 = ["Line 1\n", "Line 2\n", "Line 3\n", "Line 4\n", "Line 5\n", "Line 6\n"]
+    lines1 = ["Line 1", "Line 2", "Line 3", "Line 4", "Line 5", "Line 6"]
     lines2 = [
-        "Line 1 modified\n",
-        "Line 2\n",
-        "Line 4\n",
-        "Line 6\n",
-        "Line 7\n",
+        "Line 1 modified",
+        "Line 2",
+        "Line 4",
+        "Line 6",
+        "Line 7",
     ]
 
     custom_proposal.print_diff(lines1, lines2)
@@ -35,22 +35,14 @@ def test_print_diff(mock_stdout, custom_proposal):
         "\x1b[0m",
         "@@ -1,6 +1,5 @@",
         "",
-        "\x1b[91m-Line 1",
-        "\x1b[0m",
-        "\x1b[92m+Line 1 modified",
-        "\x1b[0m",
+        "\x1b[91m-Line 1\x1b[0m",
+        "\x1b[92m+Line 1 modified\x1b[0m",
         "Line 2",
-        "",
-        "\x1b[91m-Line 3",
-        "\x1b[0m",
+        "\x1b[91m-Line 3\x1b[0m",
         "Line 4",
-        "",
-        "\x1b[91m-Line 5",
-        "\x1b[0m",
+        "\x1b[91m-Line 5\x1b[0m",
         "Line 6",
-        "",
-        "\x1b[92m+Line 7",
-        "\x1b[0m",
+        "\x1b[92m+Line 7\x1b[0m",
     ]
 
     assert diff_lines == expected_lines

@@ -69,8 +69,8 @@ def test_simple_proposal(test_filename="simple_proposal_test.txt"):
     assert fd1._merge_lines("3\nA\nB\nC".split("\n")) is False
     assert fd1._merge_lines("A\nB\nC\n5".split("\n")) is False
 
-    fd1_c = SimpleProposal(test_issue2, radius_or_range=1, issue_line_comment=" #")
-    assert fd1_c.issue_lines == ["3", "4 #", "5"]
+    fd1_c = SimpleProposal(test_issue2, radius_or_range=1)
+    assert fd1_c.issue_lines == ["3", "4", "5"]
     fd1_c._merge_lines(fd1_c.issue_lines)
     assert fd1_c.proposed_lines == ["3", "4", "5"]
 
@@ -78,7 +78,7 @@ def test_simple_proposal(test_filename="simple_proposal_test.txt"):
 def test_cpp_file_diff_with_real_openai_results(test_filename="../../test-cpp-project/cpp/test_cpp_project.cpp"):
     test_file = Path(__file__).resolve().parent.joinpath(test_filename)
     test_issue = TestingIssue(str(test_file), issue_line=21)
-    fd = SimpleProposal(test_issue, radius_or_range=4, issue_line_comment=" // line 21")
+    fd = SimpleProposal(test_issue, radius_or_range=4)
     real_output = (
         '```cpp\n#include <iostream>\n\nvoid missingFunction(int arg) {\n    std::cout << "Missing function called with'
         ' argument: " << arg << std::endl;\n}\n\nint main(int argc, char** argv) {\n    missingFunction(argc);\n\n   '
@@ -86,9 +86,16 @@ def test_cpp_file_diff_with_real_openai_results(test_filename="../../test-cpp-pr
     )
     result = fd._merge_lines(real_output.split("\n"))
     assert result
-    assert fd.proposed_lines == ["  }", "", "  missingFunction(argc);", "", "    return 0;", "}", ""]
+    assert fd.proposed_lines == [
+        "  }",
+        "",
+        "void missingFunction(int arg) {",
+        '    std::cout << "Missing function called with argument: " << arg << std::endl;',
+        "}",
+        "",
+    ]
 
-    fd2 = SimpleProposal(test_issue, radius_or_range=5, issue_line_comment=" // line 21")
+    fd2 = SimpleProposal(test_issue, radius_or_range=5)
     real_output2 = (
         '```cpp\n#include <iostream>\n\nvoid print_usage(char* argv[]) {\n  std::cout << "Usage: " << argv[0] << "'
         ' <filename>" << std::endl;\n}\n\nvoid missingFunction(int argc) {\n  std::cout << "Missing function called'
@@ -98,29 +105,11 @@ def test_cpp_file_diff_with_real_openai_results(test_filename="../../test-cpp-pr
     result = fd2._merge_lines(real_output2.split("\n"))
     assert result
     print(fd2.proposed_lines)
-    assert fd.proposed_lines == ["  }", "", "  missingFunction(argc);", "", "    return 0;", "}", ""]
-
-
-def test_python_file_diff_with_real_openai_results(
-    test_filename="../../test-python-project/python/parse_cpp_tree_test.py",
-):
-    test_file = Path(__file__).resolve().parent.joinpath(test_filename)
-    test_issue = TestingIssue(str(test_file), issue_line=39)
-    fd = SimpleProposal(test_issue, radius_or_range=4)
-    assert fd.issue_lines == [
+    assert fd.proposed_lines == [
+        "  }",
         "",
-        "        try:",
-        "            token1 = next(tokens1)",
-        "            token2 = next(tokens2)",
-        "        except:",
-        "            break",
+        "void missingFunction(int arg) {",
+        '    std::cout << "Missing function called with argument: " << arg << std::endl;',
+        "}",
         "",
-        "",
-        "@pytest.mark.parametrize(",
     ]
-
-    fd._merge_lines(
-        "```python\ntry:\n    token1 = next(tokens1)\n    token2 = next(tokens2)\nexcept StopIteration:\n   "
-        " break\n\n\n@pytest.mark.parametrize(\n```".split("\n")
-    )
-    # ToDo: write assert

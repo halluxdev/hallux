@@ -1,3 +1,5 @@
+# Copyright: Hallux team, 2023 - 2024
+
 from __future__ import annotations
 
 import copy
@@ -44,6 +46,7 @@ class ProposalRepeat(ProposalEngine):
             raise StopIteration
 
 
+# TODO:Unused
 class ProposalEngineRepeat(ProposalEngine):
     def __init__(self, proposal_engine: ProposalEngine, times: int = 1):
         self.proposal_engine: Final[ProposalEngine] = proposal_engine
