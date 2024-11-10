@@ -59,14 +59,17 @@ class GitlabSuggestion(FilesystemTarget):
         if self.mr_json["merged_at"] is not None or self.mr_json["closed_at"] is not None:
             raise SystemError(f"Merge Request {mr_iid} is either closed or merged already")
 
+        is_git_available = True
         local_git_sha: str
+
         try:
             git_log: str = subprocess.check_output(["git", "log", "--pretty=oneline"]).decode("utf8")
             local_git_sha = git_log.split("\n")[0].split(" ")[0]
         except Exception as e:
-            raise SystemError(f"Local git commit is not available: {e}")
+            logger.warning(f"Local git commit is not available: {e}")
+            is_git_available = False
 
-        if local_git_sha != self.head_sha:
+        if is_git_available and local_git_sha != self.head_sha:
             raise SystemError(
                 f"Local git commit: `{local_git_sha}` "
                 f"do not coinside with the head from pull-request: `{self.head_sha}` "

@@ -37,10 +37,19 @@ class GithubSuggestion(FilesystemTarget):
 
         merge_commit_sha: str = self.pull_request.merge_commit_sha
         latest_github_sha: str = self.pull_request.head.sha
-        git_log = subprocess.check_output(["git", "log", "--pretty=oneline"]).decode("utf8")
-        local_git_sha = git_log.split("\n")[0].split(" ")[0]
 
-        if not (local_git_sha == latest_github_sha or local_git_sha == merge_commit_sha):
+        is_git_available = True
+        local_git_sha = ""
+
+        try:
+            git_log = subprocess.check_output(["git", "log", "--pretty=oneline"]).decode("utf8")
+            local_git_sha = git_log.split("\n")[0].split(" ")[0]
+
+        except Exception as ex:
+            logger.warning(f"Local git commit is not available: {ex}")
+            is_git_available = False
+
+        if is_git_available and not (local_git_sha == latest_github_sha or local_git_sha == merge_commit_sha):
             raise SystemError(
                 f"Local git commit: `{local_git_sha}` "
                 f"do not coinside with the head from pull-request: `{latest_github_sha}` "

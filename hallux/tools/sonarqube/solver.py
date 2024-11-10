@@ -76,19 +76,22 @@ class Sonar_IssueSolver(IssueSolver):
         self.already_fixed_files: Final[list[str]] = []
 
     def solve_issues(self, diff_target: DiffTarget, query_backend: QueryBackend):
-        if not self.token or not self.url or not self.project:
+        if not self._check_file() and (not self.token or not self.url or not self.project):
             logger.error("SonarQube: token, url or project not configured")
+            return
 
-        else:
-            logger.message("Process SonarQube issues:")
-            new_query_backend = OverrideQueryBackend(query_backend, self.already_fixed_files)
-            super().solve_issues(diff_target, new_query_backend)
+        logger.message("Process SonarQube issues:")
+        new_query_backend = OverrideQueryBackend(query_backend, self.already_fixed_files)
+        super().solve_issues(diff_target, new_query_backend)
+
+    def _check_file(self):
+        return self.argvalue and self.argvalue.endswith(".json") and Path(self.argvalue).exists()
 
     def list_issues(self) -> list[IssueDescriptor]:
         issues: list[IssueDescriptor] = []
 
         response_json: str
-        if self.argvalue and self.argvalue.endswith(".json") and Path(self.argvalue).exists():
+        if self._check_file():
             logger.info("SONAR extra_params is a json file: " + self.argvalue)
             with open(self.argvalue, "r") as f:
                 response_json = f.read()
