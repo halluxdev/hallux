@@ -113,37 +113,3 @@ def test_cpp_file_diff_with_real_openai_results(test_filename="../../test-cpp-pr
         "}",
         "",
     ]
-
-
-def test_python_file_diff_with_real_openai_results(
-    test_filename="../../test-python-project/python/parse_cpp_tree_test.py",
-):
-    test_file = Path(__file__).resolve().parent.joinpath(test_filename)
-    test_issue = TestingIssue(str(test_file), issue_line=39)
-    fd = SimpleProposal(test_issue, radius_or_range=4)
-    assert fd.issue_lines == [
-        "",
-        "        try:",
-        "            token1 = next(tokens1)",
-        "            token2 = next(tokens2)",
-        "        except: # <-- fix around this line 39",
-        "            break",
-        "",
-        "",
-        "@pytest.mark.parametrize(",
-    ]
-
-    merge_result = fd._merge_lines(
-        [
-            "```python",
-            "try:",
-            "    token1 = next(tokens1)",
-            "    token2 = next(tokens2)",
-            "except StopIteration:",
-            "    break",
-            "@pytest.mark.parametrize(",
-            "```",
-        ]
-    )
-
-    assert merge_result == False

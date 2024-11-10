@@ -6,6 +6,7 @@ import copy
 import difflib
 from typing import Final
 
+from hallux.logger import logger
 from ..backends.query_backend import QueryBackend
 from ..issues.issue import IssueDescriptor
 from ..targets.diff import DiffTarget
@@ -124,7 +125,7 @@ class SimpleProposal(DiffProposal):
 
         return merge_result
 
-    def _merge_from_both_ends(self, proposed_lines: list[str]) -> tuple[bool, str | None]:
+    def _merge_from_both_ends(self, proposed_lines: list[str]) -> bool:
         # merge starting code
         line_diff: list[str] = list(difflib.ndiff(self.issue_lines, proposed_lines))
         issue_index: int = 0
@@ -144,12 +145,15 @@ class SimpleProposal(DiffProposal):
 
         if issue_index > self.safety_radius:
             # unsuccessful merge
+            logger.debug("Unable to merge from the top")
+            self.print_diff(self.issue_lines, proposed_lines)
             return False
 
         # merge ending code
         line_diff = list(difflib.ndiff(self.issue_lines, proposed_lines))
         issue_index = 0
         prop_index = 0
+
 
         for i in range(len(line_diff)):  # loop until we find matching line
             if line_diff[-i - 1].startswith("+ "):
@@ -165,6 +169,8 @@ class SimpleProposal(DiffProposal):
 
         if issue_index > self.safety_radius:
             # unsuccessful merge
+            logger.debug("Unable to merge from the bottom")
+            self.print_diff(self.issue_lines, proposed_lines)
             return False
 
         self.proposed_lines = proposed_lines

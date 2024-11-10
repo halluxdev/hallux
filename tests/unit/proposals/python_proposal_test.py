@@ -49,3 +49,34 @@ def test_python_proposal_code_offset():
         assert proposal2.code_offset == 4
         proposal4 = PythonProposal(issue, radius_or_range=4)
         assert proposal4.code_offset == 0
+
+
+def test_python_file_diff_with_real_openai_results(
+    test_filename="../../test-python-project/python/parse_cpp_tree_test.py",
+):
+    test_file = Path(__file__).resolve().parent.joinpath(test_filename)
+    test_issue = TestingIssue(str(test_file), issue_line=39)
+    fd = PythonProposal(test_issue, radius_or_range=3)
+    assert fd.issue_lines == [
+        "try:",
+        "    token1 = next(tokens1)",
+        "    token2 = next(tokens2)",
+        "except: # <-- fix around this line 39",
+        "    break",
+        "",
+        "",
+    ]
+
+    merge_result = fd._merge_lines(
+        [
+            "```python",
+            "try:",
+            "    token1 = next(tokens1)",
+            "    token2 = next(tokens2)",
+            "except StopIteration:",
+            "    break",
+            "```",
+        ]
+    )
+
+    assert merge_result == True
