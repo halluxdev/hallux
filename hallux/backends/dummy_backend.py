@@ -51,7 +51,6 @@ class DummyBackend(QueryBackend):
 
     def report_succesfull_fix(self, issue: IssueDescriptor, proposal: DiffProposal) -> None:
         hash = self.issue_hash(issue.description, proposal.issue_lines)
-
         if hash not in self.json:
             self.json[hash] = "\n".join(proposal.proposed_lines)
 
