@@ -44,17 +44,18 @@ class SonarIssue(IssueDescriptor):
             return ProposalList([])
 
         if self.language == "python":
+
             proposal_list = [
                 PythonProposal(self, extract_function=True),
-                PythonProposal(self, radius_or_range=4),
+                PythonProposal(self, radius_or_range=10),
             ]
             if end_line - start_line > 4:
                 proposal_list.append(PythonProposal(self, radius_or_range=code_range))
 
         else:
             proposal_list = [
-                SimpleProposal(self, radius_or_range=4),
-                SimpleProposal(self, radius_or_range=6),
+                SimpleProposal(self, radius_or_range=10),
+                SimpleProposal(self, radius_or_range=100),
             ]
             if end_line - start_line > 4:
                 proposal_list.append(SimpleProposal(self, radius_or_range=code_range))
