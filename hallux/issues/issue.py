@@ -5,9 +5,8 @@ from __future__ import annotations
 from abc import ABC, abstractmethod
 from typing import Final
 
-from .annotations import get_language
-
 from ..proposals.proposal_engine import ProposalEngine
+from .annotations import get_language
 
 
 class IssueDescriptor(ABC):

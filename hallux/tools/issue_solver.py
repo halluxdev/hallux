@@ -89,9 +89,9 @@ class IssueSolver(ABC):
                 used_backend = None
 
                 # TODO: parametrize
-                iters = 10
-                while used_backend != query_backend and iters > 0:
-                    iters -= 1
+                multi_backend_iters = 10
+                while used_backend != query_backend and multi_backend_iters > 0:
+                    multi_backend_iters -= 1
                     try:
                         applying_successful, used_backend = proposal.try_fixing_with_priority(
                             diff_target=diff_target, query_backend=query_backend, used_backend=used_backend

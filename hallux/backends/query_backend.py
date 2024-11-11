@@ -5,6 +5,7 @@ from __future__ import annotations
 from abc import ABC, abstractmethod
 from pathlib import Path
 from typing import Final
+
 from hallux.models import PromptConfig
 
 from ..issues.issue import IssueDescriptor

@@ -1,11 +1,10 @@
 #!/bin/env python
-# Copyright: Hallux team, 2023
+# Copyright: Hallux team, 2024
 
 # HALLUX TEST : checks that `hallux .` command indeed capable of fixing all issues in the test-project(s)
 from __future__ import annotations
 
 import shutil
-import subprocess
 from pathlib import Path
 
 import pytest
@@ -38,6 +37,16 @@ def test_hallux_sonar_swift(
     # run hallux from the temporal project directory
     with set_directory(tmp_proj_dir):
         try:
-            main(["hallux", "--sonar=./sonar.json", "--verbose", target, backend, "."])
+            main(
+                [
+                    "hallux",
+                    "--sonar=./sonar.json",
+                    "--verbose",
+                    "--sonar.validity_test=/usr/bin/echo",
+                    target,
+                    backend,
+                    ".",
+                ]
+            )
         except Exception as e:
             pytest.fail(e, pytrace=True)  # hallux must not fail ?

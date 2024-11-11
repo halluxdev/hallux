@@ -87,9 +87,16 @@ class Sonar_IssueSolver(IssueSolver):
     def _check_file(self):
         return self.argvalue and self.argvalue.endswith(".json") and Path(self.argvalue).exists()
 
+    def is_issue_fixed(self) -> bool:
+        if self.validity_test is None:
+            return True
+        else:
+            return super().is_issue_fixed()
+
     def list_issues(self) -> list[IssueDescriptor]:
         issues: list[IssueDescriptor] = []
 
+        # ToDo: make some caching for issues, in order not to query sonar every time
         response_json: str
         if self._check_file():
             logger.info("SONAR extra_params is a json file: " + self.argvalue)

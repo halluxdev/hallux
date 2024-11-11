@@ -1,4 +1,5 @@
 import pytest
+
 from hallux.issues.annotations import get_language
 
 

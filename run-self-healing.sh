@@ -12,6 +12,6 @@
 #    tests/unit \
 #    tests/integration || exit 1
 
-#./scripts/sonar-scanner.sh || exit 1
+./scripts/sonar-scanner.sh || exit 1
 
-LOG_LEVEL=DEBUG python hallux/main.py --model=gpt-4o-mini --sonar --github https://github.com/halluxdev/hallux/pull/105 hallux
+LOG_LEVEL=DEBUG python hallux/main.py --model=gpt-4o-mini --sonar --git hallux || exit 1

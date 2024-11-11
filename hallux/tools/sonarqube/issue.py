@@ -44,7 +44,6 @@ class SonarIssue(IssueDescriptor):
             return ProposalList([])
 
         if self.language == "python":
-
             proposal_list = [
                 PythonProposal(self, extract_function=True),
                 PythonProposal(self, radius_or_range=10),

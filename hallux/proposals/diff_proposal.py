@@ -1,8 +1,8 @@
 # Copyright: Hallux team, 2023
 
 from __future__ import annotations
-import difflib
 
+import difflib
 from abc import ABC, abstractmethod
 from typing import Any
 

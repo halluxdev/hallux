@@ -27,15 +27,15 @@ class FilesystemTarget(DiffTarget):
 
         with open(proposal.filename, "wt") as file:
             for line in range(0, proposal.start_line - 1):
-                file.write(proposal.all_lines[line] + "\n")
+                file.write(proposal.all_lines[line])
 
             for code_line in proposal.proposed_lines:
-                file.write(code_line + "\n")
+                file.write(code_line)
 
             for line in range(proposal.end_line, len(proposal.all_lines)):
                 file.write(proposal.all_lines[line])
-                if line < len(proposal.all_lines) - 1:
-                    file.write("\n")
+                # if line < len(proposal.all_lines) - 1:
+                #     file.write("\n")  #ToDo: do we need it now?
 
             file.close()
         return True
@@ -47,8 +47,8 @@ class FilesystemTarget(DiffTarget):
                     all_lines = self.existing_proposal.all_lines
                     for line in range(len(all_lines)):
                         file.write(all_lines[line])
-                        if line < len(all_lines) - 1:
-                            file.write("\n")
+                        # if line < len(all_lines) - 1:
+                        #     file.write("\n") #ToDo: do we need it now?
 
             self.existing_proposal = None
             self.base_path = None

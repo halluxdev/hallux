@@ -1,7 +1,9 @@
-import pytest
-from hallux.proposals.diff_proposal import DiffProposal
-from unittest.mock import patch, MagicMock
 from io import StringIO
+from unittest.mock import MagicMock, patch
+
+import pytest
+
+from hallux.proposals.diff_proposal import DiffProposal
 
 
 class CustomProposal(DiffProposal):
