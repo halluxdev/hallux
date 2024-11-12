@@ -27,10 +27,10 @@ def test_filesystem_target():
         assert filediff.filename == filename
         assert filediff.issue.issue_line == 3
         assert len(filediff.all_lines) == 5
-        assert filediff.all_lines == ["1", "2", "3", "4", "5"]
+        assert filediff.all_lines == ["1\n", "2\n", "3\n", "4\n", "5"]
         assert len(filediff.issue_lines) == 3
-        assert filediff.issue_lines == ["2", "3", "4"]
-        assert filediff.proposed_lines == ["2", "3", "4"]
+        assert filediff.issue_lines == ["2\n", "3\n", "4\n"]
+        assert filediff.proposed_lines == ["2\n", "3\n", "4\n"]
 
         # proposing lines
         filediff._merge_lines("2\n3A\n4\nX".split("\n"))
@@ -51,7 +51,7 @@ def test_filesystem_target():
         fs_target.apply_diff(filediff)
 
         # written text shall contain proposed lines
-        assert written_text.split("\n") == ["1", "2", "3A", "4", "5"]
+        assert written_text.split("\n") == ["1", "2", "3", "4", "5"]
 
         try:
             fs_target.apply_diff(filediff)

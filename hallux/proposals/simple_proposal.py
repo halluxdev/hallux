@@ -101,6 +101,9 @@ class SimpleProposal(DiffProposal):
 
         return False
 
+    def _split_lines(self, code: str) -> list[str]:
+        return code.splitlines(keepends=True)
+
     def _merge_lines(self, proposed_lines: list[str]) -> bool:
         if proposed_lines[0].startswith("```"):
             proposed_lines = proposed_lines[1:-1]  # remove first and last line
