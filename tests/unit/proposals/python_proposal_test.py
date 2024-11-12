@@ -67,16 +67,16 @@ def test_python_file_diff_with_real_openai_results(
         "",
     ]
 
-    # merge_result = fd._merge_lines(
-    #     [
-    #         "```python",
-    #         "try:\n",
-    #         "    token1 = next(tokens1)\n",
-    #         "    token2 = next(tokens2)\n",
-    #         "except StopIteration:\n",
-    #         "    break\n",
-    #         "```",
-    #     ]
-    # )
-    #
-    # assert merge_result == True
+    merge_result = fd._merge_lines(
+        [
+            "```python",
+            "try:\n",
+            "    token1 = next(tokens1)\n",
+            "    token2 = next(tokens2)\n",
+            "except StopIteration:\n",
+            "    break\n",
+            "```",
+        ]
+    )
+
+    assert merge_result

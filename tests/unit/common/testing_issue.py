@@ -10,6 +10,8 @@ from hallux.issues.issue import IssueDescriptor
 
 
 class TestingIssue(IssueDescriptor):
+    __test__ = False
+
     def __init__(
         self,
         filename: str,

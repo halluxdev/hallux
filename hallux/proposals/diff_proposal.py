@@ -37,8 +37,8 @@ class DiffProposal(ABC):
         diff = difflib.unified_diff(lines1, lines2, fromfile=self.filename, tofile=self.filename)
         for line in diff:
             if line.startswith("-"):
-                print(f"\033[91m{line}\033[0m")
+                print(f"\033[91m{line}\033[0m", end="")
             elif line.startswith("+"):
-                print(f"\033[92m{line}\033[0m")
+                print(f"\033[92m{line}\033[0m", end="")
             else:
-                print(line)
+                print(line, end="")
