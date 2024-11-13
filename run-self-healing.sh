@@ -14,4 +14,4 @@
 
 ./scripts/sonar-scanner.sh || exit 1
 
-python hallux/main.py --gpt3 --sonar --git hallux || exit 1
+LOG_LEVEL=DEBUG python hallux/main.py --model=gpt-4o-mini --sonar --git hallux || exit 1

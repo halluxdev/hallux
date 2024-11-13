@@ -5,10 +5,11 @@ from __future__ import annotations
 
 from pathlib import Path
 from typing import Any
+
 import pytest
-from hallux.backends.factory import BackendFactory
-from hallux.backends.query_backend import QueryBackend
+
 from hallux.backends.dummy_backend import DummyBackend
+from hallux.backends.factory import BackendFactory
 from hallux.backends.litellm import LiteLLMBackend
 from hallux.backends.query_backend import QueryBackend
 from hallux.backends.rest_backend import RestBackend

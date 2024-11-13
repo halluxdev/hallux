@@ -21,7 +21,7 @@ def test_hallux_cpp(
     tmp_proj_dir: str | None = None,
     target: str = "--files",
 ):
-    backend = "--gpt3" if real_openai_test else "--cache"
+    backend = "--model=gpt-4o-mini" if real_openai_test else "--cache"
 
     # Create project dir, if not already provided
     if tmp_proj_dir is None:

@@ -1,4 +1,5 @@
 # Copyright: Hallux team, 2024
+from __future__ import annotations
 
 
 def get_language(filename: str) -> tuple[str, str]:

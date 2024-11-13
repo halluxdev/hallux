@@ -25,15 +25,15 @@ def test_compact_proposal():
         issue_line=5,
     )
     proposal = SimpleProposal(issue, radius_or_range=2)
-    assert proposal.issue_lines == ["3", "4", "5", "6", "7"]
+    assert proposal.issue_lines == ["3\n", "4\n", "5\n", "6\n", "7\n"]
     assert proposal.start_line == 3
     assert proposal.end_line == 7
 
-    proposed_lines = ["3", "4AAA", "5AAA", "NEW LINE", "6", "7"]
+    proposed_lines = ["3\n", "4AAA\n", "5AAA\n", "NEW LINE\n", "6\n", "7\n"]
     proposal._merge_lines(proposed_lines)
     assert proposal.proposed_lines == proposed_lines
 
     compacted = GithubSuggestion.compact_proposal(proposal)
-    assert compacted.proposed_lines == ["4AAA", "5AAA", "NEW LINE"]
+    assert compacted.proposed_lines == ["4AAA\n", "5AAA\n", "NEW LINE\n"]
     assert compacted.start_line == 4
     assert compacted.end_line == 5

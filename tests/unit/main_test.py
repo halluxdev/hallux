@@ -4,13 +4,13 @@
 from __future__ import annotations
 
 import os
-import requests
 from pathlib import Path
 from tempfile import TemporaryDirectory
 from unittest.mock import MagicMock, mock_open, patch
 
 import github
 import pytest
+import requests
 import yaml
 
 from hallux.auxilary import set_directory

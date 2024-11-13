@@ -43,7 +43,7 @@ class PythonProposal(SimpleProposal):
     def count_code_offset(self):
         for line in self.issue_lines:
             lsline = line.lstrip(" ")
-            if len(lsline) > 0:
+            if len(lsline) > 0 and not (lsline == "\n" or lsline == "\r\n"):
                 self.code_offset = min(self.code_offset, len(line) - len(lsline))
 
     def remove_code_offset(self):

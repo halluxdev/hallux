@@ -7,6 +7,7 @@ import difflib
 from typing import Final
 
 from hallux.logger import logger
+
 from ..backends.query_backend import QueryBackend
 from ..issues.issue import IssueDescriptor
 from ..targets.diff import DiffTarget
@@ -27,7 +28,7 @@ class SimpleProposal(DiffProposal):
         super().__init__(filename=issue.filename, description=issue.description, issue_line=issue.issue_line)
         self.issue: Final[IssueDescriptor] = issue
         with open(issue.filename, "rt") as file:
-            self.all_lines: Final[list[str]] = file.read().split("\n")
+            self.all_lines: Final[list[str]] = file.read().splitlines(keepends=True)
 
         if self.issue.issue_line < 1 or self.issue.issue_line > len(self.all_lines):
             raise SystemError(
@@ -56,7 +57,13 @@ class SimpleProposal(DiffProposal):
         self.issue_lines: list[str] = copy.deepcopy(self.all_lines[self.start_line - 1 : self.end_line])
         self.proposed_lines: list[str] = copy.deepcopy(self.issue_lines)
         if self.issue.line_comment is not None:
-            self.issue_lines[self.issue.issue_line - self.start_line] += self.issue.line_comment
+            # now because self.issue_lines contain \n or \r\n at the end of each line,
+            # adding line comment gets a little bit more involved
+            issue_line = self.issue_lines[self.issue.issue_line - self.start_line]
+            issue_line = issue_line.split("\n")
+            issue_line[0] += self.issue.line_comment
+            issue_line = "\n".join(issue_line)
+            self.issue_lines[self.issue.issue_line - self.start_line] = issue_line
 
     def try_fixing(self, query_backend: QueryBackend, diff_target: DiffTarget) -> bool:
         """
@@ -78,7 +85,7 @@ class SimpleProposal(DiffProposal):
             "ISSUE_TYPE": self.issue.issue_type,
             "ISSUE_DESCRIPTION": self.issue.description,
             "ISSUE_FILEPATH": self.issue.filename,
-            "ISSUE_LINES": "\n".join(self.issue_lines),
+            "ISSUE_LINES": "".join(self.issue_lines),
         }
 
         user_message = user_message_template.format(**issue_data)
@@ -86,13 +93,16 @@ class SimpleProposal(DiffProposal):
         if len(query_results) == 0:
             return False
 
-        proposed_lines: list[str] = query_results[0].split("\n")
+        proposed_lines: list[str] = query_results[0].splitlines(keepends=True)
         merge_result = self._merge_lines(proposed_lines)
 
         if merge_result and self.proposed_lines != self.issue_lines:
             return diff_target.apply_diff(self)
 
         return False
+
+    def _split_lines(self, code: str) -> list[str]:
+        return code.splitlines(keepends=True)
 
     def _merge_lines(self, proposed_lines: list[str]) -> bool:
         if proposed_lines[0].startswith("```"):
@@ -119,8 +129,10 @@ class SimpleProposal(DiffProposal):
 
         merge_result: bool
         if issue_line_found is not None:
+            # when issue line comment remained in the proposed code
             merge_result = self._merge_from_issue_line(proposed_lines, issue_line_found)
         else:
+            # when issue line comment deleted/missing in the proposed code
             merge_result = self._merge_from_both_ends(proposed_lines)
 
         return merge_result
@@ -128,46 +140,48 @@ class SimpleProposal(DiffProposal):
     def _merge_from_both_ends(self, proposed_lines: list[str]) -> bool:
         # merge starting code
         line_diff: list[str] = list(difflib.ndiff(self.issue_lines, proposed_lines))
-        issue_index: int = 0
-        prop_index: int = 0
+        issue_lines_index: int = 0
+        prop_lines_index: int = 0
 
         for i in range(len(line_diff)):  # loop until we find matching line
             if line_diff[i].startswith("+ "):
-                prop_index += 1
+                prop_lines_index += 1
             elif line_diff[i].startswith("- "):
-                issue_index += 1
+                issue_lines_index += 1
             elif line_diff[i].startswith("  "):
-                proposed_lines = self.issue_lines[:issue_index] + proposed_lines[prop_index:]
+                proposed_lines = self.issue_lines[:issue_lines_index] + proposed_lines[prop_lines_index:]
                 break
             else:
-                prop_index += 1
-                issue_index += 1
+                prop_lines_index += 1
+                issue_lines_index += 1
 
-        if issue_index > self.safety_radius:
+        # safety_radius is a parameter to a Proposal, telling how many lines before and after the issue line to take
+        # if issue_lines_index > self.safety_radius - we are outside of safety radius, so the code we want to fix
+        if issue_lines_index > self.safety_radius:
             # unsuccessful merge
             logger.debug("Unable to merge from the top")
             self.print_diff(self.issue_lines, proposed_lines)
             return False
 
         # merge ending code
-        line_diff = list(difflib.ndiff(self.issue_lines, proposed_lines))
-        issue_index = 0
-        prop_index = 0
-
+        # line_diff = list(difflib.ndiff(self.issue_lines, proposed_lines))
+        # even though these indexes are positive, they intend to measure offsets from bottom to up
+        issue_lines_index = 0
+        prop_lines_index = 0
 
         for i in range(len(line_diff)):  # loop until we find matching line
             if line_diff[-i - 1].startswith("+ "):
-                prop_index += 1
+                prop_lines_index += 1
             elif line_diff[-i - 1].startswith("- "):
-                issue_index += 1
+                issue_lines_index += 1
             elif line_diff[-i - 1].startswith("  "):
-                proposed_lines = proposed_lines[: -prop_index - 1] + self.issue_lines[-issue_index - 1 :]
+                proposed_lines = proposed_lines[: -prop_lines_index - 1] + self.issue_lines[-issue_lines_index - 1 :]
                 break
             else:
-                prop_index += 1
-                issue_index += 1
+                prop_lines_index += 1
+                issue_lines_index += 1
 
-        if issue_index > self.safety_radius:
+        if issue_lines_index > self.safety_radius:
             # unsuccessful merge
             logger.debug("Unable to merge from the bottom")
             self.print_diff(self.issue_lines, proposed_lines)

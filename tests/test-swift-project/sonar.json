@@ -1,0 +1,31 @@
+{
+  "issues": [
+    {
+      "key": "XXX",
+      "rule": "swift:S1144",
+      "severity": "MAJOR",
+      "component": "project:file1.swift",
+      "project": "xxxx:yyyy",
+      "line": 10,
+      "hash": "123",
+      "textRange": {
+        "startLine": 10,
+        "endLine": 10,
+        "startOffset": 14,
+        "endOffset": 38
+      },
+      "flows": [],
+      "status": "OPEN",
+      "message": "Remove this unused private function.",
+      "effort": "5min",
+      "debt": "5min",
+      "author": "",
+      "tags": ["unused"],
+      "type": "CODE_SMELL",
+      "pullRequest": "5280",
+      "scope": "MAIN",
+      "quickfixAvailable": false,
+      "messageFormattings": []
+    }
+  ]
+}
