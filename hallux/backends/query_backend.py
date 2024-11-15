@@ -30,6 +30,6 @@ class QueryBackend(ABC):
     def query(self, request: str, issue: IssueDescriptor | None = None, issue_lines: list[str] = list) -> list[str]:
         pass
 
-    def report_succesfull_fix(self, issue, proposal) -> None:
+    def report_successful_fix(self, issue, proposal) -> None:
         if self.previous is not None:
-            self.previous.report_succesfull_fix(issue, proposal)
+            self.previous.report_successful_fix(issue, proposal)

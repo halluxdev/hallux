@@ -49,7 +49,7 @@ class DummyBackend(QueryBackend):
             with open(self.filename, "wt") as file:
                 json.dump(self.json, file)
 
-    def report_succesfull_fix(self, issue: IssueDescriptor, proposal: DiffProposal) -> None:
+    def report_successful_fix(self, issue: IssueDescriptor, proposal: DiffProposal) -> None:
         hash = self.issue_hash(issue.description, proposal.issue_lines)
         if hash not in self.json:
             self.json[hash] = "\n".join(proposal.proposed_lines)
@@ -57,7 +57,7 @@ class DummyBackend(QueryBackend):
         self.was_modified = True
 
         if self.previous is not None:
-            self.previous.report_succesfull_fix(issue, proposal)
+            self.previous.report_successful_fix(issue, proposal)
 
     def query(
         self, request: str, issue: IssueDescriptor | None = None, issue_lines: list[str] | None = None

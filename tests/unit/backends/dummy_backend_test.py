@@ -61,7 +61,7 @@ class TestDummyBackend:
         assert result == []
 
 
-def test_report_succesfull_fix():
+def test_report_successful_fix():
     if not Path("/tmp/hallux").exists():
         Path("/tmp/hallux").mkdir()
 
@@ -75,7 +75,7 @@ def test_report_succesfull_fix():
     proposal = Mock(spec=DiffProposal)
     proposal.issue_lines = ["aaa"]
     proposal.proposed_lines = ["bbb"]
-    dummy_backend.report_succesfull_fix(issue, proposal)
+    dummy_backend.report_successful_fix(issue, proposal)
     # answ = dummy_backend.query("request", issue)
     del dummy_backend
     # assert answ == []
