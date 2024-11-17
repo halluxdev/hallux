@@ -121,7 +121,7 @@ class IssueSolver(ABC):
 
             if fixing_successful:
                 # provide feedback, in order to collect training data
-                query_backend.report_succesfull_fix(issue, proposal)
+                query_backend.report_successful_fix(issue, proposal)
                 if diff_target.requires_refresh():
                     self.target_issues = self.list_issues()
                 else:

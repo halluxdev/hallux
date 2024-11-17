@@ -42,3 +42,4 @@ class DiffProposal(ABC):
                 print(f"\033[92m{line}\033[0m", end="")
             else:
                 print(line, end="")
+        print()

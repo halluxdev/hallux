@@ -32,9 +32,9 @@ class OverrideQueryBackend(QueryBackend):
     def query(self, request: str, issue: IssueDescriptor | None = None, issue_lines: list[str] = list) -> list[str]:
         return self.backend.query(request, issue, issue_lines)
 
-    def report_succesfull_fix(self, issue, proposal) -> None:
+    def report_successful_fix(self, issue, proposal) -> None:
         self.already_fixed_files.append(issue.filename)
-        self.backend.report_succesfull_fix(issue, proposal)
+        self.backend.report_successful_fix(issue, proposal)
 
 
 class Sonar_IssueSolver(IssueSolver):

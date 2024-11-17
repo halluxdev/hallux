@@ -162,42 +162,73 @@ def main(argv: list[str] | None = None, run_path: Path | None = None) -> int:
     if verbose:
         logger.setLevel(logging.DEBUG)
 
-    help_requested = len(argv) == 2 and (argv[1] == "--help" or argv[1] == "-h" or argv[1] == "-?")
-    if len(argv) < 2 or help_requested:
+    if len(argv) < 2 or is_help_requested(argv):
         Hallux.print_usage()
         return 0
 
-    if run_path is None:
-        run_path = Path().resolve()
-
-    if Path(argv[-1]).exists() and Path(argv[-1]).is_dir():
-        # directory, which needs to be processed, as requested from the CLI. Relative to run_path. Could be "."
-        command_dir: str = argv[-1]
-    else:
-        logger.error(f"{argv[-1]} is not a valid DIR")
+    run_path = run_path or Path().resolve()
+    command_dir = validate_command_dir(argv)
+    if command_dir is None:
         return 1
 
-    config: dict[str, Any]
-    # Path, where config file is found. Shall be relative for all filename/paths, defined in the config itself (if any)
-    config_path: Path
     config, config_path = Hallux.find_config(run_path)
 
+    error_code, query_backend = init_backend(argv, config, config_path, verbose)
+    if query_backend is None:
+        return error_code
+
+    error_code, target = init_target(argv, config, verbose)
+    if target is None:
+        return error_code
+
+    error_code, solvers = init_solvers(argv, config, config_path, run_path, command_dir, verbose)
+    if solvers is None:
+        return error_code
+
+    error_code, hallux = init_hallux(solvers, run_path, config_path, verbose)
+    if hallux is None:
+        return error_code
+
+    if (error_code := process_hallux(hallux, query_backend, target, verbose)) != 0:
+        return error_code
+
+    return 0
+
+
+def is_help_requested(argv):
+    return len(argv) == 2 and (argv[1] in ["--help", "-h", "-?"])
+
+
+def validate_command_dir(argv):
+    if Path(argv[-1]).exists() and Path(argv[-1]).is_dir():
+        return argv[-1]
+    logger.error(f"{argv[-1]} is not a valid DIR")
+    return None
+
+
+def init_backend(argv, config, config_path, verbose):
     try:
         query_backend: QueryBackend = BackendFactory.init_backend(argv, config, config_path)
+        return 0, query_backend
     except Exception as e:
         logger.error(f"Error during BACKEND initialization: {e}")
         if verbose:
             raise e
-        return 2
+        return 2, None
 
+
+def init_target(argv, config, verbose):
     try:
         target: DiffTarget = Hallux.init_target(argv, config.get("target", {}))
+        return 0, target
     except Exception as e:
         logger.error(f"Error during TARGET initialization: {e}")
         if verbose:
             raise e
-        return 3
+        return 3, None
 
+
+def init_solvers(argv, config, config_path, run_path, command_dir, verbose):
     try:
         solvers: list[IssueSolver] = ToolsFactory.init_solvers(
             argv,
@@ -207,33 +238,38 @@ def main(argv: list[str] | None = None, run_path: Path | None = None) -> int:
             run_path=run_path,
             command_dir=command_dir,
         )
+        return 0, solvers
     except Exception as e:
         logger.error(f"Error during SOLVERS initialization: {e}")
         if verbose:
             raise e
-        return 4
+        return 4, None
 
+
+def init_hallux(solvers, run_path, config_path, verbose):
     try:
         hallux = Hallux(
             solvers=solvers,
             run_path=run_path,
             config_path=config_path,
         )
+        return 0, hallux
     except Exception as e:
         logger.error(f"Error during initialization: {e}")
         if verbose:
             raise e
-        return 5
+        return 5, None
 
+
+def process_hallux(hallux, query_backend, target, verbose):
     try:
         hallux.process(query_backend=query_backend, diff_target=target)
+        return 0
     except Exception as e:
         logger.error(f"Error during process: {e.args}")
         if verbose:
             raise e
         return 6
-
-    return 0
 
 
 if __name__ == "__main__":
