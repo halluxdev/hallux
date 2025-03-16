@@ -74,6 +74,9 @@ class SonarIssue(IssueDescriptor):
             filename = comp_arr[-1]
 
             if "line" not in json_issue:
+                logger.message(
+                    f"{filename}: {json_issue['message']}  \033[91m unable to fix\033[0m"
+                )
                 continue
 
             issue = SonarIssue(

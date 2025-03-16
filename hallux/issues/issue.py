@@ -36,7 +36,7 @@ class IssueDescriptor(ABC):
 
         if line_comment is None and comment is not None:
             # TODO: paarametrize line_comment template
-            self.line_comment = " " + comment + " <-- fix around this line " + str(issue_line)
+            self.line_comment = f" {comment} <-- fix around this line {str(issue_line)}. Remove this comment after fix applied."
 
     @abstractmethod
     def list_proposals(self) -> ProposalEngine:
