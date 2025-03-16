@@ -73,6 +73,9 @@ class SonarIssue(IssueDescriptor):
             #     continue
             filename = comp_arr[-1]
 
+            if "line" not in json_issue:
+                continue
+
             issue = SonarIssue(
                 filename=filename,
                 issue_line=json_issue["line"],
