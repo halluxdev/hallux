@@ -16,6 +16,7 @@ from pathlib import Path
 from typing import Any, Final
 
 import yaml
+import traceback
 
 from hallux.auxilary import find_arg, find_argvalue
 from hallux.backends.factory import BackendFactory, QueryBackend
@@ -267,6 +268,7 @@ def process_hallux(hallux, query_backend, target, verbose):
         return 0
     except Exception as e:
         logger.error(f"Error during process: {e.args}")
+        traceback.print_exc()
         if verbose:
             raise e
         return 6
