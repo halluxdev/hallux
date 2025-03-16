@@ -61,7 +61,7 @@ def test_python_file_diff_with_real_openai_results(
         "try:\n",
         "    token1 = next(tokens1)\n",
         "    token2 = next(tokens2)\n",
-        "except: # <-- fix around this line 39\n",
+        "except: # <-- fix around this line 39. Remove this comment after fix applied.\n",
         "    break\n",
         "",
         "",
