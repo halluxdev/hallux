@@ -5,6 +5,7 @@ from __future__ import annotations
 import copy
 import difflib
 from typing import Final
+from pathlib import Path
 
 from hallux.logger import logger
 
@@ -27,6 +28,10 @@ class SimpleProposal(DiffProposal):
         """
         super().__init__(filename=issue.filename, description=issue.description, issue_line=issue.issue_line)
         self.issue: Final[IssueDescriptor] = issue
+
+        # print full path
+        logger.debug(f"Reading: {Path.cwd().joinpath(issue.filename)}")
+
         with open(issue.filename, "rt") as file:
             self.all_lines: Final[list[str]] = file.read().splitlines(keepends=True)
 
