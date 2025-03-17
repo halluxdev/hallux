@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 from typing import Final
+from hallux.logger import logger
 
 from ...issues.issue import IssueDescriptor
 from ...proposals.proposal_engine import ProposalEngine, ProposalList
