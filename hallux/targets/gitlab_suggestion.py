@@ -8,7 +8,6 @@ from typing import Final
 
 import requests
 from unidiff import PatchSet
-
 from ..logger import logger
 from ..proposals.diff_proposal import DiffProposal
 from .filesystem import FilesystemTarget
@@ -34,6 +33,9 @@ class GitlabSuggestion(FilesystemTarget):
         self.verify = verify
 
         request_url: str = f"{base_url}/projects/{project_name}/merge_requests/{mr_iid}/changes?unidiff=true"
+        
+        logger.debug(f"Gitlab MR URL: {request_url}")
+        
         headers = {"PRIVATE-TOKEN": f"{os.environ['GITLAB_TOKEN']}"}
         mr_response = requests.get(request_url, headers=headers, verify=self.verify)
 
