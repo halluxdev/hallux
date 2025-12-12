@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from ..auxilary import set_directory
+from ..auxiliary import set_directory
 from ..proposals.diff_proposal import DiffProposal
 from .diff import DiffTarget
 

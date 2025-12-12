@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from ..auxilary import find_arg, find_argvalue
+from ..auxiliary import find_arg, find_argvalue
 from ..tools.cpp.cpp import Cpp_IssueSolver
 from ..tools.issue_solver import IssueSolver
 from ..tools.mypy.solver import Mypy_IssueSolver

@@ -18,7 +18,7 @@ from typing import Any, Final
 import yaml
 import traceback
 
-from hallux.auxilary import find_arg, find_argvalue
+from hallux.auxiliary import find_arg, find_argvalue
 from hallux.backends.factory import BackendFactory, QueryBackend
 from hallux.logger import logger
 from hallux.targets.diff import DiffTarget

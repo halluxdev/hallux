@@ -14,7 +14,7 @@ from typing import Final
 import pytest
 from github import Github, PullRequest, Repository
 
-from hallux.auxilary import set_directory
+from hallux.auxiliary import set_directory
 from hallux.main import main
 from hallux.targets.github_suggestion import GithubSuggestion
 

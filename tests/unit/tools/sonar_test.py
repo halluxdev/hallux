@@ -40,7 +40,7 @@ def test_sonar_with_json_file():
     assert len(issues) == 13
     assert isinstance(issues[0], SonarIssue)
     issues[0].issue_type == "CODE SMELL"
-    issues[0].filename == "hallux/auxilary.py"
+    issues[0].filename == "hallux/auxiliary.py"
 
 
 # Tests for Sonar_IssueSolver

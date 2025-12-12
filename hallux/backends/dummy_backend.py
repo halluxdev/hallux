@@ -42,7 +42,11 @@ class DummyBackend(QueryBackend):
 
     def issue_hash(self, description: str, issue_lines: list[str]) -> str:
         encoded_data = str(description + "\n" + "\n".join(issue_lines)).encode("utf8")
-        return str(hashlib.md5(encoded_data).hexdigest())
+        h = str(hashlib.md5(encoded_data).hexdigest())
+        from hallux.logger import logger
+        logger.message(f"DEBUG HASH: {h}")
+        logger.message(f"DEBUG DATA: {description} + {issue_lines}")
+        return h
 
     def __del__(self):
         if self.was_modified:

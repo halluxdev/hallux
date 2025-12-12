@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
+export PATH="$(pwd)/venv/bin:$PATH"
 
 # -s flag is for printing the output of the tests to the console
 # -vv flag is for printing full output in tests
-
 python -m pytest -v -vv $1 $2\
     --cov-branch \
     --cov-report=term \
