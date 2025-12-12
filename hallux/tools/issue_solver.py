@@ -9,7 +9,7 @@ from typing import Final
 
 from hallux.logger import logger
 
-from ..auxilary import set_directory
+from ..auxiliary import set_directory
 from ..backends.query_backend import QueryBackend
 from ..issues.issue import IssueDescriptor
 from ..proposals.diff_proposal import DiffProposal

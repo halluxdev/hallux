@@ -18,7 +18,7 @@ from typing import Any, Final
 import yaml
 import traceback
 
-from hallux.auxilary import find_arg, find_argvalue
+from hallux.auxiliary import find_arg, find_argvalue
 from hallux.backends.factory import BackendFactory, QueryBackend
 from hallux.logger import logger
 from hallux.targets.diff import DiffTarget
@@ -214,6 +214,7 @@ def init_backend(argv, config, config_path, verbose):
     except Exception as e:
         logger.error(f"Error during BACKEND initialization: {e}")
         if verbose:
+            traceback.print_exc()
             raise e
         return 2, None
 
@@ -225,6 +226,7 @@ def init_target(argv, config, verbose):
     except Exception as e:
         logger.error(f"Error during TARGET initialization: {e}")
         if verbose:
+            traceback.print_exc()
             raise e
         return 3, None
 
@@ -243,6 +245,7 @@ def init_solvers(argv, config, config_path, run_path, command_dir, verbose):
     except Exception as e:
         logger.error(f"Error during SOLVERS initialization: {e}")
         if verbose:
+            traceback.print_exc()
             raise e
         return 4, None
 
@@ -258,6 +261,7 @@ def init_hallux(solvers, run_path, config_path, verbose):
     except Exception as e:
         logger.error(f"Error during initialization: {e}")
         if verbose:
+            traceback.print_exc()
             raise e
         return 5, None
 
@@ -268,8 +272,8 @@ def process_hallux(hallux, query_backend, target, verbose):
         return 0
     except Exception as e:
         logger.error(f"Error during process: {e.args}")
-        traceback.print_exc()
         if verbose:
+            traceback.print_exc()
             raise e
         return 6
 

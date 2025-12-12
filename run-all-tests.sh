@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 
+export PATH="$(pwd)/venv/bin:$PATH"
 python -m pytest -v $1 $2\
     --cov-branch \
     --cov-report=term \

@@ -11,7 +11,7 @@ from pathlib import Path
 import pytest
 from utils import hallux_tmp_dir
 
-from hallux.auxilary import set_directory
+from hallux.auxiliary import set_directory
 from hallux.main import main
 
 
@@ -42,7 +42,7 @@ def test_hallux_cpp(
         try:
             subprocess.check_output(["cmake", tmp_proj_dir])
         except subprocess.CalledProcessError as e:
-            pytest.fail(e, pytrace=True)  # cmake must not fail
+            pytest.fail(str(e), pytrace=True)  # cmake must not fail
 
         make_succesfull: bool = True
         try:
@@ -67,16 +67,16 @@ def test_hallux_cpp(
     # run hallux from the temporal project directory
     with set_directory(tmp_proj_dir):
         try:
-            main(["hallux", "--cpp", target, backend, "."])
+            main(["hallux", "--cpp", target, backend, "--verbose", "."])
         except Exception as e:
-            pytest.fail(e, pytrace=True)  # hallux must not fail ?
+            pytest.fail(str(e), pytrace=True)  # hallux must not fail ?
 
     # ASSERT: must be no remaining c++ compilation issues
     with set_directory(cmake_tmp_dir):
         try:
             subprocess.check_output(["make", "cpp/test_cpp_project.o"], stderr=subprocess.DEVNULL)
         except subprocess.CalledProcessError as e:
-            pytest.fail(e, pytrace=True)  # make must not find any issues
+            pytest.fail(str(e), pytrace=True)  # make must not find any issues
 
 
 def test_hallux_python(
@@ -100,6 +100,9 @@ def test_hallux_python(
 
     # check that temporal project has ruff issues
     with set_directory(tmp_proj_dir):
+        import os
+        venv_bin = Path(__file__).parents[2].joinpath("venv", "bin")
+        os.environ["PATH"] = f"{venv_bin}:{os.environ.get('PATH')}"
         returncode: int = 0
         try:
             subprocess.check_output(["ruff", "check", "."])
@@ -121,12 +124,12 @@ def test_hallux_python(
     # run hallux from the temporal project directory
     with set_directory(tmp_proj_dir):
         try:
-            main(["hallux", target, backend, "."])
+            main(["hallux", target, backend, "--verbose", "."])
         except subprocess.CalledProcessError as e:
-            pytest.fail(e, pytrace=True)  # hallux must not fail ?
+            pytest.fail(str(e), pytrace=True)  # hallux must not fail ?
 
         # ASSERT: ruff must have no remaining issues
         try:
             subprocess.check_output(["ruff", "check", "."])
         except subprocess.CalledProcessError as e:
-            pytest.fail(e, pytrace=True)  # ruff must not find any issues
+            pytest.fail(str(e), pytrace=True)  # ruff must not find any issues

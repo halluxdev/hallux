@@ -13,7 +13,7 @@ import pytest
 import requests
 import yaml
 
-from hallux.auxilary import set_directory
+from hallux.auxiliary import set_directory
 from hallux.backends.factory import QueryBackend
 from hallux.main import CONFIG_FILE, Hallux, main
 from hallux.targets.filesystem import FilesystemTarget

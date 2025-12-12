@@ -5,7 +5,7 @@ from __future__ import annotations
 import subprocess
 from pathlib import Path
 
-from ...auxilary import set_directory
+from ...auxiliary import set_directory
 from ...issues.issue import IssueDescriptor
 from ...tools.issue_solver import IssueSolver
 from ...tools.python.python_issue import PythonIssue

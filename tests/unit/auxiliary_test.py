@@ -8,7 +8,7 @@ import tempfile
 
 import pytest
 
-from hallux.auxilary import Path, find_arg, find_argvalue, set_directory
+from hallux.auxiliary import Path, find_arg, find_argvalue, set_directory
 
 
 @pytest.mark.parametrize(

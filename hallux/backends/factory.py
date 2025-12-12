@@ -8,7 +8,7 @@ from typing import Any
 from hallux.logger import logger
 from hallux.models import PromptConfig
 
-from ..auxilary import find_arg, find_argvalue
+from ..auxiliary import find_arg, find_argvalue
 from ..backends.dummy_backend import DummyBackend
 from ..backends.litellm import LiteLLMBackend
 from ..backends.query_backend import QueryBackend

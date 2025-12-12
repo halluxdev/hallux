@@ -10,7 +10,7 @@ from pathlib import Path
 import pytest
 from utils import hallux_tmp_dir
 
-from hallux.auxilary import set_directory
+from hallux.auxiliary import set_directory
 from hallux.main import main
 
 

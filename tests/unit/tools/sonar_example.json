@@ -13,7 +13,7 @@
       "key": "AYsWPM66l_5IK4VFnlsk",
       "rule": "python:S125",
       "severity": "MAJOR",
-      "component": "halluxdev_hallux_AYpIk3Z__hwOMJbIE7XQ:hallux/auxilary.py",
+      "component": "halluxdev_hallux_AYpIk3Z__hwOMJbIE7XQ:hallux/auxiliary.py",
       "project": "halluxdev_hallux_AYpIk3Z__hwOMJbIE7XQ",
       "line": 50,
       "hash": "2291037f1786470be813f05fe858f8b9",
@@ -1223,12 +1223,12 @@
       "path": "hallux/targets/github_proposal.py"
     },
     {
-      "key": "halluxdev_hallux_AYpIk3Z__hwOMJbIE7XQ:hallux/auxilary.py",
+      "key": "halluxdev_hallux_AYpIk3Z__hwOMJbIE7XQ:hallux/auxiliary.py",
       "enabled": true,
       "qualifier": "FIL",
-      "name": "auxilary.py",
-      "longName": "hallux/auxilary.py",
-      "path": "hallux/auxilary.py"
+      "name": "auxiliary.py",
+      "longName": "hallux/auxiliary.py",
+      "path": "hallux/auxiliary.py"
     },
     {
       "key": "halluxdev_hallux_AYpIk3Z__hwOMJbIE7XQ",
